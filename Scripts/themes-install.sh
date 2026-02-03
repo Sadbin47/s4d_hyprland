@@ -116,25 +116,99 @@ install_cursor_themes() {
 # KVANTUM THEMES
 #=============================================================================
 install_kvantum_themes() {
-    log "${INFO} Installing Kvantum themes..."
+    log "${INFO} Installing Kvantum and Qt configuration tools..."
+    
+    # Install Kvantum and Qt config tools
+    install_pkg "kvantum"
+    install_pkg "qt5ct"
+    install_pkg "qt6ct"
     
     # Install Catppuccin Kvantum theme
     local KVANTUM_DIR="$HOME/.config/Kvantum"
     mkdir -p "$KVANTUM_DIR"
     
-    # Clone Catppuccin Kvantum
+    # Clone Catppuccin Kvantum (themes are in themes/ folder, not src/)
     local tmp_dir=$(mktemp -d)
     if git clone --depth 1 https://github.com/catppuccin/Kvantum.git "$tmp_dir" 2>/dev/null; then
-        cp -r "$tmp_dir/src/"* "$KVANTUM_DIR/"
-        log "${OK} Catppuccin Kvantum theme installed"
+        # Copy all Mocha variant themes (mocha is the darkest/best for dark mode)
+        if [[ -d "$tmp_dir/themes" ]]; then
+            cp -r "$tmp_dir/themes/catppuccin-mocha-"* "$KVANTUM_DIR/" 2>/dev/null
+            log "${OK} Catppuccin Kvantum Mocha themes installed"
+        else
+            log "${WARN} Kvantum themes folder not found in repo"
+        fi
+    else
+        log "${WARN} Could not clone Catppuccin Kvantum repo"
     fi
     rm -rf "$tmp_dir"
     
-    # Set Kvantum theme
+    # Set Kvantum theme to catppuccin-mocha-mauve (lowercase as per repo)
     cat > "$KVANTUM_DIR/kvantum.kvconfig" << 'EOF'
 [General]
-theme=Catppuccin-Mocha-Mauve
+theme=catppuccin-mocha-mauve
 EOF
+    
+    # Configure qt5ct
+    mkdir -p "$HOME/.config/qt5ct"
+    cat > "$HOME/.config/qt5ct/qt5ct.conf" << 'EOF'
+[Appearance]
+color_scheme_path=
+custom_palette=false
+icon_theme=Papirus-Dark
+standard_dialogs=default
+style=kvantum
+
+[Fonts]
+fixed="Inter,11,-1,5,50,0,0,0,0,0"
+general="Inter,11,-1,5,50,0,0,0,0,0"
+
+[Interface]
+activate_item_on_single_click=1
+buttonbox_layout=0
+cursor_flash_time=1000
+dialog_buttons_have_icons=1
+double_click_interval=400
+gui_effects=@Invalid()
+keyboard_scheme=2
+menus_have_icons=true
+show_shortcuts_in_context_menus=true
+stylesheets=@Invalid()
+toolbutton_style=4
+underline_shortcut=1
+wheel_scroll_lines=3
+EOF
+    
+    # Configure qt6ct
+    mkdir -p "$HOME/.config/qt6ct"
+    cat > "$HOME/.config/qt6ct/qt6ct.conf" << 'EOF'
+[Appearance]
+color_scheme_path=
+custom_palette=false
+icon_theme=Papirus-Dark
+standard_dialogs=default
+style=kvantum
+
+[Fonts]
+fixed="Inter,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+general="Inter,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+
+[Interface]
+activate_item_on_single_click=1
+buttonbox_layout=0
+cursor_flash_time=1000
+dialog_buttons_have_icons=1
+double_click_interval=400
+gui_effects=@Invalid()
+keyboard_scheme=2
+menus_have_icons=true
+show_shortcuts_in_context_menus=true
+stylesheets=@Invalid()
+toolbutton_style=4
+underline_shortcut=1
+wheel_scroll_lines=3
+EOF
+    
+    log "${OK} Kvantum and Qt configuration complete"
 }
 
 #=============================================================================
