@@ -57,22 +57,22 @@ install_pkg() {
     
     log "${INFO} Installing $pkg..."
     
-    # Try pacman first
+    # Try pacman first (use tee to show output AND log it - prevents hidden prompts)
     if pacman -Si "$pkg" &>/dev/null; then
-        if sudo pacman -S --noconfirm --needed "$pkg" &>>"$LOG_FILE"; then
+        if sudo pacman -S --noconfirm --needed "$pkg" 2>&1 | tee -a "$LOG_FILE"; then
             log "${OK} $pkg installed successfully"
             return 0
         fi
     fi
     
-    # Try AUR
+    # Try AUR (show output for compilation progress and potential prompts)
     if command -v yay &>/dev/null; then
-        if yay -S --noconfirm --needed "$pkg" &>>"$LOG_FILE"; then
+        if yay -S --noconfirm --needed "$pkg" 2>&1 | tee -a "$LOG_FILE"; then
             log "${OK} $pkg installed from AUR"
             return 0
         fi
     elif command -v paru &>/dev/null; then
-        if paru -S --noconfirm --needed "$pkg" &>>"$LOG_FILE"; then
+        if paru -S --noconfirm --needed "$pkg" 2>&1 | tee -a "$LOG_FILE"; then
             log "${OK} $pkg installed from AUR"
             return 0
         fi
