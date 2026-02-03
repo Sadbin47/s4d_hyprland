@@ -5,6 +5,35 @@
 #║                              Author: s4d                                       ║
 #╚═══════════════════════════════════════════════════════════════════════════════╝
 
+#=============================================================================
+# CURL DETECTION - If running via curl, clone and re-execute
+#=============================================================================
+if [[ ! -t 0 ]] || [[ "${BASH_SOURCE[0]}" == "" ]] || [[ ! -f "${BASH_SOURCE[0]}" ]]; then
+    echo "Detected curl pipe execution. Cloning repository first..."
+    
+    # Ensure git is installed
+    if ! command -v git &>/dev/null; then
+        echo "Installing git..."
+        sudo pacman -S --noconfirm git
+    fi
+    
+    # Clone to home directory
+    INSTALL_DIR="$HOME/s4d_hyprland"
+    if [[ -d "$INSTALL_DIR" ]]; then
+        echo "Removing existing $INSTALL_DIR..."
+        rm -rf "$INSTALL_DIR"
+    fi
+    
+    echo "Cloning s4d_hyprland to $INSTALL_DIR..."
+    git clone https://github.com/Sadbin47/s4d_hyprland.git "$INSTALL_DIR"
+    
+    echo "Starting installation..."
+    cd "$INSTALL_DIR"
+    chmod +x install.sh
+    exec ./install.sh
+    exit 0
+fi
+
 set -e
 
 #=============================================================================

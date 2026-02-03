@@ -20,8 +20,10 @@ A minimal, bloat-free Hyprland installation script for Arch Linux.
 ### One-liner (Recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Sadbin47/s4d_hyprland/main/install.sh | bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Sadbin47/s4d_hyprland/main/install.sh)
 ```
+
+> **Note:** The script will automatically clone the repo to `~/s4d_hyprland` and launch the interactive installer.
 
 ### Or clone and run manually
 
@@ -36,10 +38,9 @@ cd s4d_hyprland
 - ✅ Fresh Arch Linux installation (base system)
 - ✅ Internet connection
 - ✅ Non-root user with sudo privileges
-- ✅ `git` and `base-devel` packages installed
 
 ```bash
-# If you need git and base-devel:
+# If you need git and base-devel (script will install git if missing):
 sudo pacman -S --needed git base-devel
 ```
 
