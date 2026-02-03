@@ -6,28 +6,56 @@
 #╚═══════════════════════════════════════════════════════════════════════════════╝
 
 #=============================================================================
-# CURL DETECTION - If running via curl, clone and re-execute
+# CURL/REMOTE EXECUTION DETECTION - If running via curl, clone and re-execute
 #=============================================================================
-if [[ ! -t 0 ]] || [[ "${BASH_SOURCE[0]}" == "" ]] || [[ ! -f "${BASH_SOURCE[0]}" ]]; then
-    echo "Detected curl pipe execution. Cloning repository first..."
+# Detect if running from curl pipe, process substitution, or non-local file
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+IS_REMOTE=false
+
+# Check various remote execution scenarios
+if [[ ! -t 0 && -z "$SCRIPT_PATH" ]]; then
+    IS_REMOTE=true
+elif [[ "$SCRIPT_PATH" == /dev/* ]] || [[ "$SCRIPT_PATH" == /proc/* ]]; then
+    IS_REMOTE=true
+elif [[ -n "$SCRIPT_PATH" ]] && [[ ! -d "$(dirname "$SCRIPT_PATH")/Scripts" ]]; then
+    IS_REMOTE=true
+fi
+
+if [[ "$IS_REMOTE" == true ]]; then
+    echo ""
+    echo "════════════════════════════════════════════════════════════"
+    echo "  s4d Hyprland - Remote Installation Detected"
+    echo "════════════════════════════════════════════════════════════"
+    echo ""
+    echo "Cloning repository for interactive installation..."
+    echo ""
     
     # Ensure git is installed
     if ! command -v git &>/dev/null; then
-        echo "Installing git..."
+        echo "[i] Installing git..."
         sudo pacman -S --noconfirm git
     fi
     
     # Clone to home directory
     INSTALL_DIR="$HOME/s4d_hyprland"
     if [[ -d "$INSTALL_DIR" ]]; then
-        echo "Removing existing $INSTALL_DIR..."
-        rm -rf "$INSTALL_DIR"
+        echo "[i] Updating existing installation at $INSTALL_DIR..."
+        cd "$INSTALL_DIR"
+        git pull --ff-only 2>/dev/null || {
+            echo "[!] Removing old installation..."
+            cd "$HOME"
+            rm -rf "$INSTALL_DIR"
+            git clone https://github.com/Sadbin47/s4d_hyprland.git "$INSTALL_DIR"
+        }
+    else
+        echo "[i] Cloning s4d_hyprland to $INSTALL_DIR..."
+        git clone https://github.com/Sadbin47/s4d_hyprland.git "$INSTALL_DIR"
     fi
     
-    echo "Cloning s4d_hyprland to $INSTALL_DIR..."
-    git clone https://github.com/Sadbin47/s4d_hyprland.git "$INSTALL_DIR"
+    echo ""
+    echo "[✓] Repository ready. Starting interactive installer..."
+    echo ""
     
-    echo "Starting installation..."
     cd "$INSTALL_DIR"
     chmod +x install.sh
     exec ./install.sh
