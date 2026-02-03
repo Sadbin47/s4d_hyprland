@@ -51,21 +51,63 @@ EOF
 log "${OK} Ly configuration created"
 
 # Disable any other display managers first
-for dm in gdm sddm lightdm lxdm; do
-    if systemctl is-enabled "$dm" &>/dev/null; then
-        sudo systemctl disable "$dm" 2>/dev/null
+for dm in gdm sddm lightdm lxdm greetd; do
+    if systemctl is-enabled "$dm" &>/dev/null 2>&1; then
+        sudo systemctl disable "$dm" 2>/dev/null || true
     fi
 done
 
-# Enable Ly service (try both possible service names)
-if systemctl list-unit-files | grep -q "ly.service"; then
-    sudo systemctl enable ly.service
-    log "${OK} Ly enabled and configured"
-elif [ -f /usr/lib/systemd/system/ly.service ]; then
+# Reload systemd to pick up new service files
+sudo systemctl daemon-reload
+
+# Find and enable Ly service - check multiple possible locations and names
+LY_SERVICE=""
+for service in "ly.service" "ly-dm.service"; do
+    if systemctl list-unit-files 2>/dev/null | grep -q "^${service}"; then
+        LY_SERVICE="$service"
+        break
+    fi
+done
+
+# If not found in list, check file locations directly
+if [[ -z "$LY_SERVICE" ]]; then
+    for path in /usr/lib/systemd/system /etc/systemd/system /lib/systemd/system; do
+        if [[ -f "$path/ly.service" ]]; then
+            LY_SERVICE="ly.service"
+            break
+        elif [[ -f "$path/ly-dm.service" ]]; then
+            LY_SERVICE="ly-dm.service"
+            break
+        fi
+    done
+fi
+
+if [[ -n "$LY_SERVICE" ]]; then
+    sudo systemctl enable "$LY_SERVICE"
+    log "${OK} Ly ($LY_SERVICE) enabled and configured"
+else
+    # Create the service file manually if it doesn't exist
+    log "${WARN} Ly service file not found, creating it..."
+    
+    cat << 'SERVICEEOF' | sudo tee /etc/systemd/system/ly.service >/dev/null
+[Unit]
+Description=TUI display manager
+After=systemd-user-sessions.service plymouth-quit-wait.service getty@tty2.service
+Conflicts=getty@tty2.service
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/ly
+StandardInput=tty
+TTYPath=/dev/tty2
+TTYReset=yes
+TTYVHangup=yes
+
+[Install]
+Alias=display-manager.service
+SERVICEEOF
+
     sudo systemctl daemon-reload
     sudo systemctl enable ly.service
-    log "${OK} Ly enabled and configured"
-else
-    log "${WARN} Ly service file not found - you may need to enable it manually after reboot"
-    log "${INFO} Try: sudo systemctl enable ly.service"
+    log "${OK} Ly service created and enabled"
 fi
