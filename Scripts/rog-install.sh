@@ -11,27 +11,41 @@ log "${INFO} Installing ASUS ROG laptop support..."
 setup_asus_repo() {
     log "${INFO} Setting up ASUS Linux (g14) repository..."
     
-    # Check if repo already exists
+    # Check if repo already exists and working
     if grep -q "\[g14\]" /etc/pacman.conf; then
-        log "${INFO} [g14] repository already exists"
-        sudo pacman -Syy
-        return 0
+        log "${INFO} [g14] repository already exists, testing..."
+        if sudo pacman -Sy g14 2>/dev/null; then
+            log "${OK} [g14] repository is working"
+            return 0
+        else
+            log "${WARN} [g14] repository exists but has issues, fixing..."
+        fi
     fi
     
-    # Try to import GPG key from multiple keyservers
-    log "${INFO} Importing ASUS Linux GPG key..."
+    # Method 1: Download key directly from asus-linux.org (most reliable)
+    log "${INFO} Downloading GPG key from asus-linux.org..."
     local key_imported=false
     
-    for keyserver in "keyserver.ubuntu.com" "keys.gnupg.net" "pgp.mit.edu"; do
-        if sudo pacman-key --keyserver "$keyserver" --recv-keys 8F654886F17D497FEFE3DB448B15A6B0E9A3FA35 2>/dev/null; then
+    if curl -fsSL -o /tmp/asus-linux.gpg https://asus-linux.org/key.gpg 2>/dev/null; then
+        if sudo pacman-key --add /tmp/asus-linux.gpg 2>/dev/null; then
             sudo pacman-key --lsign-key 8F654886F17D497FEFE3DB448B15A6B0E9A3FA35 2>/dev/null
             key_imported=true
-            log "${OK} GPG key imported from $keyserver"
-            break
+            log "${OK} GPG key imported from asus-linux.org"
+            rm -f /tmp/asus-linux.gpg
         fi
-    done
+    fi
     
-    # Fallback: try without specifying keyserver
+    # Method 2: Try keyserver.ubuntu.com (fallback)
+    if [[ "$key_imported" == false ]]; then
+        log "${INFO} Trying keyserver.ubuntu.com..."
+        if sudo pacman-key --keyserver keyserver.ubuntu.com --recv-keys 8F654886F17D497FEFE3DB448B15A6B0E9A3FA35 2>/dev/null; then
+            sudo pacman-key --lsign-key 8F654886F17D497FEFE3DB448B15A6B0E9A3FA35 2>/dev/null
+            key_imported=true
+            log "${OK} GPG key imported from keyserver.ubuntu.com"
+        fi
+    fi
+    
+    # Method 3: Try default keyserver
     if [[ "$key_imported" == false ]]; then
         log "${INFO} Trying default keyserver..."
         if sudo pacman-key --recv-keys 8F654886F17D497FEFE3DB448B15A6B0E9A3FA35 2>/dev/null; then
@@ -41,21 +55,26 @@ setup_asus_repo() {
     fi
     
     if [[ "$key_imported" == false ]]; then
-        log "${WARN} Could not import GPG key - trying to add repo anyway..."
+        log "${WARN} Could not import GPG key automatically"
+        log "${INFO} You may need to manually run:"
+        log "${INFO}   curl -O https://asus-linux.org/key.gpg && sudo pacman-key --add key.gpg"
+        log "${INFO}   sudo pacman-key --lsign-key 8F654886F17D497FEFE3DB448B15A6B0E9A3FA35"
     fi
     
-    # Add repository
-    log "${INFO} Adding [g14] repository to pacman.conf..."
-    cat << 'EOF' | sudo tee -a /etc/pacman.conf >/dev/null
+    # Add repository if not present
+    if ! grep -q "\[g14\]" /etc/pacman.conf; then
+        log "${INFO} Adding [g14] repository to pacman.conf..."
+        cat << 'EOF' | sudo tee -a /etc/pacman.conf >/dev/null
 
 [g14]
-SigLevel = DatabaseNever Optional TrustAll
 Server = https://arch.asus-linux.org
 EOF
+    fi
     
     # Update package database
+    log "${INFO} Updating package database..."
     sudo pacman -Syy
-    log "${OK} [g14] repository added"
+    log "${OK} [g14] repository configured"
 }
 
 # Setup repository
