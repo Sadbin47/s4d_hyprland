@@ -50,6 +50,22 @@ EOF
 
 log "${OK} Ly configuration created"
 
-# Enable Ly service
-sudo systemctl enable ly
-log "${OK} Ly enabled and configured"
+# Disable any other display managers first
+for dm in gdm sddm lightdm lxdm; do
+    if systemctl is-enabled "$dm" &>/dev/null; then
+        sudo systemctl disable "$dm" 2>/dev/null
+    fi
+done
+
+# Enable Ly service (try both possible service names)
+if systemctl list-unit-files | grep -q "ly.service"; then
+    sudo systemctl enable ly.service
+    log "${OK} Ly enabled and configured"
+elif [ -f /usr/lib/systemd/system/ly.service ]; then
+    sudo systemctl daemon-reload
+    sudo systemctl enable ly.service
+    log "${OK} Ly enabled and configured"
+else
+    log "${WARN} Ly service file not found - you may need to enable it manually after reboot"
+    log "${INFO} Try: sudo systemctl enable ly.service"
+fi
