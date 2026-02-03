@@ -1,0 +1,49 @@
+{
+    "layout": {
+        "type": "grid",
+        "children": [
+            {
+                "label": "󰌾 Lock",
+                "action": "loginctl lock-session",
+                "text": "Lock",
+                "keybind": "l",
+                "circular": true
+            },
+            {
+                "label": " Logout",
+                "action": "hyprctl dispatch exit",
+                "text": "Logout",
+                "keybind": "e",
+                "circular": true
+            },
+            {
+                "label": "󰤄 Suspend",
+                "action": "systemctl suspend",
+                "text": "Suspend",
+                "keybind": "u",
+                "circular": true
+            },
+            {
+                "label": " Hibernate",
+                "action": "systemctl hibernate",
+                "text": "Hibernate",
+                "keybind": "h",
+                "circular": true
+            },
+            {
+                "label": " Reboot",
+                "action": "systemctl reboot",
+                "text": "Reboot",
+                "keybind": "r",
+                "circular": true
+            },
+            {
+                "label": "⏻ Shutdown",
+                "action": "systemctl poweroff",
+                "text": "Shutdown",
+                "keybind": "s",
+                "circular": true
+            }
+        ]
+    }
+}

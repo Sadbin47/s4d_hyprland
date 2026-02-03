@@ -1,0 +1,54 @@
+#!/bin/bash
+#=============================================================================
+# HYPRLAND PACKAGES - Core Hyprland and window manager components
+#=============================================================================
+
+source "$(dirname "${BASH_SOURCE[0]}")/../Scripts/functions.sh" 2>/dev/null || true
+
+log "${INFO} Installing Hyprland core packages..."
+
+HYPRLAND_PACKAGES=(
+    # Window Manager
+    "hyprland"                    # Wayland compositor
+    
+    # Essential Hypr Tools
+    "hyprlock"                    # Lock screen
+    "hypridle"                    # Idle daemon
+    "hyprpicker"                  # Color picker
+    "hyprsunset"                  # Blue light filter
+    
+    # Core Apps
+    "kitty"                       # Terminal emulator
+    "rofi"                        # Application launcher
+    "swaync"                      # Notification center
+    "swww"                        # Wallpaper daemon
+    
+    # Screenshot/Recording
+    "grim"                        # Screenshot tool
+    "slurp"                       # Region selector
+    "satty"                       # Screenshot annotation
+    
+    # Clipboard
+    "cliphist"                    # Clipboard manager
+    "wl-clip-persist"             # Clipboard persistence
+    
+    # Qt/GTK Integration
+    "qt5-wayland"                 # Qt5 Wayland support
+    "qt6-wayland"                 # Qt6 Wayland support
+    "qt5ct"                       # Qt5 configuration
+    "qt6ct"                       # Qt6 configuration
+    "nwg-look"                    # GTK configuration
+    "kvantum"                     # SVG-based Qt theme engine
+    "kvantum-qt5"                 # Kvantum Qt5 support
+    "qt5-imageformats"            # Image format plugins
+    "ffmpegthumbs"                # Video thumbnails
+    
+    # Display Configuration
+    "nwg-displays"                # Display configuration tool
+)
+
+for pkg in "${HYPRLAND_PACKAGES[@]}"; do
+    install_pkg "$pkg"
+done
+
+log "${OK} Hyprland core packages installation complete"

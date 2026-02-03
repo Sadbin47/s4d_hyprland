@@ -1,0 +1,290 @@
+/* SwayNC Style - Catppuccin Mocha */
+
+@define-color base #1e1e2e;
+@define-color mantle #181825;
+@define-color crust #11111b;
+@define-color text #cdd6f4;
+@define-color subtext0 #a6adc8;
+@define-color subtext1 #bac2de;
+@define-color surface0 #313244;
+@define-color surface1 #45475a;
+@define-color surface2 #585b70;
+@define-color overlay0 #6c7086;
+@define-color overlay1 #7f849c;
+@define-color overlay2 #9399b2;
+@define-color blue #89b4fa;
+@define-color lavender #b4befe;
+@define-color sapphire #74c7ec;
+@define-color sky #89dceb;
+@define-color teal #94e2d5;
+@define-color green #a6e3a1;
+@define-color yellow #f9e2af;
+@define-color peach #fab387;
+@define-color maroon #eba0ac;
+@define-color red #f38ba8;
+@define-color mauve #cba6f7;
+@define-color pink #f5c2e7;
+@define-color flamingo #f2cdcd;
+@define-color rosewater #f5e0dc;
+
+* {
+    font-family: "JetBrainsMono Nerd Font", "Noto Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.control-center {
+    background: alpha(@base, 0.95);
+    border-radius: 16px;
+    border: 2px solid @mauve;
+    margin: 10px;
+    padding: 12px;
+}
+
+.control-center-list {
+    background: transparent;
+}
+
+.control-center-list-placeholder {
+    opacity: 0.5;
+}
+
+.notification-row {
+    outline: none;
+    margin: 6px 0;
+    padding: 0;
+}
+
+.notification-row:focus,
+.notification-row:hover {
+    background: @surface0;
+    border-radius: 12px;
+}
+
+.notification {
+    background: @surface0;
+    border-radius: 12px;
+    border: 1px solid @surface1;
+    padding: 0;
+    margin: 0;
+}
+
+.notification-content {
+    background: transparent;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.notification-default-action {
+    border-radius: 12px;
+    margin: 0;
+    padding: 0;
+}
+
+.notification-default-action:hover {
+    background: @surface1;
+}
+
+.notification-action {
+    background: @surface1;
+    border-radius: 8px;
+    border: none;
+    color: @text;
+    margin: 6px;
+    padding: 8px 12px;
+}
+
+.notification-action:hover {
+    background: @surface2;
+}
+
+.notification-action:first-child {
+    margin-left: 0;
+}
+
+.notification-action:last-child {
+    margin-right: 0;
+}
+
+.close-button {
+    background: @red;
+    border-radius: 8px;
+    color: @base;
+    margin: 6px;
+    padding: 2px 8px;
+}
+
+.close-button:hover {
+    background: @maroon;
+}
+
+.summary {
+    color: @text;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.time {
+    color: @subtext0;
+    font-size: 11px;
+}
+
+.body {
+    color: @subtext1;
+}
+
+.notification.critical {
+    border: 2px solid @red;
+}
+
+.notification.low {
+    border: 1px solid @surface2;
+}
+
+.floating-notifications {
+    background: transparent;
+}
+
+.blank-window {
+    background: transparent;
+}
+
+.widget-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: @text;
+    margin: 8px 12px;
+}
+
+.widget-title > button {
+    background: @mauve;
+    border-radius: 8px;
+    border: none;
+    color: @base;
+    font-size: 12px;
+    padding: 4px 16px;
+}
+
+.widget-title > button:hover {
+    background: @lavender;
+}
+
+.widget-dnd {
+    background: @surface0;
+    border-radius: 12px;
+    margin: 8px;
+    padding: 12px;
+}
+
+.widget-dnd > switch {
+    background: @surface1;
+    border-radius: 16px;
+}
+
+.widget-dnd > switch:checked {
+    background: @mauve;
+}
+
+.widget-dnd > switch slider {
+    background: @text;
+    border-radius: 50%;
+}
+
+.widget-inhibitors {
+    background: @surface0;
+    border-radius: 12px;
+    margin: 8px;
+    padding: 12px;
+}
+
+.widget-inhibitors > button {
+    background: @red;
+    border-radius: 8px;
+    border: none;
+    color: @base;
+    padding: 4px 12px;
+}
+
+.widget-inhibitors > button:hover {
+    background: @maroon;
+}
+
+.widget-volume,
+.widget-backlight {
+    background: @surface0;
+    border-radius: 12px;
+    margin: 8px;
+    padding: 12px;
+}
+
+.widget-volume > box > button,
+.widget-backlight > box > button {
+    background: transparent;
+    border: none;
+}
+
+.widget-volume > box > label {
+    color: @mauve;
+    font-size: 20px;
+    margin-right: 12px;
+}
+
+.widget-backlight > box > label {
+    color: @yellow;
+    font-size: 20px;
+    margin-right: 12px;
+}
+
+scale trough {
+    background: @surface1;
+    border-radius: 8px;
+    min-height: 8px;
+}
+
+scale highlight {
+    background: @mauve;
+    border-radius: 8px;
+}
+
+scale slider {
+    background: @text;
+    border-radius: 50%;
+    min-height: 16px;
+    min-width: 16px;
+}
+
+.widget-mpris {
+    background: @surface0;
+    border-radius: 12px;
+    margin: 8px;
+    padding: 12px;
+}
+
+.widget-mpris-player {
+    border-radius: 12px;
+    padding: 8px;
+}
+
+.widget-mpris-title {
+    color: @text;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.widget-mpris-subtitle {
+    color: @subtext0;
+    font-size: 12px;
+}
+
+.widget-mpris > box > button {
+    background: @surface1;
+    border-radius: 50%;
+    border: none;
+    color: @text;
+    min-height: 36px;
+    min-width: 36px;
+}
+
+.widget-mpris > box > button:hover {
+    background: @surface2;
+}
