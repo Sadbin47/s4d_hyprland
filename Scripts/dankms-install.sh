@@ -6,23 +6,35 @@
 source "$(dirname "${BASH_SOURCE[0]}")/functions.sh"
 
 log "${INFO} Installing DankMaterialShell (Quickshell-based desktop shell)..."
+log "${WARN} Note: quickshell-git compiles from source and may take 15-30+ minutes!"
 
-# Install dependencies
-DANKMS_DEPS=(
-    "quickshell-git"
+# Install build dependencies first
+BUILD_DEPS=(
+    "cmake"
+    "ninja"
+    "git"
+    "gcc"
     "qt6-base"
-    "qt6-declarative"
+    "qt6-declarative" 
     "qt6-wayland"
     "qt6-svg"
+    "qt6-shadertools"
     "pipewire"
     "libpulse"
     "pam"
+    "wayland"
+    "wayland-protocols"
+    "jq"
 )
 
-# Install quickshell from AUR
-for pkg in "${DANKMS_DEPS[@]}"; do
+log "${INFO} Installing build dependencies..."
+for pkg in "${BUILD_DEPS[@]}"; do
     install_pkg "$pkg"
 done
+
+# Install quickshell from AUR (this takes a long time)
+log "${INFO} Installing quickshell-git (this will take a while to compile)..."
+install_pkg "quickshell-git"
 
 # Clone DankMaterialShell
 DANKMS_DIR="$HOME/.local/share/quickshell/dankms"
