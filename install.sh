@@ -489,7 +489,25 @@ install_lockscreen() {
     install_pkg hypridle
     
     if [[ "${USER_CHOICES[lockscreen]}" == "both" ]]; then
-        install_pkg wlogout
+        log "${INFO} Installing wlogout..."
+        # wlogout is in AUR, try different package names
+        if pkg_installed "wlogout"; then
+            log "${OK} wlogout is already installed"
+        elif yay -S --noconfirm --needed wlogout 2>&1 | tee -a "$LOG_FILE"; then
+            log "${OK} wlogout installed from AUR"
+        elif yay -S --noconfirm --needed wlogout-git 2>&1 | tee -a "$LOG_FILE"; then
+            log "${OK} wlogout-git installed from AUR"
+        else
+            log "${WARN} wlogout installation failed - you can install it manually later"
+            log "${INFO} Try: yay -S wlogout"
+        fi
+        
+        # Copy wlogout config
+        if [[ -d "$CONFIGS_DIR/wlogout" ]]; then
+            mkdir -p "$HOME/.config/wlogout"
+            cp -r "$CONFIGS_DIR/wlogout/"* "$HOME/.config/wlogout/"
+            log "${OK} wlogout config applied"
+        fi
     fi
 }
 
