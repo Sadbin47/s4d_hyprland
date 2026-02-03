@@ -3,20 +3,22 @@
 # SHARED FUNCTIONS - Common utilities for all scripts
 #=============================================================================
 
-# Colors
-readonly RED='\033[0;31m'
-readonly GREEN='\033[0;32m'
-readonly YELLOW='\033[0;33m'
-readonly BLUE='\033[0;34m'
-readonly MAGENTA='\033[0;35m'
-readonly CYAN='\033[0;36m'
-readonly NC='\033[0m'
+# Colors (only define if not already set)
+if [[ -z "${RED:-}" ]]; then
+    readonly RED='\033[0;31m'
+    readonly GREEN='\033[0;32m'
+    readonly YELLOW='\033[0;33m'
+    readonly BLUE='\033[0;34m'
+    readonly MAGENTA='\033[0;35m'
+    readonly CYAN='\033[0;36m'
+    readonly NC='\033[0m'
 
-readonly OK="${GREEN}[✓]${NC}"
-readonly ERROR="${RED}[✗]${NC}"
-readonly INFO="${BLUE}[i]${NC}"
-readonly WARN="${YELLOW}[!]${NC}"
-readonly ASK="${MAGENTA}[?]${NC}"
+    readonly OK="${GREEN}[✓]${NC}"
+    readonly ERROR="${RED}[✗]${NC}"
+    readonly INFO="${BLUE}[i]${NC}"
+    readonly WARN="${YELLOW}[!]${NC}"
+    readonly ASK="${MAGENTA}[?]${NC}"
+fi
 
 # Log file (should be set by main script)
 LOG_FILE="${LOG_FILE:-/tmp/s4d-hyprland-install.log}"
