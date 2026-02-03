@@ -15,16 +15,44 @@ A minimal, bloat-free Hyprland installation script for Arch Linux.
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
-## Features
+## ⚡ Quick Install
 
-- 🚀 **Fast Installation**: Streamlined installation process
-- 🎨 **User Choice**: Select your preferred components
-- 🖥️ **GPU Support**: Automatic detection for NVIDIA, AMD, and Intel
-- 📦 **Bloat-Free**: Only essential packages, no unnecessary software
-- ⚙️ **Modular**: Easy to customize and extend
-- 🎯 **ROG Support**: Optional ASUS ROG laptop support
+### One-liner (Recommended)
 
-## Components
+```bash
+curl -fsSL https://raw.githubusercontent.com/Sadbin47/s4d_hyprland/main/install.sh | bash
+```
+
+### Or clone and run manually
+
+```bash
+git clone https://github.com/Sadbin47/s4d_hyprland.git
+cd s4d_hyprland
+./install.sh
+```
+
+## 📋 Requirements
+
+- ✅ Fresh Arch Linux installation (base system)
+- ✅ Internet connection
+- ✅ Non-root user with sudo privileges
+- ✅ `git` and `base-devel` packages installed
+
+```bash
+# If you need git and base-devel:
+sudo pacman -S --needed git base-devel
+```
+
+## 🚀 Features
+
+- 🎯 **Bloat-Free**: Only essential packages, no unnecessary software
+- 🖥️ **GPU Auto-Detection**: NVIDIA, AMD, Intel - including hybrid laptops
+- 🎨 **User Choice**: Select your preferred components interactively
+- ⚙️ **Modular Config**: Easy to customize and extend
+- 🎮 **ROG Support**: Optional ASUS ROG laptop support
+- 🎨 **Catppuccin Theme**: Beautiful Mocha color scheme by default
+
+## 🧩 Components
 
 | Component | Options |
 |-----------|---------|
@@ -38,36 +66,78 @@ A minimal, bloat-free Hyprland installation script for Arch Linux.
 | **Idle Manager** | Hypridle |
 | **File Manager** | Dolphin or Nemo |
 
-## Requirements
+## 📦 Installation Process
 
-- Fresh Arch Linux installation
-- Internet connection
-- Non-root user with sudo privileges
+### Step 1: Run the Installer
 
-## Quick Start
+The script presents an interactive menu to configure your installation:
 
-```bash
-git clone https://github.com/yourusername/s4d_Hyprland.git
-cd s4d_Hyprland
-chmod +x install.sh
-./install.sh
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Configuration Menu
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Display Manager: SDDM / Ly / None
+2. Status Bar: Waybar / DankMaterialShell
+3. File Manager: Dolphin / Nemo
+4. Lockscreen: Hyprlock / Both (+ Wlogout)
+5. Dotfiles: Default / Custom / Minimal
+6. ROG Laptop Support: Yes / No
+7. Fonts: Install recommended fonts
+8. Bluetooth: Configure Bluetooth
+9. Zsh: Install Zsh + Starship
 ```
 
-## Installation Options
+### Step 2: Review & Confirm
 
-The installer will prompt you to choose:
+After configuration, you'll see a summary:
 
-1. **Display Manager**: SDDM (recommended), Ly (minimal TUI), or None
-2. **Status Bar**: Waybar (feature-rich) or DankMaterialShell (modern)
-3. **File Manager**: Dolphin (KDE) or Nemo (GTK)
-4. **Lock Screen**: Hyprlock only or with Wlogout
-5. **Dotfiles**: Default, custom Git repository, or minimal
-6. **ROG Support**: For ASUS ROG laptops
-7. **Fonts**: Popular Nerd Fonts and system fonts
-8. **Bluetooth**: Enable Bluetooth support
-9. **Shell**: Zsh with Starship prompt
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Configuration Summary:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Display Manager : sddm
+  Status Bar      : waybar
+  File Manager    : dolphin
+  Lockscreen      : hyprlock
+  Dotfiles        : default
+  ROG Support     : no
+  Fonts           : yes
+  Bluetooth       : yes
+  Zsh             : yes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
 
-## Keybindings
+### Step 3: Automatic Installation
+
+The script automatically:
+
+1. **Installs AUR Helper** (yay or paru)
+2. **Installs Base Packages** (audio, network, utilities)
+3. **Detects & Configures GPU** (NVIDIA/AMD/Intel)
+4. **Installs Hyprland & Core Apps** (compositor, terminal, launcher)
+5. **Installs Display Manager** (your choice)
+6. **Installs Status Bar** (your choice)
+7. **Installs File Manager** (your choice)
+8. **Installs Lock Screen** (hyprlock, optional wlogout)
+9. **Installs Fonts** (JetBrains Mono, Noto, etc.)
+10. **Configures Bluetooth** (if selected)
+11. **Sets up Zsh** (with Starship prompt)
+12. **Applies Dotfiles** (configs to ~/.config)
+13. **Sets up Themes** (GTK, QT, cursors, icons)
+14. **Downloads Wallpapers**
+
+### Step 4: Reboot
+
+After installation completes:
+
+```bash
+sudo reboot
+```
+
+You'll be greeted with your selected display manager (or TTY login).
+Select **Hyprland** as your session and login!
+
+## ⌨️ Keybindings
 
 | Key | Action |
 |-----|--------|
@@ -84,7 +154,7 @@ The installer will prompt you to choose:
 | `Super + N` | Notification Center |
 | `Print` | Screenshot (region) |
 
-## Directory Structure
+## 📁 Directory Structure
 
 ```
 s4d_Hyprland/
@@ -116,7 +186,7 @@ s4d_Hyprland/
     └── dotfiles-apply.sh  # Dotfiles application
 ```
 
-## GPU Support
+## 🖥️ GPU Support
 
 The installer automatically detects and configures:
 
@@ -125,7 +195,7 @@ The installer automatically detects and configures:
 - **Intel**: Installs Mesa and Intel Media driver
 - **Hybrid**: Supports laptops with multiple GPUs
 
-## Custom Dotfiles
+## 🎨 Custom Dotfiles
 
 You can use your own dotfiles:
 
@@ -140,7 +210,7 @@ Your repository should have one of these structures:
 - `config/` folder with configs
 - Individual folders (hypr, kitty, rofi, etc.)
 
-## Theme
+## 🎨 Theme
 
 The default theme uses **Catppuccin Mocha** color scheme:
 
@@ -148,14 +218,14 @@ The default theme uses **Catppuccin Mocha** color scheme:
 - Text: `#cdd6f4`
 - Accent: `#cba6f7` (Mauve)
 
-## Logs
+## 📝 Logs
 
 Installation logs are saved to:
 ```
 ./Logs/install-YYYYMMDD-HHMMSS.log
 ```
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
 ### Hyprland doesn't start
 - Check GPU drivers are installed correctly
@@ -172,14 +242,14 @@ Installation logs are saved to:
   systemctl --user status pipewire pipewire-pulse wireplumber
   ```
 
-## Credits
+## 🙏 Credits
 
 - [Hyprland](https://hyprland.org/) - Wayland compositor
 - [Catppuccin](https://github.com/catppuccin) - Color scheme
 - [JaKooLit](https://github.com/JaKooLit) - Inspiration from KooL Hyprland
 - [HyDE](https://github.com/prasanthrangan/hyprdots) - Inspiration from HyDE project
 
-## License
+## 📄 License
 
 MIT License - feel free to use and modify!
 
