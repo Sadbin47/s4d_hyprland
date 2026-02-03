@@ -1,11 +1,19 @@
 #!/bin/bash
 #=============================================================================
 # THEME INSTALLATION - GTK, Qt, Icons, Cursors
+# Reference: JaKooLit/GTK-themes-icons and Catppuccin
 #=============================================================================
 
 source "$(dirname "${BASH_SOURCE[0]}")/functions.sh"
 
 log "${INFO} Installing themes..."
+
+# Theme directories
+THEMES_DIR="$HOME/.themes"
+ICONS_DIR="$HOME/.icons"
+CURSORS_DIR="$HOME/.icons"  # Cursors go in .icons too
+
+mkdir -p "$THEMES_DIR" "$ICONS_DIR"
 
 #=============================================================================
 # GTK THEMES
@@ -13,29 +21,69 @@ log "${INFO} Installing themes..."
 install_gtk_themes() {
     log "${INFO} Installing GTK themes..."
     
-    # Catppuccin GTK Theme
-    if ! pkg_installed "catppuccin-gtk-theme-mocha"; then
-        install_pkg "catppuccin-gtk-theme-mocha"
-    fi
+    # Install GTK engine first
+    install_pkg "gtk-engine-murrine"
+    install_pkg "unzip"
     
-    # Additional themes
-    install_pkg "arc-gtk-theme"
-    install_pkg "materia-gtk-theme" || true
+    # Method 1: Clone JaKooLit's GTK themes (pre-packaged, includes Catppuccin)
+    log "${INFO} Downloading GTK themes from JaKooLit..."
+    local tmp_dir=$(mktemp -d)
+    
+    if git clone --depth 1 https://github.com/JaKooLit/GTK-themes-icons.git "$tmp_dir" 2>/dev/null; then
+        cd "$tmp_dir"
+        if [[ -f "auto-extract.sh" ]]; then
+            chmod +x auto-extract.sh
+            ./auto-extract.sh 2>/dev/null
+            log "${OK} GTK themes extracted to ~/.themes and ~/.icons"
+        else
+            # Manual extraction if script not found
+            for zip in *.tar.gz *.zip; do
+                [[ -f "$zip" ]] && tar -xzf "$zip" -C "$HOME/.themes/" 2>/dev/null || unzip -q "$zip" -d "$HOME/.themes/" 2>/dev/null
+            done
+        fi
+        cd - >/dev/null
+    else
+        log "${WARN} Could not clone JaKooLit GTK themes, trying Catppuccin directly..."
+    fi
+    rm -rf "$tmp_dir"
+    
+    # Method 2: Try AUR packages as fallback (some may fail, that's OK)
+    for theme in "catppuccin-gtk-theme-mocha" "catppuccin-gtk-theme"; do
+        if install_pkg "$theme" 2>/dev/null; then
+            break
+        fi
+    done
+    
+    # Ensure we have at least Adwaita dark as fallback
+    install_pkg "adwaita-dark" 2>/dev/null || true
 }
 
 #=============================================================================
-# ICON THEMES
+# ICON THEMES  
 #=============================================================================
 install_icon_themes() {
     log "${INFO} Installing icon themes..."
     
+    # Papirus is in official repos
     install_pkg "papirus-icon-theme"
-    install_pkg "papirus-folders" || true
     
-    # Set Papirus folder color to mauve
+    # Try to set folder color (optional)
     if command -v papirus-folders &>/dev/null; then
         papirus-folders -C cat-mocha-mauve --theme Papirus-Dark 2>/dev/null || true
     fi
+    
+    # Catppuccin Papirus folders (from GitHub)
+    log "${INFO} Installing Catppuccin Papirus folders..."
+    local tmp_dir=$(mktemp -d)
+    if git clone --depth 1 https://github.com/catppuccin/papirus-folders.git "$tmp_dir" 2>/dev/null; then
+        if [[ -f "$tmp_dir/install.sh" ]]; then
+            cd "$tmp_dir"
+            chmod +x install.sh
+            ./install.sh 2>/dev/null || true
+            cd - >/dev/null
+        fi
+    fi
+    rm -rf "$tmp_dir"
 }
 
 #=============================================================================
@@ -44,7 +92,24 @@ install_icon_themes() {
 install_cursor_themes() {
     log "${INFO} Installing cursor themes..."
     
-    install_pkg "bibata-cursor-theme" || install_pkg "bibata-cursor-theme-bin"
+    # Try different Bibata packages
+    for cursor in "bibata-cursor-theme" "bibata-cursor-theme-bin" "bibata-modern-classic-bin"; do
+        if install_pkg "$cursor" 2>/dev/null; then
+            log "${OK} Cursor theme installed"
+            return 0
+        fi
+    done
+    
+    # Fallback: Download Bibata directly from GitHub
+    log "${INFO} Downloading Bibata cursor from GitHub..."
+    local cursor_url="https://github.com/ful1e5/Bibata_Cursor/releases/download/v2.0.6/Bibata-Modern-Classic.tar.xz"
+    local tmp_file=$(mktemp)
+    
+    if curl -fsSL -o "$tmp_file" "$cursor_url" 2>/dev/null; then
+        tar -xf "$tmp_file" -C "$CURSORS_DIR/" 2>/dev/null
+        log "${OK} Bibata cursor installed to ~/.icons"
+    fi
+    rm -f "$tmp_file"
 }
 
 #=============================================================================
