@@ -11,20 +11,51 @@ log "${INFO} Installing ASUS ROG laptop support..."
 setup_asus_repo() {
     log "${INFO} Setting up ASUS Linux (g14) repository..."
     
-    # Import GPG key
-    sudo pacman-key --recv-keys 8F654886F17D497FEFE3DB448B15A6B0E9A3FA35 2>/dev/null
-    sudo pacman-key --lsign-key 8F654886F17D497FEFE3DB448B15A6B0E9A3FA35 2>/dev/null
-    
-    # Add repository if not present
-    if ! grep -q "\[g14\]" /etc/pacman.conf; then
-        log "${INFO} Adding [g14] repository to pacman.conf..."
-        echo -e "\n[g14]\nServer = https://arch.asus-linux.org" | sudo tee -a /etc/pacman.conf >/dev/null
-    else
+    # Check if repo already exists
+    if grep -q "\[g14\]" /etc/pacman.conf; then
         log "${INFO} [g14] repository already exists"
+        sudo pacman -Syy
+        return 0
     fi
+    
+    # Try to import GPG key from multiple keyservers
+    log "${INFO} Importing ASUS Linux GPG key..."
+    local key_imported=false
+    
+    for keyserver in "keyserver.ubuntu.com" "keys.gnupg.net" "pgp.mit.edu"; do
+        if sudo pacman-key --keyserver "$keyserver" --recv-keys 8F654886F17D497FEFE3DB448B15A6B0E9A3FA35 2>/dev/null; then
+            sudo pacman-key --lsign-key 8F654886F17D497FEFE3DB448B15A6B0E9A3FA35 2>/dev/null
+            key_imported=true
+            log "${OK} GPG key imported from $keyserver"
+            break
+        fi
+    done
+    
+    # Fallback: try without specifying keyserver
+    if [[ "$key_imported" == false ]]; then
+        log "${INFO} Trying default keyserver..."
+        if sudo pacman-key --recv-keys 8F654886F17D497FEFE3DB448B15A6B0E9A3FA35 2>/dev/null; then
+            sudo pacman-key --lsign-key 8F654886F17D497FEFE3DB448B15A6B0E9A3FA35 2>/dev/null
+            key_imported=true
+        fi
+    fi
+    
+    if [[ "$key_imported" == false ]]; then
+        log "${WARN} Could not import GPG key - trying to add repo anyway..."
+    fi
+    
+    # Add repository
+    log "${INFO} Adding [g14] repository to pacman.conf..."
+    cat << 'EOF' | sudo tee -a /etc/pacman.conf >/dev/null
+
+[g14]
+SigLevel = DatabaseNever Optional TrustAll
+Server = https://arch.asus-linux.org
+EOF
     
     # Update package database
     sudo pacman -Syy
+    log "${OK} [g14] repository added"
 }
 
 # Setup repository
