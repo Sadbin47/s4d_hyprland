@@ -47,10 +47,27 @@ for pkg in "${ROG_PACKAGES[@]}"; do
     install_pkg "$pkg"
 done
 
-# Enable services
-sudo systemctl enable --now power-profiles-daemon
-sudo systemctl enable --now supergfxd
-sudo systemctl enable --now asusd
+# Enable services (some may fail if not on actual ROG hardware - that's OK)
+log "${INFO} Enabling ROG services..."
+
+if sudo systemctl enable power-profiles-daemon 2>/dev/null; then
+    sudo systemctl start power-profiles-daemon 2>/dev/null || true
+    log "${OK} power-profiles-daemon enabled"
+fi
+
+if sudo systemctl enable supergfxd 2>/dev/null; then
+    sudo systemctl start supergfxd 2>/dev/null || true
+    log "${OK} supergfxd enabled"
+fi
+
+# asusd may fail to start if not on actual ASUS hardware - enable but don't start
+if sudo systemctl enable asusd 2>/dev/null; then
+    log "${OK} asusd enabled (will start on reboot)"
+else
+    log "${INFO} asusd will be available after reboot on ASUS hardware"
+fi
+
+log "${INFO} Note: ROG services will fully work after reboot on actual ASUS ROG hardware"
 
 # Create keybindings for ROG laptop in Hyprland
 mkdir -p "$HOME/.config/hypr"
