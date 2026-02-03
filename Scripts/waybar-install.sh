@@ -164,4 +164,22 @@ EOF
     log "${OK} Default Waybar configuration created"
 fi
 
+# Add waybar to Hyprland autostart
+HYPR_CONF="$HOME/.config/hypr/hyprland.conf"
+if [[ -f "$HYPR_CONF" ]]; then
+    # Check if waybar is already in config (uncommented)
+    if ! grep -q "^exec-once = waybar" "$HYPR_CONF"; then
+        # Add waybar exec-once after the bar comment
+        if grep -q "# Bar is configured by install script" "$HYPR_CONF"; then
+            sed -i '/# Bar is configured by install script/a exec-once = waybar' "$HYPR_CONF"
+            log "${OK} Added waybar to Hyprland autostart"
+        else
+            echo "exec-once = waybar" >> "$HYPR_CONF"
+            log "${OK} Appended waybar to Hyprland autostart"
+        fi
+    else
+        log "${INFO} Waybar already in Hyprland autostart"
+    fi
+fi
+
 log "${OK} Waybar installed and configured"

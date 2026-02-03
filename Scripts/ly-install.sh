@@ -83,6 +83,7 @@ if [[ -z "$LY_SERVICE" ]]; then
 fi
 
 if [[ -n "$LY_SERVICE" ]]; then
+    sudo systemctl disable getty@tty2.service 2>/dev/null || true
     sudo systemctl enable "$LY_SERVICE"
     log "${OK} Ly ($LY_SERVICE) enabled and configured"
 else
@@ -92,7 +93,7 @@ else
     cat << 'SERVICEEOF' | sudo tee /etc/systemd/system/ly.service >/dev/null
 [Unit]
 Description=TUI display manager
-After=systemd-user-sessions.service plymouth-quit-wait.service getty@tty2.service
+After=systemd-user-sessions.service plymouth-quit-wait.service
 Conflicts=getty@tty2.service
 
 [Service]
@@ -104,10 +105,15 @@ TTYReset=yes
 TTYVHangup=yes
 
 [Install]
+WantedBy=graphical.target
 Alias=display-manager.service
 SERVICEEOF
 
     sudo systemctl daemon-reload
+    sudo systemctl disable getty@tty2.service 2>/dev/null || true
     sudo systemctl enable ly.service
     log "${OK} Ly service created and enabled"
 fi
+
+log "${OK} Ly display manager installation complete"
+log "${INFO} Ly will appear on tty2 after reboot"
