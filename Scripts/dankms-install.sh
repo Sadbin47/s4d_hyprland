@@ -1,76 +1,128 @@
 #!/bin/bash
 #=============================================================================
-# DANK MATERIAL SHELL INSTALLATION
-# Uses official DankMaterialShell installer from https://github.com/AvengeMedia/DankMaterialShell
+# DANK MATERIAL SHELL (BAR) INSTALLATION
+# Installs DankMaterialShell bar for use with Hyprland
+# Reference: https://github.com/AvengeMedia/DankMaterialShell
 #=============================================================================
 
 source "$(dirname "${BASH_SOURCE[0]}")/functions.sh"
 
-log "${INFO} Installing DankMaterialShell..."
-log "${INFO} DMS is a complete desktop shell that replaces waybar, notifications, launcher, and more"
+log "${INFO} Installing DankMaterialShell bar..."
 
-# Check if dms is already installed
-if command -v dms &>/dev/null; then
-    log "${OK} DankMaterialShell is already installed"
-    dms --version 2>/dev/null || true
+# Install dependencies
+DMS_DEPS=(
+    "qt6-base"
+    "qt6-declarative"
+    "qt6-wayland"
+    "qt6-svg"
+    "qt6-shadertools"
+    "pipewire"
+    "libpulse"
+    "pam"
+    "wayland"
+    "wayland-protocols"
+    "jq"
+    "cmake"
+    "ninja"
+    "go"
+    "git"
+)
+
+log "${INFO} Installing dependencies..."
+for pkg in "${DMS_DEPS[@]}"; do
+    install_pkg "$pkg"
+done
+
+# Install quickshell from AUR (required for DMS)
+log "${INFO} Installing quickshell..."
+if pkg_installed "quickshell-git" || pkg_installed "quickshell"; then
+    log "${OK} quickshell is already installed"
 else
-    log "${INFO} Running official DankMaterialShell installer..."
-    log "${INFO} This will install quickshell, dms core, and all dependencies"
-    echo ""
-    
-    # Use the official DMS installer
-    curl -fsSL https://install.danklinux.com | sh
-    
-    if command -v dms &>/dev/null; then
-        log "${OK} DankMaterialShell installed successfully"
+    # Try binary package first if available
+    if yay -Si quickshell &>/dev/null 2>&1; then
+        install_pkg "quickshell"
     else
-        log "${ERROR} DankMaterialShell installation may have failed"
-        log "${INFO} You can try installing manually: curl -fsSL https://install.danklinux.com | sh"
+        log "${WARN} Installing quickshell-git from AUR (this may take 10-20 minutes to compile)..."
+        install_pkg "quickshell-git"
     fi
 fi
 
-# Configure DMS for Hyprland
-DMS_CONFIG_DIR="$HOME/.config/dms"
-mkdir -p "$DMS_CONFIG_DIR"
+# Clone DankMaterialShell
+DMS_DIR="$HOME/.local/share/dms"
+DMS_SHELL_DIR="$HOME/.config/quickshell"
 
-# Create basic DMS config if it doesn't exist
-if [[ ! -f "$DMS_CONFIG_DIR/config.toml" ]]; then
-    cat > "$DMS_CONFIG_DIR/config.toml" << 'EOF'
-# DankMaterialShell Configuration
-# See https://danklinux.com/docs for full documentation
+log "${INFO} Setting up DankMaterialShell..."
 
-[general]
-compositor = "hyprland"
-
-[bar]
-position = "top"
-height = 32
-
-[theme]
-# Theme will be auto-generated from wallpaper
-auto_theme = true
-EOF
-    log "${OK} DMS configuration created"
+if [[ -d "$DMS_DIR" ]]; then
+    log "${INFO} DankMaterialShell exists, updating..."
+    cd "$DMS_DIR"
+    git pull --ff-only 2>/dev/null || {
+        log "${WARN} Update failed, re-cloning..."
+        cd "$HOME"
+        rm -rf "$DMS_DIR"
+        git clone --depth 1 https://github.com/AvengeMedia/DankMaterialShell.git "$DMS_DIR"
+    }
+else
+    log "${INFO} Cloning DankMaterialShell..."
+    git clone --depth 1 https://github.com/AvengeMedia/DankMaterialShell.git "$DMS_DIR"
 fi
 
-# Update Hyprland config to use DMS instead of waybar
+# Build the dms CLI tool
+log "${INFO} Building dms CLI..."
+cd "$DMS_DIR/core"
+if make build; then
+    # Install dms binary to user local bin
+    mkdir -p "$HOME/.local/bin"
+    cp "$DMS_DIR/core/bin/dms" "$HOME/.local/bin/dms"
+    chmod +x "$HOME/.local/bin/dms"
+    log "${OK} dms CLI built and installed to ~/.local/bin/dms"
+else
+    log "${WARN} dms CLI build failed - bar will still work via quickshell"
+fi
+
+# Setup quickshell config to use DMS
+mkdir -p "$DMS_SHELL_DIR"
+
+# Link or copy the DMS quickshell files
+if [[ -d "$DMS_SHELL_DIR/dms" ]]; then
+    rm -rf "$DMS_SHELL_DIR/dms"
+fi
+ln -sf "$DMS_DIR/quickshell" "$DMS_SHELL_DIR/dms"
+
+# Create manifest to use DMS
+cat > "$DMS_SHELL_DIR/manifest.conf" << 'EOF'
+[Main]
+Entry=dms/shell.qml
+EOF
+
+log "${OK} DankMaterialShell quickshell config created"
+
+# Update Hyprland config
 HYPR_CONF="$HOME/.config/hypr/hyprland.conf"
 if [[ -f "$HYPR_CONF" ]]; then
     # Comment out waybar if present
     if grep -q "^exec-once = waybar" "$HYPR_CONF"; then
-        sed -i 's/^exec-once = waybar/# exec-once = waybar  # Disabled - using DMS/' "$HYPR_CONF"
+        sed -i 's/^exec-once = waybar/# exec-once = waybar  # Disabled - using DMS bar/' "$HYPR_CONF"
         log "${INFO} Commented out waybar in hyprland.conf"
     fi
     
-    # Add DMS autostart if not present
-    if ! grep -q "dms run" "$HYPR_CONF"; then
-        echo "" >> "$HYPR_CONF"
-        echo "# DankMaterialShell - Modern desktop shell" >> "$HYPR_CONF"
-        echo "exec-once = dms run" >> "$HYPR_CONF"
-        log "${OK} Added DMS to Hyprland autostart"
+    # Add quickshell autostart if not present
+    if ! grep -q "quickshell" "$HYPR_CONF"; then
+        cat >> "$HYPR_CONF" << 'EOF'
+
+# DankMaterialShell bar
+exec-once = quickshell
+EOF
+        log "${OK} Added DMS bar to Hyprland autostart"
     fi
 fi
 
-log "${OK} DankMaterialShell setup complete"
-log "${INFO} DMS will start automatically with Hyprland"
-log "${INFO} Use 'dms run' to start manually, 'dms --help' for more options"
+# Add ~/.local/bin to PATH reminder
+if ! echo "$PATH" | grep -q "$HOME/.local/bin"; then
+    log "${INFO} Add ~/.local/bin to your PATH for the dms CLI:"
+    log "${INFO}   export PATH=\"\$HOME/.local/bin:\$PATH\""
+fi
+
+log "${OK} DankMaterialShell bar installation complete"
+log "${INFO} Start with: quickshell"
+log "${INFO} Or use dms CLI: dms run"
