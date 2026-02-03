@@ -17,7 +17,6 @@ BASE_PACKAGES=(
     "pipewire"                    # Audio/video server
     "pipewire-alsa"               # ALSA client
     "pipewire-audio"              # Audio client
-    "pipewire-jack"               # JACK client
     "pipewire-pulse"              # PulseAudio replacement
     "gst-plugin-pipewire"         # GStreamer plugin
     "wireplumber"                 # Session manager
