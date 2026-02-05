@@ -10,7 +10,36 @@ log "${INFO} Installing Ly display manager..."
 # Install Ly
 install_pkg "ly"
 
-# Configure Ly
+#=============================================================================
+# ENSURE HYPRLAND SESSION FILE EXISTS
+#=============================================================================
+log "${INFO} Ensuring Hyprland session file exists..."
+
+# Create wayland-sessions directory if it doesn't exist
+sudo mkdir -p /usr/share/wayland-sessions
+
+# Check if hyprland.desktop exists
+if [[ ! -f /usr/share/wayland-sessions/hyprland.desktop ]]; then
+    log "${INFO} Creating Hyprland session file..."
+    cat << 'EOF' | sudo tee /usr/share/wayland-sessions/hyprland.desktop >/dev/null
+[Desktop Entry]
+Name=Hyprland
+Comment=An intelligent dynamic tiling Wayland compositor
+Exec=Hyprland
+Type=Application
+DesktopNames=Hyprland
+EOF
+    log "${OK} Created /usr/share/wayland-sessions/hyprland.desktop"
+else
+    log "${OK} Hyprland session file already exists"
+fi
+
+# Make sure it's readable
+sudo chmod 644 /usr/share/wayland-sessions/hyprland.desktop
+
+#=============================================================================
+# CONFIGURE LY
+#=============================================================================
 sudo mkdir -p /etc/ly
 
 # Create custom configuration
@@ -115,5 +144,37 @@ SERVICEEOF
     log "${OK} Ly service created and enabled"
 fi
 
+#=============================================================================
+# VERIFY HYPRLAND IS AVAILABLE AS A SESSION
+#=============================================================================
+log "${INFO} Verifying Hyprland session availability..."
+
+if [[ -f /usr/share/wayland-sessions/hyprland.desktop ]]; then
+    log "${OK} Hyprland session found: /usr/share/wayland-sessions/hyprland.desktop"
+else
+    log "${WARN} Hyprland session file not found!"
+    log "${INFO} This may mean Hyprland is not installed or session file is missing"
+fi
+
+# Check if Hyprland binary exists
+if command -v Hyprland &>/dev/null; then
+    log "${OK} Hyprland binary found: $(which Hyprland)"
+else
+    log "${WARN} Hyprland binary not found in PATH"
+    log "${INFO} Make sure Hyprland is installed before rebooting"
+fi
+
+# List available sessions for debugging
+log "${INFO} Available wayland sessions:"
+if [[ -d /usr/share/wayland-sessions ]]; then
+    for session in /usr/share/wayland-sessions/*.desktop; do
+        if [[ -f "$session" ]]; then
+            name=$(grep "^Name=" "$session" | cut -d= -f2)
+            log "         - $name ($(basename "$session"))"
+        fi
+    done
+fi
+
 log "${OK} Ly display manager installation complete"
 log "${INFO} Ly will appear on tty2 after reboot"
+log "${INFO} Select 'Hyprland' from the session list and login"
