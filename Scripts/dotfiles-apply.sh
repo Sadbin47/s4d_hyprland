@@ -232,9 +232,11 @@ bind = $mainMod, E, exec, $fileManager
 bind = $mainMod, A, exec, $menu
 bind = $mainMod, V, togglefloating,
 bind = $mainMod, F, fullscreen, 0
-bind = $mainMod, L, exec, hyprlock
+bind = $mainMod, escape, exec, pidof hyprlock || hyprlock
+bind = $mainMod, X, exec, wlogout -b 4
 bind = $mainMod, up, exec, ~/.config/hypr/scripts/waybar-style.sh next
-bind = $mainMod SHIFT, W, exec, wallpaper select
+bind = $mainMod, down, exec, ~/.config/hypr/scripts/waybar-style.sh rofi
+bind = $mainMod SHIFT, N, exec, ~/.config/hypr/scripts/wallpaper.sh select
 bind = $mainMod, N, exec, swaync-client -t -sw
 bind = $mainMod SHIFT, V, exec, cliphist list | rofi -dmenu -p "Clipboard" | cliphist decode | wl-copy
 
@@ -254,17 +256,21 @@ bind = , XF86AudioPlay, exec, playerctl play-pause
 bind = , XF86AudioNext, exec, playerctl next
 bind = , XF86AudioPrev, exec, playerctl previous
 
-# Focus
+# Focus (Vim keys)
+bind = $mainMod, H, movefocus, l
+bind = $mainMod, L, movefocus, r
+bind = $mainMod, K, movefocus, u
+bind = $mainMod, J, movefocus, d
+
+# Focus (Arrow keys)
 bind = $mainMod, left, movefocus, l
 bind = $mainMod, right, movefocus, r
-bind = $mainMod, down, movefocus, d
-bind = $mainMod, H, movefocus, l
-bind = $mainMod, J, movefocus, d
-bind = $mainMod, K, movefocus, u
+
+# Move windows
 bind = $mainMod SHIFT, H, movewindow, l
-bind = $mainMod SHIFT, J, movewindow, d
-bind = $mainMod SHIFT, K, movewindow, u
 bind = $mainMod SHIFT, L, movewindow, r
+bind = $mainMod SHIFT, K, movewindow, u
+bind = $mainMod SHIFT, J, movewindow, d
 
 # Resize
 binde = $mainMod CTRL, H, resizeactive, -30 0
@@ -296,6 +302,14 @@ bind = $mainMod SHIFT, 0, movetoworkspace, 10
 bind = $mainMod, mouse_down, workspace, e+1
 bind = $mainMod, mouse_up, workspace, e-1
 
+# Cycle workspaces
+bind = $mainMod, TAB, workspace, m+1
+bind = $mainMod SHIFT, TAB, workspace, m-1
+
+# Scratchpad
+bind = $mainMod, S, togglespecialworkspace, magic
+bind = $mainMod SHIFT, S, movetoworkspace, special:magic
+
 # Mouse
 bindm = $mainMod, mouse:272, movewindow
 bindm = $mainMod, mouse:273, resizewindow
@@ -308,6 +322,11 @@ windowrule = float, title:^(Picture-in-Picture)$
 windowrule = float, title:^(Open File)$
 windowrule = float, title:^(Save File)$
 windowrule = suppress maximize, class:.*
+
+# GPU configs (auto-enabled by gpu-detect.sh)
+# source = ~/.config/hypr/settings/nvidia.conf
+# source = ~/.config/hypr/settings/amd.conf
+# source = ~/.config/hypr/settings/intel.conf
 HYPREOF
 
     # Minimal kitty config

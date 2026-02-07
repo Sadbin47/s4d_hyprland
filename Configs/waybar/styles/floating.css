@@ -1,4 +1,10 @@
-/* s4d Waybar Style: Floating — Island bar with shadow */
+/* s4d Waybar Style: Floating -- Islands
+ * Transparent bar, each group is a floating island with alpha(@base, 0.85).
+ * 22px border-radius (very round), drop shadow, 1px border in alpha(@surface0, 0.3).
+ * Generous padding, 4px margin between islands.
+ * Active workspace = round dot style (50% border-radius, @mauve bg).
+ * Each module icon colored with Catppuccin accents.
+ */
 @import "mocha.css";
 
 * {
@@ -7,34 +13,42 @@
     font-size: 13px;
 }
 
+/* ── Transparent Bar ──────────────────────────────────────────────────── */
 #waybar {
     background-color: transparent;
 }
 
+/* ── Module Defaults ──────────────────────────────────────────────────── */
 #waybar .module {
     color: @text;
-    padding: 0 4px;
+    padding: 0 6px;
+    margin: 0;
 }
 
 #waybar .module:hover {
-    color: @lavender;
+    color: @rosewater;
+    transition: color 0.2s ease;
 }
 
-/* Workspaces */
+/* ── Workspace Buttons (round dot active) ─────────────────────────────── */
 #workspaces button {
     all: initial;
-    padding: 0 4px;
+    padding: 0 5px;
+    margin: 0 1px;
+    color: @overlay1;
     border-radius: 50%;
-    margin: 1em 1px;
-    color: @overlay0;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 13px;
+    transition: all 0.4s cubic-bezier(.55, -0.68, .48, 1.682);
 }
 
 #workspaces button.active {
     background: @mauve;
     color: @crust;
     border-radius: 50%;
-    padding: 0 7px;
-    transition: all 0.4s cubic-bezier(.55,-0.68,.48,1.682);
+    padding: 0 8px;
+    font-weight: bold;
+    transition: all 0.4s cubic-bezier(.55, -0.68, .48, 1.682);
 }
 
 #workspaces button:hover {
@@ -44,50 +58,147 @@
     transition: all 0.3s ease;
 }
 
-/* All groups — unified floating island */
-#left-ws,
-#left-media,
-#left-system,
-#right-window,
-#right-hw,
-#right-status {
-    background: alpha(@base, 0.92);
-    border-radius: 20px;
+/* ── Floating Island Groups ───────────────────────────────────────────── */
+#left-ws {
+    background: alpha(@base, 0.85);
+    border-radius: 22px;
     padding: 0 12px;
     margin: 2px 4px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    border: 1px solid alpha(@surface0, 0.5);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+    border: 1px solid alpha(@surface0, 0.3);
 }
 
-/* Specific module accents */
-#clock { color: @lavender; font-weight: bold; }
-#cpu { color: @sapphire; }
-#memory { color: @green; }
-#temperature { color: @peach; }
-#backlight { color: @yellow; }
-#wireplumber { color: @sapphire; }
-#network { color: @teal; }
+#left-media {
+    background: alpha(@base, 0.85);
+    border-radius: 22px;
+    padding: 0 16px;
+    margin: 2px 4px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+    border: 1px solid alpha(@surface0, 0.3);
+}
 
-#battery.charging, #battery.plugged { color: @green; }
-#battery.warning:not(.charging) { color: @yellow; }
+#left-system {
+    background: alpha(@base, 0.85);
+    border-radius: 22px;
+    padding: 0 16px;
+    margin: 2px 4px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+    border: 1px solid alpha(@surface0, 0.3);
+}
+
+#right-window {
+    background: alpha(@base, 0.85);
+    border-radius: 22px;
+    padding: 0 16px;
+    margin: 2px 4px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+    border: 1px solid alpha(@surface0, 0.3);
+}
+
+#right-hw {
+    background: alpha(@base, 0.85);
+    border-radius: 22px;
+    padding: 0 16px;
+    margin: 2px 4px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+    border: 1px solid alpha(@surface0, 0.3);
+}
+
+#right-status {
+    background: alpha(@base, 0.85);
+    border-radius: 22px;
+    padding: 0 16px;
+    margin: 2px 4px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+    border: 1px solid alpha(@surface0, 0.3);
+}
+
+/* ── Module Accent Colors (icon coloring) ─────────────────────────────── */
+#clock {
+    color: @lavender;
+    font-weight: bold;
+}
+
+#cpu {
+    color: @sapphire;
+}
+
+#memory {
+    color: @green;
+}
+
+#temperature {
+    color: @peach;
+}
+
+#backlight {
+    color: @yellow;
+}
+
+#wireplumber {
+    color: @blue;
+}
+
+#network {
+    color: @teal;
+}
+
+#battery {
+    color: @green;
+}
+
+#idle_inhibitor {
+    color: @flamingo;
+}
+
+/* ── Battery States ───────────────────────────────────────────────────── */
+#battery.charging,
+#battery.plugged {
+    color: @green;
+}
+
+#battery.warning:not(.charging) {
+    color: @yellow;
+}
+
 #battery.critical:not(.charging) {
     color: @red;
-    animation: blink 0.75s linear infinite alternate;
+    animation: blink-float 0.75s linear infinite alternate;
 }
 
-@keyframes blink {
-    to { color: @red; background-color: alpha(@red, 0.1); }
+@keyframes blink-float {
+    to {
+        color: @crust;
+        background-color: @red;
+        border-radius: 22px;
+    }
 }
 
-#network.disconnected, #wireplumber.muted { color: @red; }
-#idle_inhibitor.activated { color: @green; }
-#temperature.critical { color: @red; }
+/* ── Module Specifics ─────────────────────────────────────────────────── */
+#network.disconnected,
+#wireplumber.muted {
+    color: @red;
+}
 
+#idle_inhibitor.activated {
+    color: @green;
+}
+
+#temperature.critical {
+    color: @red;
+}
+
+/* ── Tooltip (matching island aesthetic) ──────────────────────────────── */
 tooltip {
-    background-color: alpha(@base, 0.95);
+    background-color: alpha(@base, 0.92);
     border: 2px solid @mauve;
-    border-radius: 12px;
-    padding: 6px 8px;
+    border-radius: 16px;
+    padding: 8px 12px;
     color: @text;
     font-family: "JetBrainsMono Nerd Font";
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+tooltip label {
+    color: @text;
 }

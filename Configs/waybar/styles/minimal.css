@@ -1,43 +1,65 @@
-/* s4d Waybar Style: Minimal — Just text, no frills */
+/* s4d Waybar Style: Minimal -- Ghost
+ * Completely transparent everything, NO backgrounds anywhere.
+ * Very small 11px font, @overlay0 text color (faded), only @text on hover.
+ * Active workspace = @mauve color, no bg, just text. No borders, no padding.
+ * Ultra-clean ghost appearance.
+ */
 @import "mocha.css";
 
 * {
     min-height: 0;
     font-family: "JetBrainsMono Nerd Font", sans-serif;
-    font-size: 12px;
+    font-size: 11px;
 }
 
+/* ── Fully Transparent Bar ────────────────────────────────────────────── */
 #waybar {
     background-color: transparent;
 }
 
+/* ── Module Defaults (faded ghost text) ───────────────────────────────── */
 #waybar .module {
-    color: @subtext0;
-    padding: 0 4px;
+    color: @overlay0;
+    padding: 0 3px;
+    margin: 0;
+    background: transparent;
+    border: none;
+    transition: color 0.2s ease;
 }
 
 #waybar .module:hover {
     color: @text;
 }
 
-/* Workspaces */
+/* ── Workspace Buttons ────────────────────────────────────────────────── */
 #workspaces button {
     all: initial;
-    padding: 0 4px;
+    padding: 0 3px;
+    margin: 0;
     color: @overlay0;
-    font-size: 12px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 11px;
+    transition: color 0.2s ease;
 }
 
 #workspaces button.active {
     color: @mauve;
+    background: transparent;
+    border: none;
+    border-radius: 0;
     font-weight: bold;
 }
 
 #workspaces button:hover {
     color: @text;
+    background: transparent;
+    border: none;
 }
 
-/* No backgrounds, no groups — pure text */
+/* ── No Group Styling (fully transparent, no padding) ─────────────────── */
 #left-ws,
 #left-media,
 #left-system,
@@ -45,24 +67,67 @@
 #right-hw,
 #right-status {
     background: transparent;
+    border: none;
+    border-radius: 0;
     padding: 0;
+    margin: 0;
 }
 
-/* Subtle color hints */
-#clock { color: @text; }
-#battery.charging { color: @green; }
-#battery.warning:not(.charging) { color: @yellow; }
-#battery.critical:not(.charging) { color: @red; }
-#network.disconnected { color: @red; }
-#wireplumber.muted { color: @red; }
-#idle_inhibitor.activated { color: @green; }
-#temperature.critical { color: @red; }
+/* ── Clock (slightly brighter than other modules) ─────────────────────── */
+#clock {
+    color: @subtext0;
+}
 
-tooltip {
-    background-color: @base;
-    border: 1px solid @surface1;
-    border-radius: 4px;
-    padding: 4px;
+#clock:hover {
     color: @text;
-    font-size: 11px;
+}
+
+/* ── Battery States ───────────────────────────────────────────────────── */
+#battery.charging,
+#battery.plugged {
+    color: @green;
+}
+
+#battery.warning:not(.charging) {
+    color: @yellow;
+}
+
+#battery.critical:not(.charging) {
+    color: @red;
+    animation: blink-ghost 0.75s linear infinite alternate;
+}
+
+@keyframes blink-ghost {
+    to {
+        color: transparent;
+    }
+}
+
+/* ── Module Specifics ─────────────────────────────────────────────────── */
+#network.disconnected,
+#wireplumber.muted {
+    color: @red;
+}
+
+#idle_inhibitor.activated {
+    color: @green;
+}
+
+#temperature.critical {
+    color: @red;
+}
+
+/* ── Tooltip (minimal, 1px border) ────────────────────────────────────── */
+tooltip {
+    background-color: alpha(@base, 0.85);
+    border: 1px solid @surface0;
+    border-radius: 4px;
+    padding: 4px 6px;
+    color: @text;
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 10px;
+}
+
+tooltip label {
+    color: @text;
 }

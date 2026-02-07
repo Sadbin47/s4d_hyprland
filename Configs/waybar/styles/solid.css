@@ -1,4 +1,9 @@
-/* s4d Waybar Style: Solid — Classic solid bar */
+/* s4d Waybar Style: Solid -- Full Bar
+ * SOLID @crust background spanning full width (not transparent).
+ * NO group backgrounds, flat look. Active workspace = @mauve bg with square
+ * corners (0 radius). Module text = @subtext1 with color-coded 3px left borders.
+ * Bold clock.
+ */
 @import "mocha.css";
 
 * {
@@ -7,44 +12,55 @@
     font-size: 13px;
 }
 
+/* ── Solid Full-Width Bar ─────────────────────────────────────────────── */
 #waybar {
-    background-color: @base;
-    border-bottom: 2px solid @surface0;
+    background-color: @crust;
+    border-bottom: 1px solid @surface0;
 }
 
+/* ── Module Defaults ──────────────────────────────────────────────────── */
 #waybar .module {
-    color: @text;
-    padding: 0 6px;
+    color: @subtext1;
+    padding: 0 8px;
+    margin: 0 1px;
+    border-left: 3px solid transparent;
 }
 
 #waybar .module:hover {
-    color: @lavender;
+    color: @text;
+    background-color: @mantle;
+    transition: all 0.2s ease;
 }
 
-/* Workspaces */
+/* ── Workspace Buttons ────────────────────────────────────────────────── */
 #workspaces button {
     all: initial;
-    padding: 0 6px;
+    padding: 0 10px;
+    margin: 0;
     color: @overlay0;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 13px;
+    transition: all 0.2s ease;
 }
 
 #workspaces button.active {
-    color: @crust;
     background: @mauve;
-    border-radius: 4px;
-    padding: 0 8px;
-    margin: 3px 0;
-    transition: all 0.3s ease;
+    color: @crust;
+    border-radius: 0;
+    padding: 0 10px;
+    font-weight: bold;
+    transition: all 0.2s ease;
 }
 
 #workspaces button:hover {
+    background: @surface0;
     color: @text;
-    background: @surface1;
-    border-radius: 4px;
-    margin: 3px 0;
+    border-radius: 0;
+    transition: all 0.2s ease;
 }
 
-/* No group backgrounds — flush with bar */
+/* ── No Group Backgrounds (flush with bar) ────────────────────────────── */
 #left-ws,
 #left-media,
 #left-system,
@@ -52,34 +68,101 @@
 #right-hw,
 #right-status {
     background: transparent;
-    padding: 0 4px;
+    border-radius: 0;
+    padding: 0;
 }
 
-/* Module colors */
-#clock { color: @lavender; font-weight: bold; }
-#cpu { color: @sapphire; }
-#memory { color: @green; }
-#temperature { color: @peach; }
+/* ── Color-Coded Left Borders per Module ──────────────────────────────── */
+#clock {
+    color: @text;
+    font-weight: bold;
+    border-left: 3px solid @lavender;
+}
 
-#battery.charging, #battery.plugged { color: @green; }
-#battery.warning:not(.charging) { color: @yellow; }
+#cpu {
+    border-left: 3px solid @sapphire;
+}
+
+#memory {
+    border-left: 3px solid @green;
+}
+
+#temperature {
+    border-left: 3px solid @peach;
+}
+
+#backlight {
+    border-left: 3px solid @yellow;
+}
+
+#wireplumber {
+    border-left: 3px solid @blue;
+}
+
+#network {
+    border-left: 3px solid @teal;
+}
+
+#battery {
+    border-left: 3px solid @green;
+}
+
+#idle_inhibitor {
+    border-left: 3px solid @flamingo;
+}
+
+/* ── Battery States ───────────────────────────────────────────────────── */
+#battery.charging,
+#battery.plugged {
+    color: @green;
+    border-left-color: @green;
+}
+
+#battery.warning:not(.charging) {
+    color: @yellow;
+    border-left-color: @yellow;
+}
+
 #battery.critical:not(.charging) {
     color: @red;
-    animation: blink 0.75s linear infinite alternate;
+    border-left-color: @red;
+    animation: blink-solid 0.75s linear infinite alternate;
 }
 
-@keyframes blink {
-    to { color: @red; background-color: @surface0; }
+@keyframes blink-solid {
+    to {
+        color: @crust;
+        background-color: @red;
+    }
 }
 
-#network.disconnected, #wireplumber.muted { color: @red; }
-#idle_inhibitor.activated { color: @green; }
-#temperature.critical { color: @red; }
+/* ── Module Specifics ─────────────────────────────────────────────────── */
+#network.disconnected,
+#wireplumber.muted {
+    color: @red;
+    border-left-color: @red;
+}
 
+#idle_inhibitor.activated {
+    color: @green;
+    border-left-color: @green;
+}
+
+#temperature.critical {
+    color: @red;
+    border-left-color: @red;
+}
+
+/* ── Tooltip ──────────────────────────────────────────────────────────── */
 tooltip {
-    background-color: @base;
+    background-color: @crust;
     border: 2px solid @surface1;
-    border-radius: 6px;
-    padding: 4px;
+    border-radius: 0;
+    padding: 6px 8px;
+    color: @text;
+    font-family: "JetBrainsMono Nerd Font";
+}
+
+tooltip label {
     color: @text;
 }

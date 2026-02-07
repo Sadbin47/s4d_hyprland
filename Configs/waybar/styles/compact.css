@@ -1,4 +1,10 @@
-/* s4d Waybar Style: Compact — Dense, space-efficient */
+/* s4d Waybar Style: Compact -- Dense
+ * @mantle semi-transparent bar (alpha 0.85), VERY tight spacing, 11px font.
+ * Groups use @crust with 4px border-radius (small pills).
+ * Minimal padding (0 2px on modules, 0 3px on groups).
+ * Active workspace = tiny @mauve badge with 2px radius.
+ * Everything cramped and dense -- maximum info in minimum space.
+ */
 @import "mocha.css";
 
 * {
@@ -7,81 +13,151 @@
     font-size: 11px;
 }
 
+/* ── Dense Semi-Transparent Bar ───────────────────────────────────────── */
 #waybar {
-    background-color: alpha(@base, 0.9);
+    background-color: alpha(@mantle, 0.85);
 }
 
+/* ── Module Defaults (minimal spacing) ────────────────────────────────── */
 #waybar .module {
     color: @text;
-    padding: 0 3px;
-    margin: 0 1px;
+    padding: 0 2px;
+    margin: 0;
+    transition: color 0.15s ease;
 }
 
 #waybar .module:hover {
     color: @lavender;
 }
 
-/* Workspaces */
+/* ── Workspace Buttons ────────────────────────────────────────────────── */
 #workspaces button {
     all: initial;
-    padding: 0 4px;
+    padding: 0 3px;
+    margin: 0 0;
     color: @overlay0;
+    border-radius: 2px;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
     font-size: 11px;
+    transition: all 0.15s ease;
 }
 
 #workspaces button.active {
-    color: @crust;
     background: @mauve;
-    border-radius: 3px;
-    padding: 1px 6px;
+    color: @crust;
+    border-radius: 2px;
+    padding: 0 4px;
     margin: 2px 0;
     font-weight: bold;
+    font-size: 10px;
+    transition: all 0.15s ease;
 }
 
 #workspaces button:hover {
-    color: @text;
     background: @surface0;
-    border-radius: 3px;
+    color: @text;
+    border-radius: 2px;
     margin: 2px 0;
+    transition: all 0.15s ease;
 }
 
-/* Tight groups */
+/* ── Tight Crust Groups (small pills) ─────────────────────────────────── */
 #left-ws {
-    background: @mantle;
-    border-radius: 6px;
+    background: @crust;
+    border-radius: 4px;
+    padding: 0 3px;
+    margin: 1px 1px;
 }
 
-#left-media,
-#left-system,
-#right-window,
-#right-hw,
+#left-media {
+    background: @crust;
+    border-radius: 4px;
+    padding: 0 3px;
+    margin: 1px 1px;
+}
+
+#left-system {
+    background: @crust;
+    border-radius: 4px;
+    padding: 0 3px;
+    margin: 1px 1px;
+}
+
+#right-window {
+    background: @crust;
+    border-radius: 4px;
+    padding: 0 3px;
+    margin: 1px 1px;
+}
+
+#right-hw {
+    background: @crust;
+    border-radius: 4px;
+    padding: 0 3px;
+    margin: 1px 1px;
+}
+
 #right-status {
-    background: @mantle;
-    border-radius: 6px;
-    padding: 0 4px;
+    background: @crust;
+    border-radius: 4px;
+    padding: 0 3px;
+    margin: 1px 1px;
 }
 
-/* Battery */
-#battery.charging, #battery.plugged { color: @green; }
-#battery.warning:not(.charging) { color: @yellow; }
+/* ── Clock ────────────────────────────────────────────────────────────── */
+#clock {
+    color: @lavender;
+    font-weight: bold;
+}
+
+/* ── Battery States ───────────────────────────────────────────────────── */
+#battery.charging,
+#battery.plugged {
+    color: @green;
+}
+
+#battery.warning:not(.charging) {
+    color: @yellow;
+}
+
 #battery.critical:not(.charging) {
     color: @red;
-    animation: blink 0.75s linear infinite alternate;
+    animation: blink-compact 0.75s linear infinite alternate;
 }
 
-@keyframes blink {
-    to { color: @red; background-color: @surface0; }
+@keyframes blink-compact {
+    to {
+        color: @crust;
+        background-color: @red;
+        border-radius: 2px;
+    }
 }
 
-#network.disconnected, #wireplumber.muted { color: @red; }
-#idle_inhibitor.activated { color: @green; }
-#temperature.critical { color: @red; }
+/* ── Module Specifics ─────────────────────────────────────────────────── */
+#network.disconnected,
+#wireplumber.muted {
+    color: @red;
+}
 
+#idle_inhibitor.activated {
+    color: @green;
+}
+
+#temperature.critical {
+    color: @red;
+}
+
+/* ── Tooltip (tight and dense) ────────────────────────────────────────── */
 tooltip {
-    background-color: @base;
+    background-color: @crust;
     border: 1px solid @surface0;
-    border-radius: 4px;
-    padding: 3px;
+    border-radius: 3px;
+    padding: 2px 4px;
     color: @text;
+    font-family: "JetBrainsMono Nerd Font";
     font-size: 10px;
+}
+
+tooltip label {
+    color: @text;
 }

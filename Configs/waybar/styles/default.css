@@ -1,4 +1,7 @@
-/* s4d Waybar Style: Default — Pill Groups */
+/* s4d Waybar Style: Default -- Pill Groups
+ * Transparent bar, each group is a rounded pill with @base background.
+ * Clean and standard. Active workspace = @mauve background.
+ */
 @import "mocha.css";
 
 * {
@@ -7,27 +10,33 @@
     font-size: 13px;
 }
 
+/* ── Transparent Bar ──────────────────────────────────────────────────── */
 #waybar {
     background-color: transparent;
 }
 
+/* ── Module Defaults ──────────────────────────────────────────────────── */
 #waybar .module {
     color: @text;
-    padding: 0;
-    margin: -10px 5px -10px;
+    padding: 0 6px;
+    margin: 0;
 }
 
 #waybar .module:hover {
-    color: @subtext1;
+    color: @lavender;
+    transition: color 0.2s ease;
 }
 
-/* Workspace Buttons */
+/* ── Workspace Buttons ────────────────────────────────────────────────── */
 #workspaces button {
     all: initial;
-    padding: 0 3px;
-    border-radius: 8px;
-    margin: 1em 0;
+    padding: 0 5px;
+    border-radius: 10.5pt;
+    margin: 0;
     color: @text;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 13px;
+    transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
 }
 
 #workspaces button.active {
@@ -35,53 +44,105 @@
     color: @crust;
     border-radius: 10.5pt;
     padding: 0 8px;
-    transition: all 0.4s cubic-bezier(.55,-0.68,.48,1.682);
+    font-weight: bold;
+    transition: all 0.4s cubic-bezier(.55, -0.68, .48, 1.682);
 }
 
 #workspaces button:hover {
-    background: @mantle;
+    background: @surface0;
     color: @text;
-    transition: all 0.3s cubic-bezier(.55,-0.68,.48,1.682);
+    transition: all 0.3s cubic-bezier(.55, -0.68, .48, 1.682);
 }
 
-/* Pill Groups */
+/* ── Pill Groups ──────────────────────────────────────────────────────── */
 #left-ws {
     background: @base;
     border-radius: 10.5pt;
+    padding: 0 4px;
 }
 
-#left-media,
-#left-system,
-#right-window,
-#right-hw,
+#left-media {
+    background: @base;
+    border-radius: 10.5pt;
+    padding: 0 10px;
+}
+
+#left-system {
+    background: @base;
+    border-radius: 10.5pt;
+    padding: 0 10px;
+}
+
+#right-window {
+    background: @base;
+    border-radius: 10.5pt;
+    padding: 0 10px;
+}
+
+#right-hw {
+    background: @base;
+    border-radius: 10.5pt;
+    padding: 0 10px;
+}
+
 #right-status {
     background: @base;
     border-radius: 10.5pt;
-    padding: 0 8px;
+    padding: 0 10px;
 }
 
-/* Battery States */
-#battery.charging, #battery.plugged { color: @green; }
-#battery.warning:not(.charging) { color: @yellow; }
+/* ── Clock ────────────────────────────────────────────────────────────── */
+#clock {
+    color: @lavender;
+}
+
+/* ── Battery States ───────────────────────────────────────────────────── */
+#battery.charging,
+#battery.plugged {
+    color: @green;
+}
+
+#battery.warning:not(.charging) {
+    color: @yellow;
+}
+
 #battery.critical:not(.charging) {
     color: @red;
     animation: blink 0.75s linear infinite alternate;
 }
 
 @keyframes blink {
-    to { color: @red; background-color: @surface0; }
+    to {
+        color: @red;
+        background-color: @surface0;
+        border-radius: 10.5pt;
+    }
 }
 
-/* Module Specifics */
-#network.disconnected, #wireplumber.muted { color: @red; }
-#idle_inhibitor.activated { color: @green; }
-#temperature.critical { color: @red; }
+/* ── Module Specifics ─────────────────────────────────────────────────── */
+#network.disconnected,
+#wireplumber.muted {
+    color: @red;
+}
 
+#idle_inhibitor.activated {
+    color: @green;
+}
+
+#temperature.critical {
+    color: @red;
+}
+
+/* ── Tooltip ──────────────────────────────────────────────────────────── */
 tooltip {
     background-color: @base;
     border: 2px solid @mauve;
-    border-radius: 8px;
-    padding: 4px;
+    border-radius: 10.5pt;
+    padding: 6px 8px;
     color: @text;
     font-family: "JetBrainsMono Nerd Font";
+}
+
+tooltip label {
+    color: @text;
 }

@@ -41,17 +41,28 @@ install_nvidia_drivers() {
 
     sudo mkinitcpio -P &>>"$LOG_FILE" || true
 
-    mkdir -p "$HOME/.config/hypr"
-    cat > "$HOME/.config/hypr/nvidia.conf" << 'EOF'
+    mkdir -p "$HOME/.config/hypr/settings"
+    cat > "$HOME/.config/hypr/settings/nvidia.conf" << 'EOF'
+# ── NVIDIA-specific Configuration ─────────────────────────────────────────────
 env = LIBVA_DRIVER_NAME,nvidia
 env = XDG_SESSION_TYPE,wayland
 env = GBM_BACKEND,nvidia-drm
 env = __GLX_VENDOR_LIBRARY_NAME,nvidia
 env = NVD_BACKEND,direct
+env = __GL_GSYNC_ALLOWED,1
+env = __GL_VRR_ALLOWED,1
+
 cursor {
     no_hardware_cursors = 1
 }
 EOF
+
+    # Enable nvidia config in hyprland.conf
+    local hypr_conf="$HOME/.config/hypr/hyprland.conf"
+    if [[ -f "$hypr_conf" ]]; then
+        sed -i 's|^# source = ~/.config/hypr/settings/nvidia.conf|source = ~/.config/hypr/settings/nvidia.conf|' "$hypr_conf"
+    fi
+
     log "${OK} NVIDIA drivers installed"
 }
 
@@ -67,11 +78,19 @@ install_amd_drivers() {
         install_pkg "$pkg"
     done
 
-    mkdir -p "$HOME/.config/hypr"
-    cat > "$HOME/.config/hypr/amd.conf" << 'EOF'
+    mkdir -p "$HOME/.config/hypr/settings"
+    cat > "$HOME/.config/hypr/settings/amd.conf" << 'EOF'
+# ── AMD-specific Configuration ────────────────────────────────────────────────
 env = LIBVA_DRIVER_NAME,radeonsi
 env = VDPAU_DRIVER,radeonsi
 EOF
+
+    # Enable amd config in hyprland.conf
+    local hypr_conf="$HOME/.config/hypr/hyprland.conf"
+    if [[ -f "$hypr_conf" ]]; then
+        sed -i 's|^# source = ~/.config/hypr/settings/amd.conf|source = ~/.config/hypr/settings/amd.conf|' "$hypr_conf"
+    fi
+
     log "${OK} AMD drivers installed"
 }
 
@@ -87,10 +106,18 @@ install_intel_drivers() {
         install_pkg "$pkg"
     done
 
-    mkdir -p "$HOME/.config/hypr"
-    cat > "$HOME/.config/hypr/intel.conf" << 'EOF'
+    mkdir -p "$HOME/.config/hypr/settings"
+    cat > "$HOME/.config/hypr/settings/intel.conf" << 'EOF'
+# ── Intel-specific Configuration ──────────────────────────────────────────────
 env = LIBVA_DRIVER_NAME,iHD
 EOF
+
+    # Enable intel config in hyprland.conf
+    local hypr_conf="$HOME/.config/hypr/hyprland.conf"
+    if [[ -f "$hypr_conf" ]]; then
+        sed -i 's|^# source = ~/.config/hypr/settings/intel.conf|source = ~/.config/hypr/settings/intel.conf|' "$hypr_conf"
+    fi
+
     log "${OK} Intel drivers installed"
 }
 

@@ -1,4 +1,9 @@
-/* s4d Waybar Style: Flat — Bottom-line accents */
+/* s4d Waybar Style: Flat -- Underline
+ * Semi-transparent bar (alpha(@mantle, 0.7)), flat no-radius design.
+ * Each module has a colored 3px bottom border in its accent color.
+ * Active workspace = @mauve underline (bottom-border), no bg.
+ * Hover = brighter underline color.
+ */
 @import "mocha.css";
 
 * {
@@ -7,43 +12,56 @@
     font-size: 13px;
 }
 
+/* ── Semi-Transparent Flat Bar ────────────────────────────────────────── */
 #waybar {
-    background-color: alpha(@base, 0.85);
+    background-color: alpha(@mantle, 0.7);
 }
 
+/* ── Module Defaults (flat with bottom border slot) ───────────────────── */
 #waybar .module {
     color: @text;
     padding: 2px 8px;
-    border-bottom: 2px solid transparent;
     margin: 0 1px;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    transition: all 0.2s ease;
 }
 
 #waybar .module:hover {
-    color: @lavender;
-    border-bottom-color: @lavender;
+    color: @rosewater;
+    border-bottom-color: @rosewater;
 }
 
-/* Workspaces */
+/* ── Workspace Buttons ────────────────────────────────────────────────── */
 #workspaces button {
     all: initial;
-    padding: 2px 6px;
-    color: @overlay0;
-    border-bottom: 2px solid transparent;
+    padding: 2px 8px;
+    margin: 0;
+    color: @overlay1;
+    border-bottom: 3px solid transparent;
     border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 13px;
+    transition: all 0.3s ease;
 }
 
 #workspaces button.active {
     color: @mauve;
-    border-bottom-color: @mauve;
+    background: transparent;
+    border-bottom: 3px solid @mauve;
+    border-radius: 0;
     font-weight: bold;
+    transition: all 0.3s ease;
 }
 
 #workspaces button:hover {
     color: @text;
-    border-bottom-color: @surface1;
+    background: transparent;
+    border-bottom: 3px solid @surface2;
+    transition: all 0.2s ease;
 }
 
-/* No group backgrounds */
+/* ── Flat Groups (no background, no radius) ───────────────────────────── */
 #left-ws,
 #left-media,
 #left-system,
@@ -55,37 +73,126 @@
     padding: 0 2px;
 }
 
-/* Color-coded underlines */
-#clock { border-bottom-color: @lavender; }
-#cpu { border-bottom-color: @sapphire; }
-#memory { border-bottom-color: @green; }
-#temperature { border-bottom-color: @peach; }
-#backlight { border-bottom-color: @yellow; }
-#wireplumber { border-bottom-color: @sapphire; }
-#network { border-bottom-color: @teal; }
-#battery { border-bottom-color: @green; }
+/* ── Color-Coded Bottom Borders per Module ────────────────────────────── */
+#clock {
+    color: @lavender;
+    border-bottom-color: @lavender;
+}
 
-#battery.charging { color: @green; border-bottom-color: @green; }
-#battery.warning:not(.charging) { color: @yellow; border-bottom-color: @yellow; }
+#clock:hover {
+    color: @text;
+    border-bottom-color: @text;
+}
+
+#cpu {
+    border-bottom-color: @sapphire;
+}
+
+#cpu:hover {
+    border-bottom-color: @lavender;
+}
+
+#memory {
+    border-bottom-color: @green;
+}
+
+#memory:hover {
+    border-bottom-color: @teal;
+}
+
+#temperature {
+    border-bottom-color: @peach;
+}
+
+#temperature:hover {
+    border-bottom-color: @yellow;
+}
+
+#backlight {
+    border-bottom-color: @yellow;
+}
+
+#backlight:hover {
+    border-bottom-color: @rosewater;
+}
+
+#wireplumber {
+    border-bottom-color: @blue;
+}
+
+#wireplumber:hover {
+    border-bottom-color: @lavender;
+}
+
+#network {
+    border-bottom-color: @teal;
+}
+
+#network:hover {
+    border-bottom-color: @green;
+}
+
+#battery {
+    border-bottom-color: @green;
+}
+
+#idle_inhibitor {
+    border-bottom-color: @flamingo;
+}
+
+/* ── Battery States ───────────────────────────────────────────────────── */
+#battery.charging,
+#battery.plugged {
+    color: @green;
+    border-bottom-color: @green;
+}
+
+#battery.warning:not(.charging) {
+    color: @yellow;
+    border-bottom-color: @yellow;
+}
+
 #battery.critical:not(.charging) {
     color: @red;
     border-bottom-color: @red;
-    animation: blink 0.75s linear infinite alternate;
+    animation: blink-flat 0.75s linear infinite alternate;
 }
 
-@keyframes blink {
-    to { color: @red; background-color: @surface0; }
+@keyframes blink-flat {
+    to {
+        color: @red;
+        background-color: alpha(@red, 0.15);
+    }
 }
 
-#network.disconnected { color: @red; border-bottom-color: @red; }
-#wireplumber.muted { color: @red; border-bottom-color: @red; }
-#idle_inhibitor.activated { color: @green; border-bottom-color: @green; }
-#temperature.critical { color: @red; border-bottom-color: @red; }
+/* ── Module Specifics ─────────────────────────────────────────────────── */
+#network.disconnected,
+#wireplumber.muted {
+    color: @red;
+    border-bottom-color: @red;
+}
 
+#idle_inhibitor.activated {
+    color: @green;
+    border-bottom-color: @green;
+}
+
+#temperature.critical {
+    color: @red;
+    border-bottom-color: @red;
+}
+
+/* ── Tooltip ──────────────────────────────────────────────────────────── */
 tooltip {
-    background-color: @base;
+    background-color: alpha(@mantle, 0.9);
     border: 1px solid @surface1;
-    border-radius: 4px;
-    padding: 4px;
+    border-radius: 0;
+    padding: 6px 8px;
+    color: @text;
+    font-family: "JetBrainsMono Nerd Font";
+    border-bottom: 3px solid @mauve;
+}
+
+tooltip label {
     color: @text;
 }

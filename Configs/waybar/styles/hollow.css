@@ -1,4 +1,8 @@
-/* s4d Waybar Style: Hollow — Floating Pods (BlackNode-inspired) */
+/* s4d Waybar Style: Hollow -- Neon Outline
+ * Transparent bar, groups have NO fill -- only a 1.5px @mauve border outline.
+ * Modules get individual Catppuccin accent colors.
+ * Active workspace = @mauve text only (no bg), dot-style border-bottom indicator.
+ */
 @import "mocha.css";
 
 * {
@@ -7,112 +11,176 @@
     font-size: 14px;
 }
 
+/* ── Transparent Bar ──────────────────────────────────────────────────── */
 #waybar {
     background-color: transparent;
 }
 
+/* ── Module Defaults ──────────────────────────────────────────────────── */
 #waybar .module {
     color: @text;
-    padding: 0;
-    margin: -10px 5px -10px;
+    padding: 0 6px;
+    margin: 0;
 }
 
 #waybar .module:hover {
-    color: @lavender;
+    color: @rosewater;
+    transition: color 0.2s ease;
 }
 
-/* Workspaces */
+/* ── Workspace Buttons ────────────────────────────────────────────────── */
 #workspaces button {
     all: initial;
-    padding: 0 3px;
-    border-radius: 8px;
-    margin: 1em 0;
-    color: @text;
+    padding: 0 6px;
+    margin: 0;
+    color: @overlay1;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 14px;
+    transition: all 0.3s ease;
 }
 
 #workspaces button.active {
-    background: @mauve;
-    color: @crust;
-    border-radius: 10.5pt;
-    padding: 0 8px;
-    transition: all 0.4s cubic-bezier(.55,-0.68,.48,1.682);
+    color: @mauve;
+    background: transparent;
+    border-bottom: 3px solid @mauve;
+    border-radius: 0;
+    font-weight: bold;
+    transition: all 0.3s ease;
 }
 
 #workspaces button:hover {
-    background: @mantle;
     color: @text;
-    transition: all 0.3s cubic-bezier(.55,-0.68,.48,1.682);
+    background: transparent;
+    border-bottom: 3px solid @surface1;
+    transition: all 0.2s ease;
 }
 
-/* Hollow Pod Groups — each group is a separate pill */
+/* ── Neon Outline Groups (NO fill, border only) ───────────────────────── */
 #left-ws {
-    background: @base;
+    background: transparent;
+    border: 1.5px solid @mauve;
     border-radius: 10.5pt;
+    padding: 0 6px;
 }
 
 #left-media {
-    background: @base;
+    background: transparent;
+    border: 1.5px solid @mauve;
     border-radius: 10.5pt;
     padding: 0 10px;
-    border: 1px solid @surface0;
 }
 
 #left-system {
-    background: @base;
+    background: transparent;
+    border: 1.5px solid @mauve;
     border-radius: 10.5pt;
     padding: 0 10px;
-    border: 1px solid @surface0;
 }
 
 #right-window {
-    background: @base;
+    background: transparent;
+    border: 1.5px solid @mauve;
     border-radius: 10.5pt;
     padding: 0 10px;
-    border: 1px solid @surface0;
 }
 
 #right-hw {
-    background: @base;
+    background: transparent;
+    border: 1.5px solid @mauve;
     border-radius: 10.5pt;
     padding: 0 10px;
-    border: 1px solid @surface0;
 }
 
 #right-status {
-    background: @base;
+    background: transparent;
+    border: 1.5px solid @mauve;
     border-radius: 10.5pt;
     padding: 0 10px;
-    border: 1px solid @surface0;
 }
 
-/* Module colors */
-#cpu { color: @sapphire; }
-#memory { color: @green; }
-#temperature { color: @peach; }
-#battery.charging, #battery.plugged { color: @green; }
-#battery.warning:not(.charging) { color: @yellow; }
+/* ── Module Accent Colors ─────────────────────────────────────────────── */
+#cpu {
+    color: @sapphire;
+}
+
+#memory {
+    color: @green;
+}
+
+#temperature {
+    color: @peach;
+}
+
+#clock {
+    color: @lavender;
+    font-weight: bold;
+}
+
+#network {
+    color: @teal;
+}
+
+#backlight {
+    color: @yellow;
+}
+
+#wireplumber {
+    color: @blue;
+}
+
+#battery {
+    color: @green;
+}
+
+/* ── Battery States ───────────────────────────────────────────────────── */
+#battery.charging,
+#battery.plugged {
+    color: @green;
+}
+
+#battery.warning:not(.charging) {
+    color: @yellow;
+}
+
 #battery.critical:not(.charging) {
     color: @red;
-    animation: blink 0.75s linear infinite alternate;
+    animation: blink-hollow 0.75s linear infinite alternate;
 }
 
-@keyframes blink {
-    to { color: @red; background-color: @surface0; }
+@keyframes blink-hollow {
+    to {
+        color: @crust;
+        background-color: @red;
+        border-radius: 4px;
+    }
 }
 
-#network.disconnected, #wireplumber.muted { color: @red; }
-#idle_inhibitor.activated { color: @green; }
-#temperature.critical { color: @red; }
-#clock { color: @lavender; }
-#backlight { color: @yellow; }
-#wireplumber { color: @sapphire; }
-#network { color: @teal; }
+/* ── Module Specifics ─────────────────────────────────────────────────── */
+#network.disconnected,
+#wireplumber.muted {
+    color: @red;
+}
 
+#idle_inhibitor.activated {
+    color: @green;
+}
+
+#temperature.critical {
+    color: @red;
+}
+
+/* ── Tooltip ──────────────────────────────────────────────────────────── */
 tooltip {
-    background-color: @base;
-    border: 2px solid @mauve;
+    background-color: alpha(@base, 0.9);
+    border: 1.5px solid @mauve;
     border-radius: 10.5pt;
-    padding: 6px;
+    padding: 6px 10px;
     color: @text;
     font-family: "JetBrainsMono Nerd Font";
+}
+
+tooltip label {
+    color: @text;
 }
