@@ -124,15 +124,13 @@ setup_dms_service() {
 Description=Dank Material Shell (DMS)
 PartOf=graphical-session.target
 After=graphical-session.target
-Requisite=graphical-session.target
 
 [Service]
-Type=dbus
-BusName=org.freedesktop.Notifications
-ExecStart=/usr/bin/dms run --session
+Type=simple
+ExecStart=/usr/bin/dms run
 ExecReload=/usr/bin/pkill -USR1 -x dms
 Restart=on-failure
-RestartSec=1.23
+RestartSec=2
 TimeoutStopSec=10
 
 [Install]
@@ -152,57 +150,10 @@ EOF
 }
 
 #=============================================================================
-# UPDATE HYPRLAND CONFIG
+# NOTE: Hyprland config (exec-once lines) is handled by
+# dotfiles-apply.sh -> configure_status_bar() using the marker system.
+# This script only installs DMS, it does NOT modify hyprland.conf.
 #=============================================================================
-update_hyprland_config() {
-    HYPR_CONF="$HOME/.config/hypr/hyprland.conf"
-    
-    if [[ ! -f "$HYPR_CONF" ]]; then
-        log "${WARN} Hyprland config not found at $HYPR_CONF"
-        return
-    fi
-    
-    log "${INFO} Updating Hyprland configuration for DMS..."
-    
-    # Comment out waybar if present (DMS replaces it)
-    if grep -q "^exec-once = waybar" "$HYPR_CONF"; then
-        sed -i 's/^exec-once = waybar/# exec-once = waybar  # Disabled - using DMS/' "$HYPR_CONF"
-        log "${INFO} Commented out waybar (DMS replaces it)"
-    fi
-    
-    # Comment out swaync if present (DMS replaces notifications)
-    if grep -q "^exec-once = swaync" "$HYPR_CONF"; then
-        sed -i 's/^exec-once = swaync/# exec-once = swaync  # Disabled - using DMS/' "$HYPR_CONF"
-        log "${INFO} Commented out swaync (DMS replaces it)"
-    fi
-    
-    # Comment out hypridle if present (DMS has session management)
-    if grep -q "^exec-once = hypridle" "$HYPR_CONF"; then
-        sed -i 's/^exec-once = hypridle/# exec-once = hypridle  # Disabled - using DMS/' "$HYPR_CONF"
-        log "${INFO} Commented out hypridle (DMS replaces it)"
-    fi
-    
-    # Comment out polkit agent if present (DMS has built-in polkit)
-    if grep -q "^exec-once = /usr/lib/polkit" "$HYPR_CONF"; then
-        sed -i 's|^exec-once = /usr/lib/polkit|# exec-once = /usr/lib/polkit|' "$HYPR_CONF"
-        log "${INFO} Commented out polkit agent (DMS replaces it)"
-    fi
-    
-    # Remove any old quickshell entries
-    sed -i '/^exec-once = quickshell/d' "$HYPR_CONF"
-    sed -i '/^# DankMaterialShell bar/d' "$HYPR_CONF"
-    
-    # Add DMS autostart using dms run
-    if ! grep -q "dms run" "$HYPR_CONF"; then
-        cat >> "$HYPR_CONF" << 'EOF'
-
-# DankMaterialShell - Complete desktop shell
-# Replaces: waybar, swaync, hypridle, polkit-agent
-exec-once = dms run
-EOF
-        log "${OK} Added DMS to Hyprland autostart"
-    fi
-}
 
 #=============================================================================
 # MAIN INSTALLATION
@@ -229,9 +180,6 @@ fi
 
 # Setup systemd service for proper session integration
 setup_dms_service
-
-# Update Hyprland config
-update_hyprland_config
 
 log "${OK} DankMaterialShell installation complete!"
 log ""

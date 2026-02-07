@@ -18,21 +18,27 @@ log "${INFO} Ensuring Hyprland session file exists..."
 # Create wayland-sessions directory if it doesn't exist
 sudo mkdir -p /usr/share/wayland-sessions
 
-# Check if hyprland.desktop exists
-if [[ ! -f /usr/share/wayland-sessions/hyprland.desktop ]]; then
-    log "${INFO} Creating Hyprland session file..."
-    cat << 'EOF' | sudo tee /usr/share/wayland-sessions/hyprland.desktop >/dev/null
+# Detect correct Hyprland binary name
+HYPR_BIN=""
+if command -v Hyprland &>/dev/null; then
+    HYPR_BIN="Hyprland"
+elif command -v hyprland &>/dev/null; then
+    HYPR_BIN="hyprland"
+else
+    HYPR_BIN="Hyprland"  # Default
+fi
+
+# Create/update hyprland.desktop session file
+log "${INFO} Creating Hyprland session file (Exec=$HYPR_BIN)..."
+cat << DEOF | sudo tee /usr/share/wayland-sessions/hyprland.desktop >/dev/null
 [Desktop Entry]
 Name=Hyprland
 Comment=An intelligent dynamic tiling Wayland compositor
-Exec=Hyprland
+Exec=$HYPR_BIN
 Type=Application
 DesktopNames=Hyprland
-EOF
-    log "${OK} Created /usr/share/wayland-sessions/hyprland.desktop"
-else
-    log "${OK} Hyprland session file already exists"
-fi
+DEOF
+log "${OK} Created /usr/share/wayland-sessions/hyprland.desktop"
 
 # Make sure it's readable
 sudo chmod 644 /usr/share/wayland-sessions/hyprland.desktop

@@ -487,6 +487,7 @@ install_lockscreen() {
     
     install_pkg hyprlock
     install_pkg hypridle
+    install_pkg grim  # Required for hyprlock screenshot background
     
     if [[ "${USER_CHOICES[lockscreen]}" == "both" ]]; then
         log "${INFO} Installing wlogout..."

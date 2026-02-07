@@ -7,14 +7,12 @@ source "$(dirname "${BASH_SOURCE[0]}")/functions.sh"
 
 log "${INFO} Installing Nemo file manager..."
 
-NEMO_PACKAGES=(
-    "nemo"
-    "nemo-fileroller"         # Archive integration
-    "file-roller"             # Archive manager
-)
+# Core package (required)
+install_pkg "nemo"
 
-for pkg in "${NEMO_PACKAGES[@]}"; do
-    install_pkg "$pkg"
+# Optional extras - don't fail if unavailable
+for pkg in "nemo-fileroller" "file-roller"; do
+    install_pkg "$pkg" || log "${WARN} $pkg not available - skipping (non-essential)"
 done
 
 # Set Nemo as default file manager
