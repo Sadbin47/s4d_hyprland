@@ -91,6 +91,11 @@ install_kvantum_themes() {
     cat > "$KVANTUM_DIR/kvantum.kvconfig" << 'EOF'
 [General]
 theme=catppuccin-mocha-mauve
+translucent_windows=true
+blurring=true
+composite=true
+reduce_window_opacity=0
+reduce_menu_opacity=15
 EOF
 
     # qt5ct config
@@ -206,29 +211,126 @@ configure_kde_dark() {
 [General]
 ColorScheme=CatppuccinMochaMauve
 Name=Catppuccin Mocha Mauve
+fixed=JetBrainsMono Nerd Font,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+font=Inter,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+menuFont=Inter,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+smallestReadableFont=Inter,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+toolBarFont=Inter,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
 
 [Colors:View]
 BackgroundNormal=30,30,46
+BackgroundAlternate=24,24,37
 ForegroundNormal=205,214,244
+ForegroundInactive=166,173,200
+ForegroundActive=203,166,247
+ForegroundLink=137,180,250
+ForegroundVisited=245,194,231
+ForegroundNegative=243,139,168
+ForegroundNeutral=249,226,175
+ForegroundPositive=166,227,161
+DecorationFocus=203,166,247
+DecorationHover=137,180,250
 
 [Colors:Window]
 BackgroundNormal=24,24,37
+BackgroundAlternate=30,30,46
 ForegroundNormal=205,214,244
+ForegroundInactive=166,173,200
+ForegroundActive=203,166,247
+ForegroundLink=137,180,250
+ForegroundVisited=245,194,231
+ForegroundNegative=243,139,168
+ForegroundNeutral=249,226,175
+ForegroundPositive=166,227,161
+DecorationFocus=203,166,247
+DecorationHover=137,180,250
 
 [Colors:Button]
 BackgroundNormal=49,50,68
+BackgroundAlternate=69,71,90
 ForegroundNormal=205,214,244
+ForegroundInactive=166,173,200
+ForegroundActive=203,166,247
+ForegroundLink=137,180,250
+ForegroundVisited=245,194,231
+ForegroundNegative=243,139,168
+ForegroundNeutral=249,226,175
+ForegroundPositive=166,227,161
+DecorationFocus=203,166,247
+DecorationHover=137,180,250
 
 [Colors:Selection]
 BackgroundNormal=203,166,247
+BackgroundAlternate=180,190,254
 ForegroundNormal=17,17,27
+ForegroundInactive=30,30,46
+ForegroundActive=17,17,27
+ForegroundLink=17,17,27
+ForegroundVisited=49,50,68
+ForegroundNegative=243,139,168
+ForegroundNeutral=249,226,175
+ForegroundPositive=166,227,161
+DecorationFocus=203,166,247
+DecorationHover=137,180,250
+
+[Colors:Tooltip]
+BackgroundNormal=24,24,37
+BackgroundAlternate=30,30,46
+ForegroundNormal=205,214,244
+ForegroundInactive=166,173,200
+ForegroundActive=203,166,247
+ForegroundLink=137,180,250
+ForegroundVisited=245,194,231
+ForegroundNegative=243,139,168
+ForegroundNeutral=249,226,175
+ForegroundPositive=166,227,161
+DecorationFocus=203,166,247
+DecorationHover=137,180,250
+
+[Colors:Complementary]
+BackgroundNormal=17,17,27
+BackgroundAlternate=24,24,37
+ForegroundNormal=205,214,244
+ForegroundInactive=166,173,200
+ForegroundActive=203,166,247
+ForegroundLink=137,180,250
+ForegroundVisited=245,194,231
+ForegroundNegative=243,139,168
+ForegroundNeutral=249,226,175
+ForegroundPositive=166,227,161
+DecorationFocus=203,166,247
+DecorationHover=137,180,250
+
+[Colors:Header]
+BackgroundNormal=24,24,37
+BackgroundAlternate=30,30,46
+ForegroundNormal=205,214,244
+ForegroundInactive=166,173,200
+ForegroundActive=203,166,247
+ForegroundLink=137,180,250
+ForegroundVisited=245,194,231
+ForegroundNegative=243,139,168
+ForegroundNeutral=249,226,175
+ForegroundPositive=166,227,161
+DecorationFocus=203,166,247
+DecorationHover=137,180,250
 
 [KDE]
 LookAndFeelPackage=org.kde.breezedark.desktop
 widgetStyle=kvantum-dark
+contrast=4
 
 [Icons]
 Theme=Papirus-Dark
+
+[WM]
+activeBackground=24,24,37
+activeForeground=205,214,244
+inactiveBackground=17,17,27
+inactiveForeground=166,173,200
+activeBlend=203,166,247
+inactiveBlend=69,71,90
+frame=17,17,27
 EOF
 
     log "${OK} KDE dark mode configured"

@@ -27,19 +27,53 @@ done
 mkdir -p "$HOME/.config"
 
 if [[ ! -f "$HOME/.config/dolphinrc" ]]; then
-    log "${INFO} Creating minimal Dolphin config (preserves theme from dotfiles)"
-    
+    log "${INFO} Creating clean Dolphin config..."
+
     cat > "$HOME/.config/dolphinrc" << 'EOF'
 [General]
 BrowseThroughArchives=true
 ConfirmClosingMultipleTabs=true
 ShowFullPath=true
-ShowZoomSlider=true
+ShowFullPathInTitlebar=true
+ShowZoomSlider=false
 Version=202
+GlobalViewProps=true
+RememberOpenedTabs=true
+
+[MainWindow]
+MenuBar=Disabled
+ToolBarsMovable=Disabled
+
+[PreviewsTab]
+Plugins=directorythumbnail,imagethumbnail,jpegthumbnail,ffmpegthumbs
+
+[DetailsMode]
+ExpandableFolders=false
+PreviewSize=22
+
+[CompactMode]
+PreviewSize=32
+
+[IconsMode]
+PreviewSize=80
+
+[PlacesPanel]
+IconSize=22
 
 [Search]
 Location=Everywhere
+
+[VersionControl]
+enabledPlugins=Git
 EOF
+
+    # Dolphin state — start in Details view with a clean layout
+    mkdir -p "$HOME/.local/share/dolphin"
+    cat > "$HOME/.config/dolphinstaterc" << 'EOF'
+[State]
+firstRun=false
+EOF
+
 else
     log "${OK} Dolphin config already exists - preserving your dotfiles settings"
 fi
