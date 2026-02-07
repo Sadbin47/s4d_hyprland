@@ -40,7 +40,7 @@ apply_default() {
     log "${INFO} Applying default s4d dotfiles..."
 
     # These directories from Configs/ go to ~/.config/
-    local config_dirs=(hypr waybar rofi swaync kitty wlogout fastfetch)
+    local config_dirs=(hypr rofi swaync kitty wlogout fastfetch)
 
     for d in "${config_dirs[@]}"; do
         if [[ -d "$CONFIGS_DIR/$d" ]]; then
@@ -49,6 +49,23 @@ apply_default() {
             log "${OK} Applied $d config"
         fi
     done
+
+    # Waybar: copy configs but preserve style.css if already set by waybar-install.sh
+    if [[ -d "$CONFIGS_DIR/waybar" ]]; then
+        mkdir -p "$HOME/.config/waybar"
+        # Copy everything except style.css (which was set by waybar-install.sh)
+        for f in "$CONFIGS_DIR/waybar/"*; do
+            local fname
+            fname=$(basename "$f")
+            [[ "$fname" == "style.css" ]] && continue
+            cp -rf "$f" "$HOME/.config/waybar/" 2>/dev/null || true
+        done
+        # Only copy style.css if none exists yet
+        if [[ ! -f "$HOME/.config/waybar/style.css" ]]; then
+            cp -f "$CONFIGS_DIR/waybar/style.css" "$HOME/.config/waybar/style.css" 2>/dev/null || true
+        fi
+        log "${OK} Applied waybar config"
+    fi
 
     # Zsh: .zshrc and .zprofile go to $HOME (not ~/.config/zsh/)
     if [[ -d "$CONFIGS_DIR/zsh" ]]; then
@@ -216,7 +233,7 @@ bind = $mainMod, A, exec, $menu
 bind = $mainMod, V, togglefloating,
 bind = $mainMod, F, fullscreen, 0
 bind = $mainMod, L, exec, hyprlock
-bind = $mainMod, W, exec, ~/.config/hypr/scripts/waybar-style.sh rofi
+bind = $mainMod, up, exec, ~/.config/hypr/scripts/waybar-style.sh next
 bind = $mainMod SHIFT, W, exec, wallpaper select
 bind = $mainMod, N, exec, swaync-client -t -sw
 bind = $mainMod SHIFT, V, exec, cliphist list | rofi -dmenu -p "Clipboard" | cliphist decode | wl-copy
@@ -240,7 +257,6 @@ bind = , XF86AudioPrev, exec, playerctl previous
 # Focus
 bind = $mainMod, left, movefocus, l
 bind = $mainMod, right, movefocus, r
-bind = $mainMod, up, movefocus, u
 bind = $mainMod, down, movefocus, d
 bind = $mainMod, H, movefocus, l
 bind = $mainMod, J, movefocus, d

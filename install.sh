@@ -84,7 +84,6 @@ USER_CHOICES=(
     [install_fonts]=""
     [configure_bluetooth]=""
     [configure_zsh]=""
-    [waybar_style]=""
 )
 
 #=============================================================================
@@ -182,27 +181,8 @@ configuration_menu() {
     done
     log "${OK} Dotfiles: ${USER_CHOICES[dotfiles]}"
 
-    # 6. Waybar Style (only if waybar selected)
-    if [[ "${USER_CHOICES[status_bar]}" == "waybar" ]]; then
-        echo -e "\n${BOLD}6. Waybar Style:${NC}"
-        PS3="   Select: "
-        select ws in "Default (Pill Groups)" "Hollow (Floating Pods)" "Solid (Classic Bar)" "Minimal (Just Text)" "Flat (Bottom Lines)" "Compact (Dense)" "Floating (Island)"; do
-            case $REPLY in
-                1) USER_CHOICES[waybar_style]="default"; break;;
-                2) USER_CHOICES[waybar_style]="hollow"; break;;
-                3) USER_CHOICES[waybar_style]="solid"; break;;
-                4) USER_CHOICES[waybar_style]="minimal"; break;;
-                5) USER_CHOICES[waybar_style]="flat"; break;;
-                6) USER_CHOICES[waybar_style]="compact"; break;;
-                7) USER_CHOICES[waybar_style]="floating"; break;;
-                *) echo "   Enter 1-7";;
-            esac
-        done
-        log "${OK} Waybar Style: ${USER_CHOICES[waybar_style]}"
-    fi
-
-    # 7-10: Yes/No options
-    echo -e "\n${BOLD}7. ASUS ROG Laptop Support:${NC}"
+    # 6-9: Yes/No options
+    echo -e "\n${BOLD}6. ASUS ROG Laptop Support:${NC}"
     PS3="   Select: "
     select rog in "No" "Yes"; do
         case $REPLY in
@@ -213,7 +193,7 @@ configuration_menu() {
     done
     log "${OK} ROG Laptop: ${USER_CHOICES[rog_laptop]}"
 
-    echo -e "\n${BOLD}8. Install Fonts:${NC}"
+    echo -e "\n${BOLD}7. Install Fonts:${NC}"
     PS3="   Select: "
     select fonts in "Yes (Recommended)" "No"; do
         case $REPLY in
@@ -224,7 +204,7 @@ configuration_menu() {
     done
     log "${OK} Fonts: ${USER_CHOICES[install_fonts]}"
 
-    echo -e "\n${BOLD}9. Bluetooth:${NC}"
+    echo -e "\n${BOLD}8. Bluetooth:${NC}"
     PS3="   Select: "
     select bt in "Yes" "No"; do
         case $REPLY in
@@ -235,7 +215,7 @@ configuration_menu() {
     done
     log "${OK} Bluetooth: ${USER_CHOICES[configure_bluetooth]}"
 
-    echo -e "\n${BOLD}10. Zsh + Starship Prompt:${NC}"
+    echo -e "\n${BOLD}9. Zsh + Starship Prompt:${NC}"
     PS3="   Select: "
     select zsh in "Yes (Recommended)" "No"; do
         case $REPLY in
@@ -256,8 +236,6 @@ configuration_menu() {
     echo -e "  File Manager    : ${GREEN}${USER_CHOICES[file_manager]}${NC}"
     echo -e "  Lockscreen      : ${GREEN}${USER_CHOICES[lockscreen]}${NC}"
     echo -e "  Dotfiles        : ${GREEN}${USER_CHOICES[dotfiles]}${NC}"
-    [[ "${USER_CHOICES[status_bar]}" == "waybar" ]] && \
-    echo -e "  Waybar Style    : ${GREEN}${USER_CHOICES[waybar_style]}${NC}"
     echo -e "  ROG Support     : ${GREEN}${USER_CHOICES[rog_laptop]}${NC}"
     echo -e "  Fonts           : ${GREEN}${USER_CHOICES[install_fonts]}${NC}"
     echo -e "  Bluetooth       : ${GREEN}${USER_CHOICES[configure_bluetooth]}${NC}"
@@ -367,7 +345,6 @@ install_status_bar() {
     log_section "Status Bar"
     case "${USER_CHOICES[status_bar]}" in
         waybar)
-            export S4D_WAYBAR_STYLE="${USER_CHOICES[waybar_style]:-default}"
             source "$SCRIPTS_DIR/waybar-install.sh"
             ;;
         dankms)
@@ -524,7 +501,7 @@ main() {
     echo -e "    Super + E      File Manager"
     echo -e "    Super + Q      Close Window"
     echo -e "    Super + Escape Lock Screen"
-    echo -e "    Super + W      Change Waybar Style"
+    echo -e "    Super + Up     Cycle Waybar Style"
     echo -e "    Super + /      Keybindings Help"
     echo ""
     echo -e "${INFO} Log: $LOG_FILE"
