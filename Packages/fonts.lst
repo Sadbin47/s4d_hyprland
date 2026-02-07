@@ -1,54 +1,40 @@
 #!/bin/bash
 #=============================================================================
-# FONTS PACKAGES - Popular fonts for desktop use
+# FONTS PACKAGES
 #=============================================================================
 
-source "$(dirname "${BASH_SOURCE[0]}")/../Scripts/functions.sh" 2>/dev/null || true
+source "$(dirname "${BASH_SOURCE[0]}")/../Scripts/functions.sh"
 
 log "${INFO} Installing font packages..."
 
 FONT_PACKAGES=(
     # Nerd Fonts
-    "ttf-jetbrains-mono-nerd"     # JetBrains Mono with icons
-    "ttf-firacode-nerd"           # Fira Code with icons
-    "ttf-cascadia-code-nerd"      # Cascadia Code with icons
-    "ttf-hack-nerd"               # Hack with icons
-    
-    # System Fonts
-    "noto-fonts"                  # Google Noto fonts
-    "noto-fonts-cjk"              # CJK characters
-    "noto-fonts-emoji"            # Emoji support
-    "ttf-liberation"              # Liberation fonts
-    "ttf-dejavu"                  # DejaVu fonts
-    
-    # Icon Fonts
-    "ttf-font-awesome"            # Font Awesome icons
-    "otf-font-awesome"            # Font Awesome (OpenType)
-    
-    # Additional popular fonts
-    "ttf-roboto"                  # Roboto font family
-    "ttf-ubuntu-font-family"      # Ubuntu fonts
-    "inter-font"                  # Inter font
-)
+    "ttf-jetbrains-mono-nerd"
+    "ttf-firacode-nerd"
+    "ttf-cascadia-code-nerd"
+    "ttf-hack-nerd"
 
-AUR_FONTS=(
-    "ttf-apple-emoji"             # Apple emoji (optional)
-    "ttf-ms-fonts"                # Microsoft core fonts (optional)
+    # System Fonts
+    "noto-fonts"
+    "noto-fonts-cjk"
+    "noto-fonts-emoji"
+    "ttf-liberation"
+    "ttf-dejavu"
+
+    # Icon Fonts
+    "ttf-font-awesome"
+    "otf-font-awesome"
+
+    # UI Fonts
+    "ttf-roboto"
+    "inter-font"
 )
 
 for pkg in "${FONT_PACKAGES[@]}"; do
     install_pkg "$pkg"
 done
 
-# Optional AUR fonts
-if confirm "Install additional AUR fonts (Apple emoji, MS fonts)?"; then
-    for pkg in "${AUR_FONTS[@]}"; do
-        install_pkg "$pkg"
-    done
-fi
-
 # Refresh font cache
-log "${INFO} Refreshing font cache..."
-fc-cache -fv &>/dev/null
+fc-cache -fv &>/dev/null || true
 
-log "${OK} Font installation complete"
+log "${OK} Font installation done"

@@ -1,0 +1,68 @@
+/* s4d Waybar Style: Minimal — Just text, no frills */
+@import "mocha.css";
+
+* {
+    min-height: 0;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 12px;
+}
+
+#waybar {
+    background-color: transparent;
+}
+
+#waybar .module {
+    color: @subtext0;
+    padding: 0 4px;
+}
+
+#waybar .module:hover {
+    color: @text;
+}
+
+/* Workspaces */
+#workspaces button {
+    all: initial;
+    padding: 0 4px;
+    color: @overlay0;
+    font-size: 12px;
+}
+
+#workspaces button.active {
+    color: @mauve;
+    font-weight: bold;
+}
+
+#workspaces button:hover {
+    color: @text;
+}
+
+/* No backgrounds, no groups — pure text */
+#left-ws,
+#left-media,
+#left-system,
+#right-window,
+#right-hw,
+#right-status {
+    background: transparent;
+    padding: 0;
+}
+
+/* Subtle color hints */
+#clock { color: @text; }
+#battery.charging { color: @green; }
+#battery.warning:not(.charging) { color: @yellow; }
+#battery.critical:not(.charging) { color: @red; }
+#network.disconnected { color: @red; }
+#wireplumber.muted { color: @red; }
+#idle_inhibitor.activated { color: @green; }
+#temperature.critical { color: @red; }
+
+tooltip {
+    background-color: @base;
+    border: 1px solid @surface1;
+    border-radius: 4px;
+    padding: 4px;
+    color: @text;
+    font-size: 11px;
+}

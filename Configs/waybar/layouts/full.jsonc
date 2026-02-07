@@ -1,0 +1,156 @@
+// s4d Waybar Layout: Full — All modules
+{
+  "layer": "top",
+  "position": "top",
+  "height": 30,
+  "margin-left": 10,
+  "margin-right": 10,
+  "margin-top": 5,
+  "margin-bottom": 0,
+  "spacing": 15,
+  "reload_style_on_change": true,
+
+  "modules-left": [
+    "group/left-ws",
+    "group/left-media",
+    "group/left-system"
+  ],
+  "modules-center": [],
+  "modules-right": [
+    "group/right-window",
+    "group/right-hw",
+    "group/right-status"
+  ],
+
+  "group/left-ws": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/workspaces"]
+  },
+  "group/left-media": {
+    "orientation": "horizontal",
+    "modules": ["mpris", "custom/previous", "custom/pause", "custom/next"]
+  },
+  "group/left-system": {
+    "orientation": "horizontal",
+    "modules": ["backlight", "wireplumber", "network", "custom/power", "battery"]
+  },
+  "group/right-window": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/window"]
+  },
+  "group/right-hw": {
+    "orientation": "horizontal",
+    "modules": ["cpu", "temperature", "memory"]
+  },
+  "group/right-status": {
+    "orientation": "horizontal",
+    "modules": ["idle_inhibitor", "clock", "custom/notification"]
+  },
+
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "all-outputs": true,
+    "format": "{name}",
+    "persistent-workspaces": { "*": 5 }
+  },
+  "hyprland/window": {
+    "format": " {} ",
+    "max-length": 35,
+    "separate-outputs": false
+  },
+  "clock": {
+    "format": "{:%H:%M}",
+    "format-alt": "{:%A, %B %d %Y}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+  },
+  "cpu": {
+    "interval": 3,
+    "format": " {usage:>2}%",
+    "on-click": "kitty -e btop"
+  },
+  "temperature": {
+    "critical-threshold": 80,
+    "interval": 3,
+    "format": " {temperatureC:>2}°C",
+    "format-critical": " {temperatureC}°C",
+    "on-click": "kitty -e btop"
+  },
+  "memory": {
+    "interval": 3,
+    "format": " {:>2}%",
+    "on-click": "kitty -e btop"
+  },
+  "backlight": {
+    "format": "{icon}",
+    "format-icons": ["", "", "", "", "", "", "", "", ""],
+    "tooltip-format": "Brightness: {percent}%"
+  },
+  "wireplumber": {
+    "format": "{icon}",
+    "format-muted": "󰖁",
+    "format-icons": ["", "", ""],
+    "tooltip-format": "Volume: {volume}%",
+    "on-click": "pavucontrol",
+    "on-click-right": "pamixer -t"
+  },
+  "network": {
+    "interval": 3,
+    "format-wifi": "{icon}",
+    "format-ethernet": "󰌗",
+    "format-disconnected": "󰖪",
+    "format-alt": "󰛳 {ifname}",
+    "tooltip-format-wifi": "{essid}\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-ethernet": "󰌗 {ifname} | {ipaddr}/{cidr}",
+    "tooltip-format-disconnected": "No connection",
+    "format-icons": { "wifi": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"] },
+    "on-click": "nm-connection-editor"
+  },
+  "battery": {
+    "states": { "good": 95, "warning": 30, "critical": 15 },
+    "format": "{icon}",
+    "format-full": "{icon}",
+    "format-plugged": " {capacity}%",
+    "format-alt": "{icon} {capacity}%",
+    "tooltip-format": "{capacity}% — {time}",
+    "format-icons": [" ", " ", " ", " "]
+  },
+  "bluetooth": {
+    "format": "󰂯",
+    "format-off": "󰂲",
+    "format-connected": "󰂱 {num_connections}",
+    "on-click": "blueman-manager"
+  },
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": { "activated": "󰅶", "deactivated": "󰛊" }
+  },
+  "mpris": {
+    "format": "{player_icon} {title} — {artist}",
+    "format-paused": "{status_icon} {title} — {artist}",
+    "player-icons": {
+      "default": "<span foreground='#cba6f7'>󰝚 </span>",
+      "spotify": "<span foreground='#a6e3a1'>󰓇 </span>",
+      "firefox": "<span foreground='#f38ba8'>󰗃 </span>"
+    },
+    "status-icons": { "paused": "<span color='#b4befe'>  󰏤  </span>" },
+    "max-length": 25
+  },
+  "custom/previous": { "format": "󰙣", "on-click": "playerctl previous", "tooltip": false },
+  "custom/pause": { "format": "󰐎", "on-click": "playerctl play-pause", "tooltip": false },
+  "custom/next": { "format": "󰙡", "on-click": "playerctl next", "tooltip": false },
+  "custom/power": {
+    "format": "",
+    "on-click": "wlogout -b 4 -c 0 -r 0 -m 0 --protocol layer-shell 2>/dev/null || rofi -show power-menu -modi 'power-menu:~/.config/rofi/scripts/power-menu.sh'",
+    "tooltip-format": "Power Menu"
+  },
+  "custom/notification": {
+    "format": "󰂚",
+    "on-click": "swaync-client -t -sw",
+    "tooltip-format": "Notifications"
+  },
+  "tray": {
+    "icon-size": 16,
+    "spacing": 8,
+    "show-passive-items": true
+  }
+}

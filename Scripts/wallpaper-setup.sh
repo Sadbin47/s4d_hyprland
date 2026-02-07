@@ -1,159 +1,95 @@
 #!/bin/bash
 #=============================================================================
-# WALLPAPER SETUP - Download sample wallpapers and configure SWWW
+# WALLPAPER SETUP — Use bundled wallpapers, create management script
 #=============================================================================
 
 source "$(dirname "${BASH_SOURCE[0]}")/functions.sh"
 
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+CONFIGS_DIR="$SCRIPT_DIR/../Configs"
+WALLPAPER_DIR="$HOME/Pictures/Wallpapers"
+
 log "${INFO} Setting up wallpapers..."
 
-WALLPAPER_DIR="$HOME/Pictures/Wallpapers"
 mkdir -p "$WALLPAPER_DIR"
 
-#=============================================================================
-# DOWNLOAD SAMPLE WALLPAPERS
-#=============================================================================
-download_wallpapers() {
-    log "${INFO} Downloading sample wallpapers..."
-    
-    # Catppuccin wallpapers from GitHub
-    local WALL_REPO="https://raw.githubusercontent.com/catppuccin/wallpapers/main/minimalistic"
-    
-    local wallpapers=(
-        "catppuccin_triangle.png"
-        "catppuccin-colors.png"
-    )
-    
-    for wall in "${wallpapers[@]}"; do
-        if [[ ! -f "$WALLPAPER_DIR/$wall" ]]; then
-            curl -sL "$WALL_REPO/$wall" -o "$WALLPAPER_DIR/$wall" 2>/dev/null || true
-        fi
-    done
-    
-    log "${OK} Wallpapers downloaded to $WALLPAPER_DIR"
+# Copy bundled wallpapers
+if [[ -d "$CONFIGS_DIR/Wallpapers" ]]; then
+    local_count=$(find "$CONFIGS_DIR/Wallpapers" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.webp" \) 2>/dev/null | wc -l)
+    if [[ "$local_count" -gt 0 ]]; then
+        cp -n "$CONFIGS_DIR/Wallpapers/"* "$WALLPAPER_DIR/" 2>/dev/null || true
+        log "${OK} Copied $local_count bundled wallpaper(s) to $WALLPAPER_DIR"
+    fi
+fi
+
+# If still empty, download a default
+total_count=$(find "$WALLPAPER_DIR" -maxdepth 1 -type f 2>/dev/null | wc -l)
+if [[ "$total_count" -eq 0 ]]; then
+    log "${INFO} No wallpapers found, downloading a default..."
+    curl -fsSL -o "$WALLPAPER_DIR/catppuccin_triangle.png" \
+        "https://raw.githubusercontent.com/catppuccin/wallpapers/main/minimalistic/catppuccin_triangle.png" 2>/dev/null || true
+fi
+
+# Create wallpaper management script
+mkdir -p "$HOME/.local/bin"
+
+cat > "$HOME/.local/bin/wallpaper" << 'WALLSCRIPT'
+#!/usr/bin/env bash
+# s4d Wallpaper Manager
+# Usage: wallpaper {set <path>|random|select|next|prev|restore}
+
+WALL_DIR="$HOME/Pictures/Wallpapers"
+CACHE="$HOME/.cache/s4d-hyprland/current_wallpaper"
+mkdir -p "$(dirname "$CACHE")" "$WALL_DIR"
+
+get_walls() {
+    find "$WALL_DIR" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.webp" \) 2>/dev/null | sort
 }
 
-#=============================================================================
-# CREATE WALLPAPER SCRIPT
-#=============================================================================
-create_wallpaper_script() {
-    log "${INFO} Creating wallpaper management script..."
-    
-    mkdir -p "$HOME/.local/bin"
-    
-    cat > "$HOME/.local/bin/wallpaper" << 'EOF'
-#!/bin/bash
-# Wallpaper management script for SWWW
-
-WALLPAPER_DIR="$HOME/Pictures/Wallpapers"
-CACHE_FILE="$HOME/.cache/current_wallpaper"
-
-set_wallpaper() {
-    local wall="$1"
-    
-    if [[ ! -f "$wall" ]]; then
-        echo "Wallpaper not found: $wall"
-        exit 1
-    fi
-    
-    # Check if swww-daemon is running
-    if ! pgrep -x swww-daemon > /dev/null; then
-        swww-daemon &
-        sleep 1
-    fi
-    
-    # Set wallpaper with transition
-    swww img "$wall" \
-        --transition-type grow \
-        --transition-pos 0.9,0.1 \
-        --transition-duration 1.5 \
-        --transition-fps 60
-    
-    # Cache current wallpaper
-    echo "$wall" > "$CACHE_FILE"
-    
-    echo "Wallpaper set: $wall"
+ensure_swww() {
+    pgrep -x swww-daemon > /dev/null 2>&1 || { swww-daemon & sleep 1; }
 }
 
-random_wallpaper() {
-    local walls=("$WALLPAPER_DIR"/*)
-    
-    if [[ ${#walls[@]} -eq 0 ]]; then
-        echo "No wallpapers found in $WALLPAPER_DIR"
-        exit 1
-    fi
-    
-    local random_wall="${walls[RANDOM % ${#walls[@]}]}"
-    set_wallpaper "$random_wall"
+set_wall() {
+    [[ ! -f "$1" ]] && echo "Not found: $1" && return 1
+    ensure_swww
+    swww img "$1" --transition-type grow --transition-pos 0.9,0.1 --transition-duration 1.5 --transition-fps 60 2>/dev/null
+    echo "$1" > "$CACHE"
 }
 
-select_wallpaper() {
-    if ! command -v rofi &>/dev/null; then
-        echo "Rofi is required for wallpaper selection"
-        exit 1
-    fi
-    
-    local selected
-    selected=$(find "$WALLPAPER_DIR" -type f \( -name "*.jpg" -o -name "*.png" -o -name "*.jpeg" -o -name "*.webp" \) | \
-        rofi -dmenu -p "Wallpaper" -i)
-    
-    if [[ -n "$selected" ]]; then
-        set_wallpaper "$selected"
-    fi
-}
-
-restore_wallpaper() {
-    if [[ -f "$CACHE_FILE" ]]; then
-        local cached_wall
-        cached_wall=$(cat "$CACHE_FILE")
-        if [[ -f "$cached_wall" ]]; then
-            set_wallpaper "$cached_wall"
-            return
-        fi
-    fi
-    
-    # Fallback to random
-    random_wallpaper
-}
-
-case "$1" in
+case "${1:-restore}" in
     set)
-        set_wallpaper "$2"
-        ;;
+        [[ -n "$2" ]] && set_wall "$2" ;;
     random)
-        random_wallpaper
-        ;;
+        mapfile -t walls < <(get_walls)
+        [[ ${#walls[@]} -gt 0 ]] && set_wall "${walls[RANDOM % ${#walls[@]}]}" ;;
+    next|prev)
+        mapfile -t walls < <(get_walls)
+        [[ ${#walls[@]} -eq 0 ]] && exit 0
+        current=""; [[ -f "$CACHE" ]] && current=$(cat "$CACHE")
+        idx=0
+        for i in "${!walls[@]}"; do [[ "${walls[$i]}" == "$current" ]] && idx=$i && break; done
+        [[ "$1" == "next" ]] && idx=$(( (idx + 1) % ${#walls[@]} )) || idx=$(( (idx - 1 + ${#walls[@]}) % ${#walls[@]} ))
+        set_wall "${walls[$idx]}" ;;
     select)
-        select_wallpaper
-        ;;
+        command -v rofi &>/dev/null || { echo "rofi required"; exit 1; }
+        selected=$(get_walls | rofi -dmenu -p "Wallpaper" -i)
+        [[ -n "$selected" ]] && set_wall "$selected" ;;
     restore)
-        restore_wallpaper
-        ;;
+        if [[ -f "$CACHE" ]] && [[ -f "$(cat "$CACHE")" ]]; then
+            set_wall "$(cat "$CACHE")"
+        else
+            mapfile -t walls < <(get_walls)
+            [[ ${#walls[@]} -gt 0 ]] && set_wall "${walls[0]}"
+        fi ;;
     *)
-        echo "Usage: wallpaper {set <path>|random|select|restore}"
-        exit 1
-        ;;
+        echo "Usage: wallpaper {set <path>|random|select|next|prev|restore}"
+        echo ""; echo "Add wallpapers to: $WALL_DIR" ;;
 esac
-EOF
-    
-    chmod +x "$HOME/.local/bin/wallpaper"
-    log "${OK} Wallpaper script created: ~/.local/bin/wallpaper"
-}
+WALLSCRIPT
 
-#=============================================================================
-# MAIN
-#=============================================================================
-main() {
-    download_wallpapers
-    create_wallpaper_script
-    
-    # Set initial wallpaper
-    if command -v swww &>/dev/null; then
-        "$HOME/.local/bin/wallpaper" random 2>/dev/null || true
-    fi
-    
-    log "${OK} Wallpaper setup complete"
-    log "${INFO} Use 'wallpaper random' or 'wallpaper select' to change wallpapers"
-}
+chmod +x "$HOME/.local/bin/wallpaper"
 
-main
+log "${OK} Wallpaper setup done"
+log "${INFO} Add wallpapers to: $WALLPAPER_DIR"
+log "${INFO} Commands: wallpaper random | wallpaper select | wallpaper next"

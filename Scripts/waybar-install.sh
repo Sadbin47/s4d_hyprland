@@ -1,185 +1,59 @@
 #!/bin/bash
 #=============================================================================
-# WAYBAR INSTALLATION & CONFIGURATION
+# WAYBAR INSTALLATION — Install waybar + styles + layouts
 #=============================================================================
 
 source "$(dirname "${BASH_SOURCE[0]}")/functions.sh"
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 CONFIGS_DIR="$SCRIPT_DIR/../Configs"
+WAYBAR_STYLE="${S4D_WAYBAR_STYLE:-default}"
 
 log "${INFO} Installing Waybar..."
 
 install_pkg "waybar"
 
-# Create Waybar configuration directory
-mkdir -p "$HOME/.config/waybar"
-
-# Copy Waybar configuration if exists, otherwise create default
+# Copy all waybar configs
 if [[ -d "$CONFIGS_DIR/waybar" ]]; then
-    cp -r "$CONFIGS_DIR/waybar/"* "$HOME/.config/waybar/"
-    log "${OK} Waybar configuration copied from templates"
-else
-    # Create default config
-    cat > "$HOME/.config/waybar/config.jsonc" << 'EOF'
-{
-    "layer": "top",
-    "position": "top",
-    "height": 35,
-    "spacing": 4,
-    "modules-left": ["hyprland/workspaces", "hyprland/window"],
-    "modules-center": ["clock"],
-    "modules-right": ["pulseaudio", "network", "cpu", "memory", "battery", "tray"],
-    
-    "hyprland/workspaces": {
-        "disable-scroll": true,
-        "all-outputs": true,
-        "format": "{icon}",
-        "format-icons": {
-            "1": "󰲠",
-            "2": "󰲢",
-            "3": "󰲤",
-            "4": "󰲦",
-            "5": "󰲨",
-            "6": "󰲪",
-            "7": "󰲬",
-            "8": "󰲮",
-            "9": "󰲰",
-            "10": "󰿬",
-            "urgent": "",
-            "default": ""
-        }
-    },
-    "hyprland/window": {
-        "format": "{}",
-        "max-length": 50
-    },
-    "clock": {
-        "format": "{:%H:%M}",
-        "format-alt": "{:%A, %B %d, %Y}",
-        "tooltip-format": "<tt>{calendar}</tt>"
-    },
-    "cpu": {
-        "format": "󰻠 {usage}%",
-        "interval": 2
-    },
-    "memory": {
-        "format": "󰍛 {percentage}%",
-        "interval": 2
-    },
-    "battery": {
-        "states": {
-            "warning": 30,
-            "critical": 15
-        },
-        "format": "{icon} {capacity}%",
-        "format-charging": "󰂄 {capacity}%",
-        "format-plugged": "󰂄 {capacity}%",
-        "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
-    },
-    "network": {
-        "format-wifi": "󰤨 {signalStrength}%",
-        "format-ethernet": "󰈀 Connected",
-        "format-disconnected": "󰤭 Disconnected",
-        "tooltip-format": "{ifname}: {ipaddr}"
-    },
-    "pulseaudio": {
-        "format": "{icon} {volume}%",
-        "format-muted": "󰝟",
-        "format-icons": {
-            "default": ["󰕿", "󰖀", "󰕾"]
-        },
-        "on-click": "pavucontrol"
-    },
-    "tray": {
-        "spacing": 10
-    }
-}
-EOF
+    mkdir -p "$HOME/.config/waybar"
 
-    # Create default style
-    cat > "$HOME/.config/waybar/style.css" << 'EOF'
-* {
-    font-family: "JetBrainsMono Nerd Font", "Font Awesome 6 Free";
-    font-size: 13px;
-    min-height: 0;
-}
+    # Copy main config and color palette
+    cp -f "$CONFIGS_DIR/waybar/config.jsonc" "$HOME/.config/waybar/config.jsonc" 2>/dev/null || true
+    cp -f "$CONFIGS_DIR/waybar/mocha.css" "$HOME/.config/waybar/mocha.css" 2>/dev/null || true
 
-window#waybar {
-    background: rgba(30, 30, 46, 0.9);
-    color: #cdd6f4;
-    border-radius: 0;
-}
-
-#workspaces button {
-    padding: 0 8px;
-    color: #6c7086;
-    background: transparent;
-    border: none;
-    border-radius: 8px;
-    margin: 4px 2px;
-}
-
-#workspaces button.active {
-    color: #cba6f7;
-    background: rgba(203, 166, 247, 0.2);
-}
-
-#workspaces button:hover {
-    background: rgba(203, 166, 247, 0.1);
-}
-
-#clock, #battery, #cpu, #memory, #network, #pulseaudio, #tray {
-    padding: 0 12px;
-    margin: 4px 2px;
-    border-radius: 8px;
-    background: rgba(69, 71, 90, 0.5);
-}
-
-#battery.warning {
-    color: #fab387;
-}
-
-#battery.critical {
-    color: #f38ba8;
-}
-
-#network.disconnected {
-    color: #f38ba8;
-}
-
-#pulseaudio.muted {
-    color: #6c7086;
-}
-
-#tray > .passive {
-    -gtk-icon-effect: dim;
-}
-
-#tray > .needs-attention {
-    -gtk-icon-effect: highlight;
-}
-EOF
-
-    log "${OK} Default Waybar configuration created"
-fi
-
-# Add waybar to Hyprland autostart
-HYPR_CONF="$HOME/.config/hypr/hyprland.conf"
-if [[ -f "$HYPR_CONF" ]]; then
-    # Check if waybar is already in config (uncommented)
-    if ! grep -q "^exec-once = waybar" "$HYPR_CONF"; then
-        # Add waybar exec-once after the bar comment
-        if grep -q "# Bar is configured by install script" "$HYPR_CONF"; then
-            sed -i '/# Bar is configured by install script/a exec-once = waybar' "$HYPR_CONF"
-            log "${OK} Added waybar to Hyprland autostart"
-        else
-            echo "exec-once = waybar" >> "$HYPR_CONF"
-            log "${OK} Appended waybar to Hyprland autostart"
-        fi
-    else
-        log "${INFO} Waybar already in Hyprland autostart"
+    # Copy all styles
+    if [[ -d "$CONFIGS_DIR/waybar/styles" ]]; then
+        mkdir -p "$HOME/.config/waybar/styles"
+        cp -rf "$CONFIGS_DIR/waybar/styles/"* "$HOME/.config/waybar/styles/" 2>/dev/null || true
+        log "${OK} Waybar styles installed"
     fi
+
+    # Copy all layouts
+    if [[ -d "$CONFIGS_DIR/waybar/layouts" ]]; then
+        mkdir -p "$HOME/.config/waybar/layouts"
+        cp -rf "$CONFIGS_DIR/waybar/layouts/"* "$HOME/.config/waybar/layouts/" 2>/dev/null || true
+        log "${OK} Waybar layouts installed"
+    fi
+
+    # Save default config for layout switching
+    cp -f "$HOME/.config/waybar/config.jsonc" "$HOME/.config/waybar/config.jsonc.default" 2>/dev/null || true
+
+    # Apply selected style
+    if [[ -f "$HOME/.config/waybar/styles/${WAYBAR_STYLE}.css" ]]; then
+        cp -f "$HOME/.config/waybar/styles/${WAYBAR_STYLE}.css" "$HOME/.config/waybar/style.css"
+        log "${OK} Applied waybar style: $WAYBAR_STYLE"
+    elif [[ -f "$CONFIGS_DIR/waybar/styles/default.css" ]]; then
+        cp -f "$CONFIGS_DIR/waybar/styles/default.css" "$HOME/.config/waybar/style.css"
+        log "${OK} Applied waybar style: default"
+    elif [[ -f "$CONFIGS_DIR/waybar/style.css" ]]; then
+        cp -f "$CONFIGS_DIR/waybar/style.css" "$HOME/.config/waybar/style.css"
+    fi
+
+    log "${OK} Waybar configuration installed"
+else
+    log "${WARN} Waybar configs not found in $CONFIGS_DIR/waybar"
 fi
 
-log "${OK} Waybar installed and configured"
+log "${OK} Waybar setup done"
+log "${INFO} Switch styles: waybar-style set <style>"
+log "${INFO} Available: default, hollow, solid, minimal, flat, compact, floating"

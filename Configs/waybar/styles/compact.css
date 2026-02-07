@@ -1,0 +1,87 @@
+/* s4d Waybar Style: Compact — Dense, space-efficient */
+@import "mocha.css";
+
+* {
+    min-height: 0;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 11px;
+}
+
+#waybar {
+    background-color: alpha(@base, 0.9);
+}
+
+#waybar .module {
+    color: @text;
+    padding: 0 3px;
+    margin: 0 1px;
+}
+
+#waybar .module:hover {
+    color: @lavender;
+}
+
+/* Workspaces */
+#workspaces button {
+    all: initial;
+    padding: 0 4px;
+    color: @overlay0;
+    font-size: 11px;
+}
+
+#workspaces button.active {
+    color: @crust;
+    background: @mauve;
+    border-radius: 3px;
+    padding: 1px 6px;
+    margin: 2px 0;
+    font-weight: bold;
+}
+
+#workspaces button:hover {
+    color: @text;
+    background: @surface0;
+    border-radius: 3px;
+    margin: 2px 0;
+}
+
+/* Tight groups */
+#left-ws {
+    background: @mantle;
+    border-radius: 6px;
+}
+
+#left-media,
+#left-system,
+#right-window,
+#right-hw,
+#right-status {
+    background: @mantle;
+    border-radius: 6px;
+    padding: 0 4px;
+}
+
+/* Battery */
+#battery.charging, #battery.plugged { color: @green; }
+#battery.warning:not(.charging) { color: @yellow; }
+#battery.critical:not(.charging) {
+    color: @red;
+    animation: blink 0.75s linear infinite alternate;
+}
+
+@keyframes blink {
+    to { color: @red; background-color: @surface0; }
+}
+
+#network.disconnected, #wireplumber.muted { color: @red; }
+#idle_inhibitor.activated { color: @green; }
+#temperature.critical { color: @red; }
+
+tooltip {
+    background-color: @base;
+    border: 1px solid @surface0;
+    border-radius: 4px;
+    padding: 3px;
+    color: @text;
+    font-size: 10px;
+}

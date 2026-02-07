@@ -1,0 +1,91 @@
+/* s4d Waybar Style: Flat — Bottom-line accents */
+@import "mocha.css";
+
+* {
+    min-height: 0;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 13px;
+}
+
+#waybar {
+    background-color: alpha(@base, 0.85);
+}
+
+#waybar .module {
+    color: @text;
+    padding: 2px 8px;
+    border-bottom: 2px solid transparent;
+    margin: 0 1px;
+}
+
+#waybar .module:hover {
+    color: @lavender;
+    border-bottom-color: @lavender;
+}
+
+/* Workspaces */
+#workspaces button {
+    all: initial;
+    padding: 2px 6px;
+    color: @overlay0;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+}
+
+#workspaces button.active {
+    color: @mauve;
+    border-bottom-color: @mauve;
+    font-weight: bold;
+}
+
+#workspaces button:hover {
+    color: @text;
+    border-bottom-color: @surface1;
+}
+
+/* No group backgrounds */
+#left-ws,
+#left-media,
+#left-system,
+#right-window,
+#right-hw,
+#right-status {
+    background: transparent;
+    border-radius: 0;
+    padding: 0 2px;
+}
+
+/* Color-coded underlines */
+#clock { border-bottom-color: @lavender; }
+#cpu { border-bottom-color: @sapphire; }
+#memory { border-bottom-color: @green; }
+#temperature { border-bottom-color: @peach; }
+#backlight { border-bottom-color: @yellow; }
+#wireplumber { border-bottom-color: @sapphire; }
+#network { border-bottom-color: @teal; }
+#battery { border-bottom-color: @green; }
+
+#battery.charging { color: @green; border-bottom-color: @green; }
+#battery.warning:not(.charging) { color: @yellow; border-bottom-color: @yellow; }
+#battery.critical:not(.charging) {
+    color: @red;
+    border-bottom-color: @red;
+    animation: blink 0.75s linear infinite alternate;
+}
+
+@keyframes blink {
+    to { color: @red; background-color: @surface0; }
+}
+
+#network.disconnected { color: @red; border-bottom-color: @red; }
+#wireplumber.muted { color: @red; border-bottom-color: @red; }
+#idle_inhibitor.activated { color: @green; border-bottom-color: @green; }
+#temperature.critical { color: @red; border-bottom-color: @red; }
+
+tooltip {
+    background-color: @base;
+    border: 1px solid @surface1;
+    border-radius: 4px;
+    padding: 4px;
+    color: @text;
+}

@@ -1,0 +1,85 @@
+/* s4d Waybar Style: Solid — Classic solid bar */
+@import "mocha.css";
+
+* {
+    min-height: 0;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 13px;
+}
+
+#waybar {
+    background-color: @base;
+    border-bottom: 2px solid @surface0;
+}
+
+#waybar .module {
+    color: @text;
+    padding: 0 6px;
+}
+
+#waybar .module:hover {
+    color: @lavender;
+}
+
+/* Workspaces */
+#workspaces button {
+    all: initial;
+    padding: 0 6px;
+    color: @overlay0;
+}
+
+#workspaces button.active {
+    color: @crust;
+    background: @mauve;
+    border-radius: 4px;
+    padding: 0 8px;
+    margin: 3px 0;
+    transition: all 0.3s ease;
+}
+
+#workspaces button:hover {
+    color: @text;
+    background: @surface1;
+    border-radius: 4px;
+    margin: 3px 0;
+}
+
+/* No group backgrounds — flush with bar */
+#left-ws,
+#left-media,
+#left-system,
+#right-window,
+#right-hw,
+#right-status {
+    background: transparent;
+    padding: 0 4px;
+}
+
+/* Module colors */
+#clock { color: @lavender; font-weight: bold; }
+#cpu { color: @sapphire; }
+#memory { color: @green; }
+#temperature { color: @peach; }
+
+#battery.charging, #battery.plugged { color: @green; }
+#battery.warning:not(.charging) { color: @yellow; }
+#battery.critical:not(.charging) {
+    color: @red;
+    animation: blink 0.75s linear infinite alternate;
+}
+
+@keyframes blink {
+    to { color: @red; background-color: @surface0; }
+}
+
+#network.disconnected, #wireplumber.muted { color: @red; }
+#idle_inhibitor.activated { color: @green; }
+#temperature.critical { color: @red; }
+
+tooltip {
+    background-color: @base;
+    border: 2px solid @surface1;
+    border-radius: 6px;
+    padding: 4px;
+    color: @text;
+}

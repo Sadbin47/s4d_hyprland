@@ -1,0 +1,93 @@
+/* s4d Waybar Style: Floating — Island bar with shadow */
+@import "mocha.css";
+
+* {
+    min-height: 0;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 13px;
+}
+
+#waybar {
+    background-color: transparent;
+}
+
+#waybar .module {
+    color: @text;
+    padding: 0 4px;
+}
+
+#waybar .module:hover {
+    color: @lavender;
+}
+
+/* Workspaces */
+#workspaces button {
+    all: initial;
+    padding: 0 4px;
+    border-radius: 50%;
+    margin: 1em 1px;
+    color: @overlay0;
+}
+
+#workspaces button.active {
+    background: @mauve;
+    color: @crust;
+    border-radius: 50%;
+    padding: 0 7px;
+    transition: all 0.4s cubic-bezier(.55,-0.68,.48,1.682);
+}
+
+#workspaces button:hover {
+    background: @surface1;
+    color: @text;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+/* All groups — unified floating island */
+#left-ws,
+#left-media,
+#left-system,
+#right-window,
+#right-hw,
+#right-status {
+    background: alpha(@base, 0.92);
+    border-radius: 20px;
+    padding: 0 12px;
+    margin: 2px 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    border: 1px solid alpha(@surface0, 0.5);
+}
+
+/* Specific module accents */
+#clock { color: @lavender; font-weight: bold; }
+#cpu { color: @sapphire; }
+#memory { color: @green; }
+#temperature { color: @peach; }
+#backlight { color: @yellow; }
+#wireplumber { color: @sapphire; }
+#network { color: @teal; }
+
+#battery.charging, #battery.plugged { color: @green; }
+#battery.warning:not(.charging) { color: @yellow; }
+#battery.critical:not(.charging) {
+    color: @red;
+    animation: blink 0.75s linear infinite alternate;
+}
+
+@keyframes blink {
+    to { color: @red; background-color: alpha(@red, 0.1); }
+}
+
+#network.disconnected, #wireplumber.muted { color: @red; }
+#idle_inhibitor.activated { color: @green; }
+#temperature.critical { color: @red; }
+
+tooltip {
+    background-color: alpha(@base, 0.95);
+    border: 2px solid @mauve;
+    border-radius: 12px;
+    padding: 6px 8px;
+    color: @text;
+    font-family: "JetBrainsMono Nerd Font";
+}

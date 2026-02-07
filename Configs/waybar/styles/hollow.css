@@ -1,0 +1,118 @@
+/* s4d Waybar Style: Hollow — Floating Pods (BlackNode-inspired) */
+@import "mocha.css";
+
+* {
+    min-height: 0;
+    font-family: "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 14px;
+}
+
+#waybar {
+    background-color: transparent;
+}
+
+#waybar .module {
+    color: @text;
+    padding: 0;
+    margin: -10px 5px -10px;
+}
+
+#waybar .module:hover {
+    color: @lavender;
+}
+
+/* Workspaces */
+#workspaces button {
+    all: initial;
+    padding: 0 3px;
+    border-radius: 8px;
+    margin: 1em 0;
+    color: @text;
+}
+
+#workspaces button.active {
+    background: @mauve;
+    color: @crust;
+    border-radius: 10.5pt;
+    padding: 0 8px;
+    transition: all 0.4s cubic-bezier(.55,-0.68,.48,1.682);
+}
+
+#workspaces button:hover {
+    background: @mantle;
+    color: @text;
+    transition: all 0.3s cubic-bezier(.55,-0.68,.48,1.682);
+}
+
+/* Hollow Pod Groups — each group is a separate pill */
+#left-ws {
+    background: @base;
+    border-radius: 10.5pt;
+}
+
+#left-media {
+    background: @base;
+    border-radius: 10.5pt;
+    padding: 0 10px;
+    border: 1px solid @surface0;
+}
+
+#left-system {
+    background: @base;
+    border-radius: 10.5pt;
+    padding: 0 10px;
+    border: 1px solid @surface0;
+}
+
+#right-window {
+    background: @base;
+    border-radius: 10.5pt;
+    padding: 0 10px;
+    border: 1px solid @surface0;
+}
+
+#right-hw {
+    background: @base;
+    border-radius: 10.5pt;
+    padding: 0 10px;
+    border: 1px solid @surface0;
+}
+
+#right-status {
+    background: @base;
+    border-radius: 10.5pt;
+    padding: 0 10px;
+    border: 1px solid @surface0;
+}
+
+/* Module colors */
+#cpu { color: @sapphire; }
+#memory { color: @green; }
+#temperature { color: @peach; }
+#battery.charging, #battery.plugged { color: @green; }
+#battery.warning:not(.charging) { color: @yellow; }
+#battery.critical:not(.charging) {
+    color: @red;
+    animation: blink 0.75s linear infinite alternate;
+}
+
+@keyframes blink {
+    to { color: @red; background-color: @surface0; }
+}
+
+#network.disconnected, #wireplumber.muted { color: @red; }
+#idle_inhibitor.activated { color: @green; }
+#temperature.critical { color: @red; }
+#clock { color: @lavender; }
+#backlight { color: @yellow; }
+#wireplumber { color: @sapphire; }
+#network { color: @teal; }
+
+tooltip {
+    background-color: @base;
+    border: 2px solid @mauve;
+    border-radius: 10.5pt;
+    padding: 6px;
+    color: @text;
+    font-family: "JetBrainsMono Nerd Font";
+}

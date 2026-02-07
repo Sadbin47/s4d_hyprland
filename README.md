@@ -77,15 +77,16 @@ The script presents an interactive menu to configure your installation:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Configuration Menu
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. Display Manager: SDDM / Ly / None
-2. Status Bar: Waybar / DankMaterialShell
-3. File Manager: Dolphin / Nemo
-4. Lockscreen: Hyprlock / Both (+ Wlogout)
-5. Dotfiles: Default / Custom / Minimal
-6. ROG Laptop Support: Yes / No
-7. Fonts: Install recommended fonts
-8. Bluetooth: Configure Bluetooth
-9. Zsh: Install Zsh + Starship
+ 1. Display Manager: SDDM / Ly / None
+ 2. Status Bar: Waybar / DankMaterialShell
+ 3. File Manager: Dolphin / Nemo
+ 4. Lockscreen: Hyprlock / Both (+ Wlogout)
+ 5. Dotfiles: Default / Custom / Minimal
+ 6. Waybar Style: Default / Hollow / Solid / Minimal / Flat / Compact / Floating
+ 7. ROG Laptop Support: Yes / No
+ 8. Fonts: Install recommended fonts
+ 9. Bluetooth: Configure Bluetooth
+10. Zsh: Install Zsh + Starship
 ```
 
 ### Step 2: Review & Confirm
@@ -101,6 +102,7 @@ Configuration Summary:
   File Manager    : dolphin
   Lockscreen      : hyprlock
   Dotfiles        : default
+  Waybar Style    : default
   ROG Support     : no
   Fonts           : yes
   Bluetooth       : yes
@@ -123,9 +125,9 @@ The script automatically:
 9. **Installs Fonts** (JetBrains Mono, Noto, etc.)
 10. **Configures Bluetooth** (if selected)
 11. **Sets up Zsh** (with Starship prompt)
-12. **Applies Dotfiles** (configs to ~/.config)
-13. **Sets up Themes** (GTK, QT, cursors, icons)
-14. **Downloads Wallpapers**
+12. **Installs Themes** (GTK, Qt, cursors, icons)
+13. **Applies Dotfiles** (configs to ~/.config)
+14. **Sets up Wallpapers**
 
 ### Step 4: Reboot
 
@@ -140,29 +142,64 @@ Select **Hyprland** as your session and login!
 
 ## ⌨️ Keybindings
 
+### Applications
 | Key | Action |
 |-----|--------|
 | `Super + T` | Terminal (Kitty) |
 | `Super + A` | App Launcher (Rofi) |
 | `Super + E` | File Manager |
 | `Super + B` | Browser |
+| `Super + C` | Editor |
+
+### Window Management
+| Key | Action |
+|-----|--------|
 | `Super + Q` | Close Window |
-| `Super + L` | Lock Screen |
 | `Super + F` | Fullscreen |
+| `Super + Shift + F` | Maximize |
 | `Super + V` | Toggle Floating |
 | `Super + P` | Pseudo-tile |
-| `Super + J` | Toggle Split |
-| `Super + N` | Notification Center |
+| `Super + D` | Toggle Split |
+| `Super + G` | Toggle Group |
+
+### Navigation
+| Key | Action |
+|-----|--------|
+| `Super + H/J/K/L` | Focus (vim-style) |
+| `Super + Shift + H/J/K/L` | Move window (vim-style) |
+| `Super + Ctrl + H/J/K/L` | Resize window (vim-style) |
+| `Super + Arrow` | Focus direction |
+| `Super + Shift + Arrow` | Move window |
+| `Super + Ctrl + Arrow` | Resize window |
+| `Super + Alt + Arrow` | Swap window |
 | `Super + 1-0` | Switch Workspace |
 | `Super + Shift + 1-0` | Move to Workspace |
-| `Super + Shift + Arrow` | Move Window |
-| `Super + Ctrl + Arrow` | Resize Window |
+| `Super + S` | Scratchpad |
+| `Super + Tab` | Next Workspace |
+
+### System & Utilities
+| Key | Action |
+|-----|--------|
+| `Super + Escape` | Lock Screen |
+| `Super + X` | Power Menu (wlogout) |
+| `Super + N` | Notification Center |
 | `Super + /` | Keybindings Help |
-| `Print` | Screenshot (area) |
-| `Shift + Print` | Screenshot (full) |
-| `Super + Print` | Screenshot (active) |
+| `Super + W` | Waybar Style (rofi) |
+| `Super + Shift + W` | Waybar Next Style |
+| `Super + Shift + N` | Wallpaper Select |
+| `Super + Alt + W` | Random Wallpaper |
 | `Super + Shift + B` | Blue Light Filter |
 | `Super + Shift + T` | Toggle Touchpad |
+| `Super + Shift + C` | Color Picker |
+| `Super + Shift + V` | Clipboard History |
+
+### Screenshots
+| Key | Action |
+|-----|--------|
+| `Print` | Screenshot (area → clipboard) |
+| `Shift + Print` | Screenshot (fullscreen → clipboard) |
+| `Super + Print` | Screenshot (area → save) |
+| `Super + Shift + Print` | Screenshot (area → edit) |
 
 ## 📁 Directory Structure
 
@@ -212,14 +249,25 @@ s4d_hyprland/
 │   │       ├── brightness.sh      # Brightness ± with notification
 │   │       ├── touchpad.sh        # Toggle touchpad on/off
 │   │       ├── colorpicker.sh     # Pick color → clipboard
-│   │       └── s4d-theme.sh       # Switch animations / colors
+│   │       ├── s4d-theme.sh       # Switch animations / colors
+│   │       ├── waybar-style.sh    # Waybar style/layout switcher
+│   │       └── keybinds-help.sh   # Display keybindings via rofi
 │   ├── waybar/                    # ── Status Bar ──
 │   │   ├── config.jsonc           # Pill-style grouped modules
 │   │   ├── style.css              # Transparent bar + Catppuccin
 │   │   ├── mocha.css              # Color definitions
-│   │   └── Layouts/               # Alternative bar layouts
-│   │       ├── minimal.jsonc
-│   │       └── sysmon.jsonc
+│   │   ├── styles/                # Swappable bar styles
+│   │   │   ├── default.css        # Pill Groups (default)
+│   │   │   ├── hollow.css         # Floating Pods with borders
+│   │   │   ├── solid.css          # Classic solid bar
+│   │   │   ├── minimal.css        # Just text, no frills
+│   │   │   ├── flat.css           # Bottom-line accents
+│   │   │   ├── compact.css        # Dense, space-efficient
+│   │   │   └── floating.css       # Island bar with shadow
+│   │   └── layouts/               # Alternative bar layouts
+│   │       ├── full.jsonc         # All modules
+│   │       ├── minimal.jsonc      # Center-only (clock + battery)
+│   │       └── sysmon.jsonc       # System monitor emphasis
 │   ├── rofi/                      # ── App Launcher ──
 │   │   ├── config.rasi
 │   │   ├── catppuccin-mocha.rasi
@@ -282,6 +330,30 @@ s4d-theme wallpaper set ~/Pictures/wall.png
 # Show current theme
 s4d-theme status
 ```
+
+## 🎨 Waybar Style Switcher
+
+Change your status bar appearance on the fly with `Super + W`:
+
+```bash
+# Via rofi menu (Super + W)
+waybar-style.sh rofi
+
+# Set directly
+waybar-style.sh set hollow
+waybar-style.sh set floating
+
+# Cycle through styles (Super + Shift + W)
+waybar-style.sh next
+waybar-style.sh prev
+
+# Switch layout
+waybar-style.sh layout minimal
+waybar-style.sh layout sysmon
+```
+
+**Available styles:** default, hollow, solid, minimal, flat, compact, floating
+**Available layouts:** default (full), minimal, sysmon
 
 ## 🖥️ GPU Support
 
