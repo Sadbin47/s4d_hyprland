@@ -496,13 +496,6 @@ install_lockscreen() {
     else
         install_pkg "wlogout" 2>/dev/null || log "${WARN} wlogout not available - power menu will use rofi fallback"
     fi
-    
-    # Copy wlogout config
-    if [[ -d "$CONFIGS_DIR/wlogout" ]]; then
-        mkdir -p "$HOME/.config/wlogout"
-        cp -r "$CONFIGS_DIR/wlogout/"* "$HOME/.config/wlogout/"
-        log "${OK} wlogout config applied"
-    fi
 }
 
 install_fonts() {

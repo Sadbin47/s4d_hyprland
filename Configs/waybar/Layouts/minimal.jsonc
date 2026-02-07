@@ -1,0 +1,21 @@
+// Minimal center-only bar layout
+{
+  "layer": "top",
+  "position": "top",
+  "height": 30,
+  "margin-left": 400,
+  "margin-right": 400,
+  "margin-top": 5,
+  "spacing": 15,
+  "reload_style_on_change": true,
+  "modules-left": [],
+  "modules-center": ["group/center"],
+  "modules-right": [],
+  "group/center": {
+    "orientation": "horizontal",
+    "modules": ["backlight", "clock", "battery"]
+  },
+  "backlight": { "format": "{icon} {percent}%", "format-icons": ["", "", "", "", ""] },
+  "clock": { "format": "{:%H:%M — %b %d}", "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>" },
+  "battery": { "format": "{icon} {capacity}%", "format-icons": [" ", " ", " ", " "] }
+}

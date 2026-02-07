@@ -1,33 +1,19 @@
+/* ── s4d Rofi Configuration ── */
 configuration {
-    modi: "drun,run,window,filebrowser";
-    show-icons: true;
-    icon-theme: "Papirus-Dark";
-    display-drun: " Apps";
-    display-run: " Run";
-    display-window: " Windows";
-    display-filebrowser: " Files";
-    drun-display-format: "{name}";
-    window-format: "{w} · {c} · {t}";
-    font: "JetBrainsMono Nerd Font 11";
-    terminal: "kitty";
-    ssh-client: "ssh";
-    ssh-command: "{terminal} {ssh-client} {host}";
-    run-shell-command: "{terminal} -e {cmd}";
-    drun-match-fields: "name,generic,exec,categories,keywords";
-    drun-show-actions: false;
-    matching: "fuzzy";
-    sort: true;
-    sorting-method: "fzf";
-    case-sensitive: false;
-    cycle: true;
-    sidebar-mode: false;
-    hover-select: false;
-    eh: 1;
-    parse-hosts: true;
-    parse-known-hosts: true;
-    click-to-exit: true;
-    fixed-num-lines: true;
-    normalize-match: true;
+  modi:               "drun,run,filebrowser,window";
+  show-icons:         true;
+  icon-theme:         "Papirus-Dark";
+  font:               "JetBrainsMono Nerd Font 11";
+  drun-display-format: "{name}";
+  hover-select:       true;
+  me-select-entry:    "";
+  me-accept-entry:    "MousePrimary";
+  terminal:           "kitty";
+  matching:           "fuzzy";
+  scroll-method:      0;
+  disable-history:    false;
+  click-to-exit:      true;
+  location:           0;
 }
 
 @theme "catppuccin-mocha"

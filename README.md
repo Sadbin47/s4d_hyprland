@@ -142,49 +142,145 @@ Select **Hyprland** as your session and login!
 
 | Key | Action |
 |-----|--------|
-| `Super + T` | Terminal |
-| `Super + A` | App Launcher |
+| `Super + T` | Terminal (Kitty) |
+| `Super + A` | App Launcher (Rofi) |
 | `Super + E` | File Manager |
 | `Super + B` | Browser |
 | `Super + Q` | Close Window |
 | `Super + L` | Lock Screen |
 | `Super + F` | Fullscreen |
 | `Super + V` | Toggle Floating |
+| `Super + P` | Pseudo-tile |
+| `Super + J` | Toggle Split |
+| `Super + N` | Notification Center |
 | `Super + 1-0` | Switch Workspace |
 | `Super + Shift + 1-0` | Move to Workspace |
-| `Super + N` | Notification Center |
-| `Print` | Screenshot (region) |
+| `Super + Shift + Arrow` | Move Window |
+| `Super + Ctrl + Arrow` | Resize Window |
+| `Super + /` | Keybindings Help |
+| `Print` | Screenshot (area) |
+| `Shift + Print` | Screenshot (full) |
+| `Super + Print` | Screenshot (active) |
+| `Super + Shift + B` | Blue Light Filter |
+| `Super + Shift + T` | Toggle Touchpad |
 
 ## 📁 Directory Structure
 
 ```
-s4d_Hyprland/
-├── install.sh              # Main installation script
-├── README.md               # This file
-├── Configs/                # Default configuration files
-│   ├── hypr/              # Hyprland configs
-│   ├── kitty/             # Kitty terminal config
-│   ├── rofi/              # Rofi launcher config
-│   ├── waybar/            # Waybar config
-│   └── swaync/            # SwayNC notification config
-├── Packages/              # Package lists
-│   ├── base.lst           # Base system packages
-│   ├── hyprland.lst       # Hyprland packages
-│   └── fonts.lst          # Font packages
-└── Scripts/               # Installation scripts
-    ├── functions.sh       # Shared functions
-    ├── gpu-detect.sh      # GPU detection
-    ├── sddm-install.sh    # SDDM installation
-    ├── ly-install.sh      # Ly installation
-    ├── waybar-install.sh  # Waybar installation
-    ├── dankms-install.sh  # DankMaterialShell installation
-    ├── dolphin-install.sh # Dolphin installation
-    ├── nemo-install.sh    # Nemo installation
-    ├── fonts-install.sh   # Fonts installation
-    ├── bluetooth-install.sh # Bluetooth setup
-    ├── rog-install.sh     # ROG laptop support
-    ├── zsh-install.sh     # Zsh setup
-    └── dotfiles-apply.sh  # Dotfiles application
+s4d_hyprland/
+├── install.sh                      # Main installation script
+├── README.md
+├── Configs/                        # Default configuration files
+│   ├── hypr/                      # ── Hyprland (modular) ──
+│   │   ├── hyprland.conf          # Main entry — sources all modules
+│   │   ├── monitors.conf          # Monitor layout (user-editable)
+│   │   ├── userprefs.conf         # Personal overrides
+│   │   ├── animations.conf        # Router → animations/<preset>.conf
+│   │   ├── hyprlock.conf          # Lock screen config
+│   │   ├── hypridle.conf          # Idle manager config
+│   │   ├── animations/            # Swappable animation presets
+│   │   │   ├── smooth.conf        # Default — smooth & balanced
+│   │   │   ├── dynamic.conf       # Bouncy & playful
+│   │   │   ├── fast.conf          # Snappy & minimal delay
+│   │   │   ├── material.conf      # Material Design inspired
+│   │   │   ├── minimal.conf       # Subtle fades only
+│   │   │   └── disabled.conf      # No animations
+│   │   ├── colors/                # Color palettes
+│   │   │   ├── catppuccin-mocha.conf
+│   │   │   └── catppuccin-latte.conf
+│   │   ├── settings/              # System settings
+│   │   │   ├── env.conf           # Environment variables
+│   │   │   ├── input.conf         # Keyboard, mouse, touchpad
+│   │   │   ├── general.conf       # Gaps, borders, layout
+│   │   │   ├── misc.conf          # VFR, VRR, cursor
+│   │   │   ├── nvidia.conf        # NVIDIA-specific env vars
+│   │   │   ├── amd.conf           # AMD-specific env vars
+│   │   │   ├── intel.conf         # Intel-specific env vars
+│   │   │   └── rog.conf           # ASUS ROG laptop extras
+│   │   ├── themes/
+│   │   │   └── decoration.conf    # Rounding, blur, shadows, opacity
+│   │   ├── keybinds/
+│   │   │   ├── keybinds.conf      # All keybindings (bindd)
+│   │   │   └── windowrules.conf   # Float, opacity, workspace rules
+│   │   ├── shaders/
+│   │   │   ├── blue-light-filter.glsl
+│   │   │   └── vibrance.glsl
+│   │   └── scripts/               # Utility scripts
+│   │       ├── wallpaper.sh       # Set / random / restore wallpaper
+│   │       ├── screenshot.sh      # Full / area / active window
+│   │       ├── volume.sh          # Volume ± with notification
+│   │       ├── brightness.sh      # Brightness ± with notification
+│   │       ├── touchpad.sh        # Toggle touchpad on/off
+│   │       ├── colorpicker.sh     # Pick color → clipboard
+│   │       └── s4d-theme.sh       # Switch animations / colors
+│   ├── waybar/                    # ── Status Bar ──
+│   │   ├── config.jsonc           # Pill-style grouped modules
+│   │   ├── style.css              # Transparent bar + Catppuccin
+│   │   ├── mocha.css              # Color definitions
+│   │   └── Layouts/               # Alternative bar layouts
+│   │       ├── minimal.jsonc
+│   │       └── sysmon.jsonc
+│   ├── rofi/                      # ── App Launcher ──
+│   │   ├── config.rasi
+│   │   ├── catppuccin-mocha.rasi
+│   │   └── scripts/power-menu.sh
+│   ├── swaync/                    # ── Notifications ──
+│   │   ├── config.json
+│   │   └── style.css
+│   ├── kitty/kitty.conf           # ── Terminal ──
+│   ├── wlogout/                   # ── Power Menu ──
+│   │   ├── layout
+│   │   └── style.css
+│   ├── fastfetch/config.jsonc     # ── System Info ──
+│   ├── starship/starship.toml     # ── Prompt ──
+│   ├── zsh/                       # ── Shell ──
+│   │   ├── .zshrc
+│   │   └── .zprofile
+│   ├── gtk-3.0/settings.ini       # ── GTK Theme ──
+│   ├── gtk-4.0/settings.ini
+│   ├── qt5ct/qt5ct.conf           # ── Qt Theme ──
+│   └── qt6ct/qt6ct.conf
+├── Packages/                      # Package lists
+│   ├── base.lst
+│   ├── hyprland.lst
+│   └── fonts.lst
+└── Scripts/                       # Installation scripts
+    ├── functions.sh
+    ├── gpu-detect.sh
+    ├── dotfiles-apply.sh
+    ├── themes-install.sh
+    ├── wallpaper-setup.sh
+    ├── sddm-install.sh
+    ├── ly-install.sh
+    ├── waybar-install.sh
+    ├── dankms-install.sh
+    ├── dolphin-install.sh
+    ├── nemo-install.sh
+    ├── fonts-install.sh
+    ├── bluetooth-install.sh
+    ├── rog-install.sh
+    ├── zsh-install.sh
+    └── post-install.sh
+```
+
+## 🎨 s4d-theme — Theme Manager CLI
+
+Switch animation presets, color palettes, and wallpapers on the fly:
+
+```bash
+# List / switch animation presets
+s4d-theme animation list
+s4d-theme animation set dynamic
+
+# Switch color palette
+s4d-theme color set catppuccin-latte
+
+# Wallpaper management
+s4d-theme wallpaper random
+s4d-theme wallpaper set ~/Pictures/wall.png
+
+# Show current theme
+s4d-theme status
 ```
 
 ## 🖥️ GPU Support
@@ -245,10 +341,14 @@ Installation logs are saved to:
 
 ## 🙏 Credits
 
-- [Hyprland](https://hyprland.org/) - Wayland compositor
-- [Catppuccin](https://github.com/catppuccin) - Color scheme
-- [JaKooLit](https://github.com/JaKooLit) - Inspiration from KooL Hyprland
-- [HyDE](https://github.com/prasanthrangan/hyprdots) - Inspiration from HyDE project
+- [Hyprland](https://hyprland.org/) — Wayland compositor
+- [Catppuccin](https://github.com/catppuccin) — Color scheme
+- [BlackNode](https://github.com/Jexxar/BlackNode) — Modular config architecture inspiration
+- [HyDE](https://github.com/prasanthrangan/hyprdots) — Shader system & wallbash concepts
+- [HyprFlux](https://github.com/Jexxar/HyprFlux) — Animation presets design
+- [JaKooLit](https://github.com/JaKooLit) — KooL Hyprland install patterns
+- [omarchy](https://github.com/dhh/omarchy) — Clean theme system & starship prompt
+- [DankMaterialShell](https://github.com/user/DankMaterialShell) — Desktop shell alternative
 
 ## 📄 License
 

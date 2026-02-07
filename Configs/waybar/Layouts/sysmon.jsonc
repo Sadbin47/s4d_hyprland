@@ -1,0 +1,34 @@
+// Full-featured bar with system monitor emphasis
+{
+  "layer": "top",
+  "position": "top",
+  "height": 30,
+  "margin-left": 50,
+  "margin-right": 50,
+  "margin-top": 5,
+  "spacing": 15,
+  "reload_style_on_change": true,
+  "modules-left": ["group/sys", "group/workspaces", "group/netspeed"],
+  "modules-center": ["group/center"],
+  "modules-right": ["group/controls", "group/user"],
+
+  "group/sys": { "orientation": "horizontal", "modules": ["cpu", "temperature", "memory"] },
+  "group/workspaces": { "orientation": "horizontal", "modules": ["hyprland/workspaces"] },
+  "group/netspeed": { "orientation": "horizontal", "modules": ["network#speed"] },
+  "group/center": { "orientation": "horizontal", "modules": ["backlight", "clock", "battery"] },
+  "group/controls": { "orientation": "horizontal", "modules": ["network", "idle_inhibitor", "custom/power"] },
+  "group/user": { "orientation": "horizontal", "modules": ["custom/user"] },
+
+  "hyprland/workspaces": { "on-click": "activate", "all-outputs": true, "format": "{name}", "persistent-workspaces": { "*": 5 } },
+  "cpu": { "interval": 3, "format": " {usage:>2}%", "on-click": "kitty -e btop" },
+  "temperature": { "critical-threshold": 80, "interval": 3, "format": " {temperatureC:>2}°C" },
+  "memory": { "interval": 3, "format": " {:>2}%" },
+  "backlight": { "format": "{icon} {percent}%", "format-icons": ["", "", "", "", ""] },
+  "clock": { "format": "{:%H:%M}", "format-alt": "{:%A, %B %d}", "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>" },
+  "battery": { "format": "{icon} {capacity}%", "format-icons": [" ", " ", " ", " "], "states": { "warning": 30, "critical": 15 } },
+  "network": { "format-wifi": "{icon}", "format-disconnected": "󰖪", "format-icons": { "wifi": ["󰤯","󰤟","󰤢","󰤥","󰤨"] } },
+  "network#speed": { "interval": 3, "format": "⇣{bandwidthDownBytes} ⇡{bandwidthUpBytes}" },
+  "idle_inhibitor": { "format": "{icon}", "format-icons": { "activated": "󰅶", "deactivated": "󰛊" } },
+  "custom/power": { "format": "", "on-click": "wlogout -b 4", "tooltip-format": "Power Menu" },
+  "custom/user": { "format": " {}", "exec": "whoami", "interval": 3600 }
+}
