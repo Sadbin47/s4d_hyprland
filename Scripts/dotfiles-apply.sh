@@ -70,7 +70,8 @@ apply_custom_dotfiles() {
     
     local tmp_dir=$(mktemp -d)
     
-    if git clone --depth 1 "$repo_url" "$tmp_dir"; then
+    # Suppress interactive git prompts and set timeout for clone
+    if GIT_TERMINAL_PROMPT=0 timeout 30 git clone --depth 1 "$repo_url" "$tmp_dir" &>/dev/null; then
         # Check for common dotfile structures
         if [[ -d "$tmp_dir/.config" ]]; then
             cp -r "$tmp_dir/.config/"* "$HOME/.config/"
@@ -88,7 +89,7 @@ apply_custom_dotfiles() {
         fi
         log "${OK} Custom dotfiles applied"
     else
-        log "${ERROR} Failed to clone repository"
+        log "${WARN} Could not clone repository (requires public access or SSH key)"
         log "${INFO} Falling back to minimal configs..."
         create_minimal_configs
     fi

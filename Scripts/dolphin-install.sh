@@ -22,42 +22,27 @@ for pkg in "${DOLPHIN_PACKAGES[@]}"; do
     install_pkg "$pkg"
 done
 
-# Configure Dolphin for Wayland
+# Only create minimal Dolphin config if none exists
+# This respects any existing dotfiles configuration
 mkdir -p "$HOME/.config"
 
-cat > "$HOME/.config/dolphinrc" << 'EOF'
+if [[ ! -f "$HOME/.config/dolphinrc" ]]; then
+    log "${INFO} Creating minimal Dolphin config (preserves theme from dotfiles)"
+    
+    cat > "$HOME/.config/dolphinrc" << 'EOF'
 [General]
 BrowseThroughArchives=true
 ConfirmClosingMultipleTabs=true
-FilterBar=false
-GlobalViewProps=true
-RememberOpenedTabs=true
 ShowFullPath=true
-ShowFullPathInTitlebar=true
 ShowZoomSlider=true
-SortingChoice=CaseInsensitiveSorting
-UseTabForSwitchingSplitView=false
 Version=202
-ViewPropsTimestamp=2024,1,1,0,0,0
-
-[DetailsMode]
-PreviewSize=22
-
-[IconsMode]
-PreviewSize=80
-
-[KFileDialog Settings]
-Places Icons Auto-resize=false
-Places Icons Static Size=22
-
-[PreviewSettings]
-Plugins=appimagethumbnail,audiothumbnail,blenderthumbnail,comicbookthumbnail,djvuthumbnail,ebookthumbnail,exrthumbnail,directorythumbnail,fontthumbnail,imagethumbnail,jaborathumbnail,kraborathumbnail,opendocumentthumbnail,gaborathumbnail,cursorthumbnail,windowsexethumbnail,windowsimagethumbnail,ffmpegthumbs,svgthumbnail,textthumbnail
 
 [Search]
 Location=Everywhere
-
-[Toolbar mainToolBar]
-ToolButtonStyle=IconOnly
 EOF
+else
+    log "${OK} Dolphin config already exists - preserving your dotfiles settings"
+fi
 
 log "${OK} Dolphin installed and configured"
+
