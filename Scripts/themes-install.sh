@@ -88,6 +88,44 @@ install_kvantum_themes() {
     fi
     rm -rf "$tmp_dir"
 
+    # Patch the theme config to add transparency + dolphin hacks
+    local THEME_KVCONFIG="$KVANTUM_DIR/catppuccin-mocha-mauve/catppuccin-mocha-mauve.kvconfig"
+    if [[ -f "$THEME_KVCONFIG" ]]; then
+        # Add [Hacks] section if it doesn't already exist
+        if ! grep -q '^\[Hacks\]' "$THEME_KVCONFIG"; then
+            cat >> "$THEME_KVCONFIG" << 'HACKSEOF'
+
+[Hacks]
+transparent_dolphin_view=true
+blur_konsole=true
+transparent_ktitle_label=true
+transparent_menutitle=true
+respect_darkness=true
+kcapacitybar_as_progressbar=true
+iconless_pushbutton=true
+iconless_menu=true
+disabled_icon_opacity=80
+normal_default_pushbutton=true
+transparent_pcmanfm_sidepane=true
+transparent_pcmanfm_view=true
+blur_translucent=true
+tint_on_mouseover=0
+HACKSEOF
+        else
+            # Ensure transparent_dolphin_view is enabled even if [Hacks] exists
+            sed -i 's/^transparent_dolphin_view=.*/transparent_dolphin_view=true/' "$THEME_KVCONFIG"
+        fi
+
+        # Ensure translucent_windows is enabled in [%General] section of the theme
+        if grep -q '^\[%General\]' "$THEME_KVCONFIG"; then
+            if grep -q '^translucent_windows=' "$THEME_KVCONFIG"; then
+                sed -i 's/^translucent_windows=.*/translucent_windows=true/' "$THEME_KVCONFIG"
+            else
+                sed -i '/^\[%General\]/a translucent_windows=true' "$THEME_KVCONFIG"
+            fi
+        fi
+    fi
+
     cat > "$KVANTUM_DIR/kvantum.kvconfig" << 'EOF'
 [General]
 theme=catppuccin-mocha-mauve
