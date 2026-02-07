@@ -291,10 +291,10 @@
   },
   "custom/power": {
     "format": "{icon}",
-    "format-icons": "",
+    "format-icons": "", //  
     "exec-on-event": "true",
-    "on-click": "bash -c 'if command -v wlogout &>/dev/null; then wlogout; else choice=$(echo -e \"⏻ Shutdown\\n Reboot\\n Suspend\\n󰌾 Lock\\n Logout\" | rofi -dmenu -p \"Power\" -i); case \"$choice\" in *Shutdown*) systemctl poweroff;; *Reboot*) systemctl reboot;; *Suspend*) systemctl suspend;; *Lock*) hyprlock;; *Logout*) hyprctl dispatch exit;; esac; fi'",
-    "tooltip-format": "Power Menu"
+    "on-click": "wlogout",
+    "tooltip-format": "Power Menu",
   },
   "custom/htb-vpn": {
     "format": "{}",

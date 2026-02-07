@@ -152,15 +152,15 @@ EOF
     mkdir -p "$HOME/.config/qt5ct"
     cat > "$HOME/.config/qt5ct/qt5ct.conf" << 'EOF'
 [Appearance]
-color_scheme_path=
+color_scheme_path=/usr/share/qt5ct/colors/Catppuccin-Mocha.conf
 custom_palette=false
 icon_theme=Papirus-Dark
 standard_dialogs=default
-style=kvantum
+style=kvantum-dark
 
 [Fonts]
-fixed="Inter,11,-1,5,50,0,0,0,0,0"
-general="Inter,11,-1,5,50,0,0,0,0,0"
+fixed="JetBrainsMono Nerd Font,10,-1,5,50,0,0,0,0,0"
+general="Inter,10,-1,5,50,0,0,0,0,0"
 
 [Interface]
 activate_item_on_single_click=1
@@ -176,21 +176,25 @@ stylesheets=@Invalid()
 toolbutton_style=4
 underline_shortcut=1
 wheel_scroll_lines=3
+
+[Troubleshooting]
+force_raster_widgets=1
+ignored_applications=@Invalid()
 EOF
     
     # Configure qt6ct
     mkdir -p "$HOME/.config/qt6ct"
     cat > "$HOME/.config/qt6ct/qt6ct.conf" << 'EOF'
 [Appearance]
-color_scheme_path=
+color_scheme_path=/usr/share/qt6ct/colors/Catppuccin-Mocha.conf
 custom_palette=false
 icon_theme=Papirus-Dark
 standard_dialogs=default
-style=kvantum
+style=kvantum-dark
 
 [Fonts]
-fixed="Inter,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
-general="Inter,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+fixed="JetBrainsMono Nerd Font,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+general="Inter,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
 
 [Interface]
 activate_item_on_single_click=1
@@ -275,6 +279,69 @@ EOF
 }
 
 #=============================================================================
+# CONFIGURE KDE/DOLPHIN DARK MODE
+#=============================================================================
+configure_kde_dark() {
+    log "${INFO} Configuring KDE apps dark mode (Dolphin, etc.)..."
+    
+    # Create kdeglobals for KDE apps (Dolphin uses this)
+    cat > "$HOME/.config/kdeglobals" << 'EOF'
+[General]
+ColorScheme=CatppuccinMochaMauve
+Name=Catppuccin Mocha Mauve
+
+[Colors:View]
+BackgroundNormal=30,30,46
+ForegroundNormal=205,214,244
+
+[Colors:Window]
+BackgroundNormal=24,24,37
+ForegroundNormal=205,214,244
+
+[Colors:Button]
+BackgroundNormal=49,50,68
+ForegroundNormal=205,214,244
+
+[Colors:Selection]
+BackgroundNormal=203,166,247
+ForegroundNormal=17,17,27
+
+[Colors:Tooltip]
+BackgroundNormal=49,50,68
+ForegroundNormal=205,214,244
+
+[Colors:Complementary]
+BackgroundNormal=24,24,37
+ForegroundNormal=205,214,244
+
+[KDE]
+LookAndFeelPackage=org.kde.breezedark.desktop
+widgetStyle=kvantum-dark
+colorScheme=CatppuccinMochaMauve
+
+[Icons]
+Theme=Papirus-Dark
+EOF
+
+    # Install Catppuccin color scheme files for qt5ct/qt6ct
+    # These are needed for color_scheme_path in qt5ct/qt6ct.conf
+    for qt_dir in /usr/share/qt5ct/colors /usr/share/qt6ct/colors; do
+        if [[ -d "$(dirname "$qt_dir")" ]] && [[ ! -f "$qt_dir/Catppuccin-Mocha.conf" ]]; then
+            sudo mkdir -p "$qt_dir"
+            sudo tee "$qt_dir/Catppuccin-Mocha.conf" > /dev/null << 'COLOREOF'
+[ColorScheme]
+active_colors=#ffcdd6f4, #ff1e1e2e, #ff45475a, #ff313244, #ff181825, #ff313244, #ffcdd6f4, #ffcdd6f4, #ffcdd6f4, #ff1e1e2e, #ff181825, #ff585b70, #ffcba6f7, #ff11111b, #ff89b4fa, #ffcba6f7, #ff1e1e2e, #ffcdd6f4, #ff181825, #ffcdd6f4, #80cdd6f4
+inactive_colors=#ffcdd6f4, #ff1e1e2e, #ff45475a, #ff313244, #ff181825, #ff313244, #ff6c7086, #ffcdd6f4, #ff6c7086, #ff1e1e2e, #ff181825, #ff585b70, #ff313244, #ff6c7086, #ff89b4fa, #ffcba6f7, #ff1e1e2e, #ffcdd6f4, #ff181825, #ffcdd6f4, #80cdd6f4
+disabled_colors=#ff6c7086, #ff1e1e2e, #ff45475a, #ff313244, #ff181825, #ff313244, #ff6c7086, #ff6c7086, #ff6c7086, #ff1e1e2e, #ff1e1e2e, #ff585b70, #ff181825, #ff6c7086, #ff89b4fa, #ffcba6f7, #ff1e1e2e, #ffcdd6f4, #ff181825, #ffcdd6f4, #80cdd6f4
+COLOREOF
+            log "${OK} Catppuccin color scheme installed for $(basename $(dirname "$qt_dir"))"
+        fi
+    done
+
+    log "${OK} KDE dark mode configured"
+}
+
+#=============================================================================
 # MAIN
 #=============================================================================
 main() {
@@ -283,6 +350,7 @@ main() {
     install_cursor_themes
     install_kvantum_themes
     configure_gtk
+    configure_kde_dark
     
     log "${OK} Theme installation complete"
 }
