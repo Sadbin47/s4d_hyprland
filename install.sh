@@ -542,6 +542,9 @@ configure_zsh() {
 apply_dotfiles() {
     log_section "Applying Dotfiles"
     
+    # Export bar choice so dotfiles-apply.sh can configure hyprland.conf
+    export S4D_STATUS_BAR="${USER_CHOICES[status_bar]}"
+    
     case "${USER_CHOICES[custom_dots]}" in
         default)
             source "$SCRIPTS_DIR/dotfiles-apply.sh" "default"

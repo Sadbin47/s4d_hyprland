@@ -126,16 +126,17 @@ $editor = code
 $mainMod = SUPER
 
 # Startup applications
-exec-once = swaync
-exec-once = waybar
+exec-once = waybar #BAR_WAYBAR
+# exec-once = dms run #BAR_DMS
+exec-once = swaync #SWAYNC_LINE
 exec-once = swww init
-exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 #POLKIT_LINE
 exec-once = udiskie &
 exec-once = nm-applet --indicator
 exec-once = blueman-applet
 exec-once = wl-paste --type text --watch cliphist store
 exec-once = wl-paste --type image --watch cliphist store
-exec-once = hypridle
+exec-once = hypridle #HYPRIDLE_LINE
 
 # Source additional configs
 source = ~/.config/hypr/nvidia.conf # Comment if not using NVIDIA
@@ -690,6 +691,46 @@ EOF
 }
 
 #=============================================================================
+# CONFIGURE STATUS BAR IN HYPRLAND.CONF
+# Uses S4D_STATUS_BAR env var (waybar or dankms) exported from install.sh
+#=============================================================================
+configure_status_bar() {
+    local hypr_conf="$HOME/.config/hypr/hyprland.conf"
+    local bar_choice="${S4D_STATUS_BAR:-waybar}"
+
+    if [[ ! -f "$hypr_conf" ]]; then
+        log "${WARN} hyprland.conf not found, skipping bar configuration"
+        return
+    fi
+
+    log "${INFO} Configuring status bar: $bar_choice"
+
+    if [[ "$bar_choice" == "dankms" ]]; then
+        # Enable DMS, disable Waybar
+        sed -i 's/^exec-once = waybar.*#BAR_WAYBAR/# exec-once = waybar #BAR_WAYBAR/' "$hypr_conf"
+        sed -i 's/^# exec-once = dms run.*#BAR_DMS/exec-once = dms run #BAR_DMS/' "$hypr_conf"
+
+        # DMS replaces swaync, hypridle, and polkit — comment them out
+        sed -i 's/^exec-once = swaync.*#SWAYNC_LINE/# exec-once = swaync #SWAYNC_LINE/' "$hypr_conf"
+        sed -i 's/^exec-once = hypridle.*#HYPRIDLE_LINE/# exec-once = hypridle #HYPRIDLE_LINE/' "$hypr_conf"
+        sed -i 's|^exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1.*#POLKIT_LINE|# exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 #POLKIT_LINE|' "$hypr_conf"
+
+        log "${OK} DankMaterialShell configured (waybar, swaync, hypridle, polkit disabled)"
+    else
+        # Enable Waybar, disable DMS
+        sed -i 's/^# exec-once = waybar.*#BAR_WAYBAR/exec-once = waybar #BAR_WAYBAR/' "$hypr_conf"
+        sed -i 's/^exec-once = dms run.*#BAR_DMS/# exec-once = dms run #BAR_DMS/' "$hypr_conf"
+
+        # Ensure swaync, hypridle, polkit are enabled for Waybar setup
+        sed -i 's/^# exec-once = swaync.*#SWAYNC_LINE/exec-once = swaync #SWAYNC_LINE/' "$hypr_conf"
+        sed -i 's/^# exec-once = hypridle.*#HYPRIDLE_LINE/exec-once = hypridle #HYPRIDLE_LINE/' "$hypr_conf"
+        sed -i 's|^# exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1.*#POLKIT_LINE|exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 #POLKIT_LINE|' "$hypr_conf"
+
+        log "${OK} Waybar configured as status bar"
+    fi
+}
+
+#=============================================================================
 # MAIN
 #=============================================================================
 case "$DOTFILES_TYPE" in
@@ -713,5 +754,8 @@ case "$DOTFILES_TYPE" in
         create_minimal_configs
         ;;
 esac
+
+# Configure the status bar based on user choice AFTER dotfiles are in place
+configure_status_bar
 
 log "${OK} Dotfiles application complete"
