@@ -175,7 +175,6 @@ decoration {
         enabled = true
         size = 6
         passes = 3
-        new_optimizations = true
     }
 }
 
@@ -195,7 +194,7 @@ input {
     sensitivity = 0
     touchpad {
         natural_scroll = true
-        tap-to-click = true
+        tap_to_click = true
     }
 }
 
@@ -286,13 +285,13 @@ bindm = $mainMod, mouse:272, movewindow
 bindm = $mainMod, mouse:273, resizewindow
 
 # Window rules
-windowrulev2 = float, class:^(pavucontrol)$
-windowrulev2 = float, class:^(blueman-manager)$
-windowrulev2 = float, class:^(nm-connection-editor)$
-windowrulev2 = float, title:^(Picture-in-Picture)$
-windowrulev2 = float, title:^(Open File)$
-windowrulev2 = float, title:^(Save File)$
-windowrulev2 = suppressevent maximize, class:.*
+windowrule = float, class:^(pavucontrol)$
+windowrule = float, class:^(blueman-manager)$
+windowrule = float, class:^(nm-connection-editor)$
+windowrule = float, title:^(Picture-in-Picture)$
+windowrule = float, title:^(Open File)$
+windowrule = float, title:^(Save File)$
+windowrule = suppress maximize, class:.*
 HYPREOF
 
     # Minimal kitty config

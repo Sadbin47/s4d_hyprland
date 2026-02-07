@@ -49,7 +49,7 @@ env = GBM_BACKEND,nvidia-drm
 env = __GLX_VENDOR_LIBRARY_NAME,nvidia
 env = NVD_BACKEND,direct
 cursor {
-    no_hardware_cursors = true
+    no_hardware_cursors = 1
 }
 EOF
     log "${OK} NVIDIA drivers installed"
