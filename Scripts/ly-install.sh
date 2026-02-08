@@ -92,6 +92,10 @@ for dm in gdm sddm lightdm lxdm greetd; do
     fi
 done
 
+# Set default boot target to graphical so Ly actually starts on boot
+sudo systemctl set-default graphical.target
+log "${OK} Set default boot target to graphical.target"
+
 # Reload systemd to pick up new service files
 sudo systemctl daemon-reload
 
