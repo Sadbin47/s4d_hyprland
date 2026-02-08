@@ -440,13 +440,18 @@ configure_status_bar() {
         # Comment out waybar and swaync lines (using markers)
         sed -i 's|^exec-once = waybar.*#BAR_WAYBAR|# exec-once = waybar #BAR_WAYBAR|' "$hypr_conf"
         sed -i 's|^exec-once = swaync.*#SWAYNC_LINE|# exec-once = swaync #SWAYNC_LINE|' "$hypr_conf"
+        # DMS replaces hypridle and polkit-gnome too
+        sed -i 's|^exec-once = hypridle.*#HYPRIDLE_LINE|# exec-once = hypridle #HYPRIDLE_LINE|' "$hypr_conf"
+        sed -i 's|^exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1.*#POLKIT_LINE|# exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 #POLKIT_LINE|' "$hypr_conf"
         # Uncomment DMS line
         sed -i 's|^# *exec-once = dms run.*#BAR_DMS|exec-once = dms run #BAR_DMS|' "$hypr_conf"
-        log "${OK} Configured DankMaterialShell as status bar"
+        log "${OK} Configured DankMaterialShell as status bar (disabled waybar, swaync, hypridle, polkit)"
     else
-        # Ensure waybar and swaync are active
+        # Ensure waybar, swaync, hypridle, polkit are active
         sed -i 's|^# *exec-once = waybar.*#BAR_WAYBAR|exec-once = waybar #BAR_WAYBAR|' "$hypr_conf"
         sed -i 's|^# *exec-once = swaync.*#SWAYNC_LINE|exec-once = swaync #SWAYNC_LINE|' "$hypr_conf"
+        sed -i 's|^# *exec-once = hypridle.*#HYPRIDLE_LINE|exec-once = hypridle #HYPRIDLE_LINE|' "$hypr_conf"
+        sed -i 's|^# *exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1.*#POLKIT_LINE|exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 #POLKIT_LINE|' "$hypr_conf"
         # Comment out DMS line
         sed -i 's|^exec-once = dms run.*#BAR_DMS|# exec-once = dms run #BAR_DMS|' "$hypr_conf"
         log "${OK} Configured Waybar as status bar"

@@ -116,12 +116,13 @@ HACKSEOF
             sed -i 's/^transparent_dolphin_view=.*/transparent_dolphin_view=true/' "$THEME_KVCONFIG"
         fi
 
-        # Ensure translucent_windows is enabled in [%General] section of the theme
+        # Ensure translucent_windows is DISABLED in [%General] section of the theme
+        # Hyprland handles window opacity; Kvantum translucency causes double-transparency
         if grep -q '^\[%General\]' "$THEME_KVCONFIG"; then
             if grep -q '^translucent_windows=' "$THEME_KVCONFIG"; then
-                sed -i 's/^translucent_windows=.*/translucent_windows=true/' "$THEME_KVCONFIG"
+                sed -i 's/^translucent_windows=.*/translucent_windows=false/' "$THEME_KVCONFIG"
             else
-                sed -i '/^\[%General\]/a translucent_windows=true' "$THEME_KVCONFIG"
+                sed -i '/^\[%General\]/a translucent_windows=false' "$THEME_KVCONFIG"
             fi
         fi
     fi
@@ -129,11 +130,11 @@ HACKSEOF
     cat > "$KVANTUM_DIR/kvantum.kvconfig" << 'EOF'
 [General]
 theme=catppuccin-mocha-mauve
-translucent_windows=true
+translucent_windows=false
 blurring=true
 composite=true
 reduce_window_opacity=0
-reduce_menu_opacity=15
+reduce_menu_opacity=10
 EOF
 
     # qt5ct config

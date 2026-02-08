@@ -96,45 +96,31 @@ ask_yn() {
 }
 
 #=============================================================================
-# TUI — SPINNER & STEP RUNNER
+# TUI — STEP RUNNER WITH LIVE LOG
 #=============================================================================
-_SPIN_PID=""
-
-_spin() {
-    local msg="$1"
-    local chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-    local i=0
-    tput civis 2>/dev/null
-    while true; do
-        printf "\r  \033[0;36m%s\033[0m %-55s" "${chars:i%${#chars}:1}" "$msg"
-        i=$((i + 1))
-        sleep 0.08
-    done
-}
-
 run_step() {
     local msg="$1"
     shift
 
+    # Show step header with pending indicator
+    printf "  \033[2m◌\033[0m %-55s\n" "$msg"
+
     S4D_QUIET=true
 
-    _spin "$msg" &
-    _SPIN_PID=$!
-
+    # Run the step; log() writes live updates to /dev/tty on the line below
     "$@" >> "$LOG_FILE" 2>&1
     local ret=$?
 
-    kill "$_SPIN_PID" 2>/dev/null
-    wait "$_SPIN_PID" 2>/dev/null
-    _SPIN_PID=""
-
-    tput cnorm 2>/dev/null
     S4D_QUIET=false
 
+    # Clear the live log sub-line and move up to overwrite the step header
+    printf "\r%-64s" "" > /dev/tty 2>/dev/null
+    printf "\033[A\r" > /dev/tty 2>/dev/null
+
     if [[ $ret -eq 0 ]]; then
-        printf "\r  \033[0;32m●\033[0m %-55s\n" "$msg"
+        printf "  \033[0;32m●\033[0m %-55s\n" "$msg"
     else
-        printf "\r  \033[0;33m●\033[0m %-55s\n" "$msg"
+        printf "  \033[0;33m●\033[0m %-55s\n" "$msg"
     fi
 
     return 0
@@ -146,7 +132,6 @@ run_step() {
 cleanup() {
     tput cnorm 2>/dev/null
     [[ -n "${SUDO_KEEPALIVE_PID:-}" ]] && kill "$SUDO_KEEPALIVE_PID" 2>/dev/null
-    [[ -n "${_SPIN_PID:-}" ]] && kill "$_SPIN_PID" 2>/dev/null
 }
 trap cleanup EXIT INT TERM
 
@@ -197,14 +182,8 @@ configuration_menu() {
         2) USER_CHOICES[status_bar]="dankms" ;;
     esac
 
-    # 3. File Manager
-    ask_choice "File Manager" \
-        "Dolphin ${DIM}(KDE)${NC}" \
-        "Nemo ${DIM}(GTK, Lightweight)${NC}"
-    case $CHOICE in
-        1) USER_CHOICES[file_manager]="dolphin" ;;
-        2) USER_CHOICES[file_manager]="nemo" ;;
-    esac
+    # 3. File Manager (Dolphin — only option, best Wayland integration)
+    USER_CHOICES[file_manager]="dolphin"
 
     # 4. Lockscreen
     ask_choice "Lockscreen" \
@@ -261,7 +240,7 @@ configuration_menu() {
     echo ""
     echo -e "  ${DIM}Display Manager     ${NC}${WHITE}${USER_CHOICES[display_manager]}${NC}"
     echo -e "  ${DIM}Status Bar          ${NC}${WHITE}${USER_CHOICES[status_bar]}${NC}"
-    echo -e "  ${DIM}File Manager        ${NC}${WHITE}${USER_CHOICES[file_manager]}${NC}"
+    echo -e "  ${DIM}File Manager        ${NC}${WHITE}dolphin${NC}"
     echo -e "  ${DIM}Lockscreen          ${NC}${WHITE}${USER_CHOICES[lockscreen]}${NC}"
     echo -e "  ${DIM}Dotfiles            ${NC}${WHITE}${USER_CHOICES[dotfiles]}${NC}"
     echo -e "  ${DIM}ROG Support         ${NC}${WHITE}${USER_CHOICES[rog_laptop]}${NC}"
@@ -368,10 +347,7 @@ install_status_bar() {
 
 install_file_manager() {
     log_section "File Manager"
-    case "${USER_CHOICES[file_manager]}" in
-        dolphin) source "$SCRIPTS_DIR/dolphin-install.sh" ;;
-        nemo)    source "$SCRIPTS_DIR/nemo-install.sh" ;;
-    esac
+    source "$SCRIPTS_DIR/dolphin-install.sh"
 }
 
 install_lockscreen() {
@@ -380,6 +356,12 @@ install_lockscreen() {
     install_pkg hypridle
     install_pkg grim
     if [[ "${USER_CHOICES[lockscreen]}" == "both" ]]; then
+        # wlogout is AUR-only and needs build dependencies
+        install_pkg gtk3
+        install_pkg gtk-layer-shell
+        install_pkg gobject-introspection
+        install_pkg meson
+        install_pkg scdoc
         install_pkg wlogout
     fi
 }

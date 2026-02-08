@@ -13,13 +13,13 @@ set_wallpaper() {
         echo "File not found: $wallpaper"
         return 1
     fi
-    
+
     # Wait for swww-daemon
     for i in {1..10}; do
         swww query &>/dev/null && break
         sleep 0.5
     done
-    
+
     swww img "$wallpaper" \
         --transition-type grow \
         --transition-pos "$(hyprctl cursorpos)" \
@@ -29,8 +29,14 @@ set_wallpaper() {
     swww img "$wallpaper" \
         --transition-type fade \
         --transition-duration 1 2>/dev/null
-    
+
     echo "$wallpaper" > "$CACHE_FILE"
+
+    # Generate DMS/matugen colors from the wallpaper (if matugen is installed)
+    # This ensures DMS themes itself to match the wallpaper without overriding it
+    if command -v matugen &>/dev/null; then
+        matugen image "$wallpaper" &>/dev/null &
+    fi
 }
 
 random_wallpaper() {

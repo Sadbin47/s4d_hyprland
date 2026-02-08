@@ -39,6 +39,11 @@ FAILED_PACKAGES=()
 log() {
     if [[ "$S4D_QUIET" == true ]]; then
         echo -e "$1" >> "$LOG_FILE" 2>/dev/null
+        # Live log: write compact status to /dev/tty (bypasses stdout redirection)
+        # Strip ANSI color codes and show a compact one-line update
+        local clean
+        clean=$(echo -e "$1" | sed 's/\x1b\[[0-9;]*m//g' | tr -d '\n' | cut -c1-60)
+        [[ -n "$clean" ]] && printf "\r    \033[2m%-60s\033[0m" "$clean" > /dev/tty 2>/dev/null
     else
         echo -e "$1" | tee -a "$LOG_FILE" 2>/dev/null
     fi

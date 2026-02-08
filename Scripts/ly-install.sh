@@ -10,6 +10,26 @@ log "${INFO} Installing Ly display manager..."
 # Install Ly
 install_pkg "ly"
 
+# Verify Ly actually installed
+LY_BIN=""
+if command -v ly-dm &>/dev/null; then
+    LY_BIN="$(command -v ly-dm)"
+elif command -v ly &>/dev/null; then
+    LY_BIN="$(command -v ly)"
+elif [[ -x /usr/bin/ly-dm ]]; then
+    LY_BIN="/usr/bin/ly-dm"
+elif [[ -x /usr/bin/ly ]]; then
+    LY_BIN="/usr/bin/ly"
+fi
+
+if [[ -z "$LY_BIN" ]]; then
+    log "${ERROR} Ly binary not found after installation — aborting Ly setup"
+    log "${INFO} You can install Ly manually: yay -S ly"
+    return 1 2>/dev/null || exit 1
+fi
+
+log "${OK} Ly binary found at: $LY_BIN"
+
 #=============================================================================
 # ENSURE HYPRLAND SESSION FILE EXISTS
 #=============================================================================
@@ -94,7 +114,6 @@ for dm in gdm sddm lightdm lxdm greetd; do
     if systemctl is-enabled "$dm" &>/dev/null 2>&1; then
         sudo systemctl disable "$dm" 2>/dev/null || true
     fi
-    # Also check templated service names
     if systemctl is-enabled "${dm}.service" &>/dev/null 2>&1; then
         sudo systemctl disable "${dm}.service" 2>/dev/null || true
     fi
@@ -108,28 +127,42 @@ log "${OK} Set default boot target to graphical.target"
 sudo systemctl daemon-reload
 
 # Ly on Arch uses a templated service: ly@ttyN.service
-# Default TTY is tty2
 LY_TTY="tty2"
 
 # Disable getty on the TTY that Ly will use (CRITICAL: they conflict)
 sudo systemctl disable "getty@${LY_TTY}.service" 2>/dev/null || true
+sudo systemctl mask "getty@${LY_TTY}.service" 2>/dev/null || true
+log "${OK} Disabled getty@${LY_TTY}.service"
 
-# Try the templated service name first (ly@tty2.service) - this is what Arch provides
-if systemctl list-unit-files 2>/dev/null | grep -q "ly@"; then
+# Determine the service file location
+LY_SERVICE_FOUND=false
+
+# Check for the templated service provided by the ly package
+if [[ -f /usr/lib/systemd/system/ly@.service ]]; then
+    log "${INFO} Found system-provided ly@.service"
     sudo systemctl enable --force "ly@${LY_TTY}.service"
+    LY_SERVICE_FOUND=true
     log "${OK} Ly (ly@${LY_TTY}.service) enabled"
-# Fall back to non-templated service name
+elif systemctl list-unit-files 2>/dev/null | grep -q "ly@"; then
+    log "${INFO} Found ly@ templated service"
+    sudo systemctl enable --force "ly@${LY_TTY}.service"
+    LY_SERVICE_FOUND=true
+    log "${OK} Ly (ly@${LY_TTY}.service) enabled"
 elif systemctl list-unit-files 2>/dev/null | grep -q "^ly\.service"; then
     sudo systemctl enable --force "ly.service"
+    LY_SERVICE_FOUND=true
     log "${OK} Ly (ly.service) enabled"
 elif systemctl list-unit-files 2>/dev/null | grep -q "^ly-dm\.service"; then
     sudo systemctl enable --force "ly-dm.service"
+    LY_SERVICE_FOUND=true
     log "${OK} Ly (ly-dm.service) enabled"
-else
-    # No service file found at all - create one manually
+fi
+
+if [[ "$LY_SERVICE_FOUND" == false ]]; then
+    # No service file found at all - create one manually with correct binary path
     log "${WARN} Ly service file not found, creating it..."
 
-    cat << SERVICEEOF | sudo tee /etc/systemd/system/ly@.service >/dev/null
+    cat << SERVICEEOF | sudo tee /usr/lib/systemd/system/ly@.service >/dev/null
 [Unit]
 Description=TUI display manager
 After=systemd-user-sessions.service plymouth-quit-wait.service
@@ -137,7 +170,7 @@ Conflicts=getty@%i.service
 
 [Service]
 Type=idle
-ExecStart=/usr/bin/ly
+ExecStart=${LY_BIN}
 StandardInput=tty
 TTYPath=/dev/%i
 TTYReset=yes
@@ -154,15 +187,44 @@ SERVICEEOF
 fi
 
 #=============================================================================
-# VERIFY HYPRLAND IS AVAILABLE AS A SESSION
+# VERIFY EVERYTHING IS SET UP CORRECTLY
 #=============================================================================
-log "${INFO} Verifying Hyprland session availability..."
+log "${INFO} Verifying Ly setup..."
 
+# Verify the service is actually enabled
+if systemctl is-enabled "ly@${LY_TTY}.service" &>/dev/null 2>&1; then
+    log "${OK} ly@${LY_TTY}.service is enabled"
+elif systemctl is-enabled "ly.service" &>/dev/null 2>&1; then
+    log "${OK} ly.service is enabled"
+else
+    log "${WARN} Ly service does not appear to be enabled!"
+    log "${INFO} Attempting direct symlink as fallback..."
+    # Direct symlink as absolute last resort
+    sudo ln -sf /usr/lib/systemd/system/ly@.service \
+        /etc/systemd/system/display-manager.service 2>/dev/null || true
+    sudo systemctl daemon-reload
+    sudo systemctl enable --force "ly@${LY_TTY}.service" 2>/dev/null || true
+fi
+
+# Verify getty is not going to conflict
+if systemctl is-enabled "getty@${LY_TTY}.service" &>/dev/null 2>&1; then
+    log "${WARN} getty@${LY_TTY}.service is still enabled — disabling"
+    sudo systemctl disable "getty@${LY_TTY}.service" 2>/dev/null || true
+    sudo systemctl mask "getty@${LY_TTY}.service" 2>/dev/null || true
+fi
+
+# Verify default target
+CURRENT_TARGET=$(systemctl get-default 2>/dev/null)
+if [[ "$CURRENT_TARGET" != "graphical.target" ]]; then
+    log "${WARN} Default target is $CURRENT_TARGET, setting to graphical.target"
+    sudo systemctl set-default graphical.target
+fi
+
+# Verify Hyprland session file
 if [[ -f /usr/share/wayland-sessions/hyprland.desktop ]]; then
     log "${OK} Hyprland session found: /usr/share/wayland-sessions/hyprland.desktop"
 else
     log "${WARN} Hyprland session file not found!"
-    log "${INFO} This may mean Hyprland is not installed or session file is missing"
 fi
 
 # Check if Hyprland binary exists

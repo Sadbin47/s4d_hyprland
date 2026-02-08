@@ -3,19 +3,17 @@
 A minimal, bloat-free Hyprland installation script for Arch Linux.
 
 ```
-╔═══════════════════════════════════════════════════════════════╗
-║     _____  ___ _____    _   _                  _              ║
-║    /  ___|/ _ \|  _  \ | | | |                | |             ║
-║    \ `--.| | | | | | | | |_| |_   _ _ __  _ __| | __ _ _ __   ║
-║     `--. \ | | | | | | |  _  | | | | '_ \| '__| |/ _` | '_ \  ║
-║    /\__/ / |_| | |/ /  | | | | |_| | |_) | |  | | (_| | | | | ║
-║    \____/ \___/|___/   \_| |_/\__, | .__/|_|  |_|\__,_|_| |_| ║
-║                                __/ | |                        ║
-║                               |___/|_|   Minimal & Clean      ║
-╚═══════════════════════════════════════════════════════════════╝
+    ███████╗  ██╗  ██╗  ██████╗
+    ██╔════╝  ██║  ██║  ██╔══██╗
+    ███████╗  ███████║  ██║  ██║
+    ╚════██║  ╚════██║  ██║  ██║
+    ███████║       ██║  ██████╔╝
+    ╚══════╝       ╚═╝  ╚═════╝
+
+    Minimal Hyprland  ·  Arch Linux
 ```
 
-## ⚡ Quick Install
+## Quick Install
 
 ### One-liner (Recommended)
 
@@ -33,114 +31,113 @@ cd s4d_hyprland
 ./install.sh
 ```
 
-## 📋 Requirements
+## Requirements
 
-- ✅ Fresh Arch Linux installation (base system)
-- ✅ Internet connection
-- ✅ Non-root user with sudo privileges
+- Fresh Arch Linux installation (base system)
+- Internet connection
+- Non-root user with sudo privileges
 
 ```bash
 # If you need git and base-devel (script will install git if missing):
 sudo pacman -S --needed git base-devel
 ```
 
-## 🚀 Features
+## Features
 
-- 🎯 **Bloat-Free**: Only essential packages, no unnecessary software
-- 🖥️ **GPU Auto-Detection**: NVIDIA, AMD, Intel - including hybrid laptops
-- 🎨 **User Choice**: Select your preferred components interactively
-- ⚙️ **Modular Config**: Easy to customize and extend
-- 🎮 **ROG Support**: Optional ASUS ROG laptop support
-- 🎨 **Catppuccin Theme**: Beautiful Mocha color scheme by default
+- **Bloat-Free** — Only essential packages, no unnecessary software
+- **GPU Auto-Detection** — NVIDIA, AMD, Intel including hybrid laptops
+- **Interactive TUI** — Gradient-styled menus with live installation progress
+- **Modular Config** — Easy to customize and extend
+- **ROG Support** — Optional ASUS ROG laptop support
+- **Catppuccin Mocha** — Beautiful dark color scheme by default
 
-## 🧩 Components
+## Components
 
 | Component | Options |
 |-----------|---------|
-| **Display Manager** | SDDM, Ly, or None (TTY) |
+| **Display Manager** | SDDM, Ly (TUI), or None (TTY) |
 | **Status Bar** | Waybar or DankMaterialShell |
 | **Terminal** | Kitty |
 | **App Launcher** | Rofi |
 | **Notifications** | SwayNC |
-| **Wallpaper** | SWWW |
-| **Lock Screen** | Hyprlock |
+| **Wallpaper** | SWWW (smooth transitions) |
+| **Lock Screen** | Hyprlock (+ optional Wlogout) |
 | **Idle Manager** | Hypridle |
-| **File Manager** | Dolphin or Nemo |
+| **File Manager** | Dolphin |
 
-## 📦 Installation Process
+## Installation Process
 
 ### Step 1: Run the Installer
 
-The script presents an interactive menu to configure your installation:
+The script presents an interactive TUI with gradient-colored menus:
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Configuration Menu
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- 1. Display Manager: SDDM / Ly / None
- 2. Status Bar: Waybar / DankMaterialShell
- 3. File Manager: Dolphin / Nemo
- 4. Lockscreen: Hyprlock / Both (+ Wlogout)
- 5. Dotfiles: Default / Custom / Minimal
- 6. Waybar Style: Default / Hollow / Solid / Minimal / Flat / Compact / Floating
- 7. ROG Laptop Support: Yes / No
- 8. Fonts: Install recommended fonts
- 9. Bluetooth: Configure Bluetooth
-10. Zsh: Install Zsh + Starship
+    ███████╗  ██╗  ██╗  ██████╗
+    ██╔════╝  ██║  ██║  ██╔══██╗
+    ███████╗  ███████║  ██║  ██║
+    ╚════██║  ╚════██║  ██║  ██║
+    ███████║       ██║  ██████╔╝
+    ╚══════╝       ╚═╝  ╚═════╝
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Configure Installation
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Display Manager
+    1 › SDDM (Feature-rich)
+    2 › Ly (Minimal TUI)
+    3 › None (TTY Login)
+
+  Status Bar
+    1 › Waybar (Feature-rich)
+    2 › DankMaterialShell (Modern Desktop Shell)
+
+  Lockscreen
+    1 › Hyprlock
+    2 › Hyprlock + Wlogout
+
+  ...
 ```
 
 ### Step 2: Review & Confirm
 
-After configuration, you'll see a summary:
+After configuration, you'll see a summary of your choices before proceeding.
+
+### Step 3: Live Installation
+
+The installer shows live progress with status indicators:
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Configuration Summary:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Display Manager : sddm
-  Status Bar      : waybar
-  File Manager    : dolphin
-  Lockscreen      : hyprlock
-  Dotfiles        : default
-  Waybar Style    : default
-  ROG Support     : no
-  Fonts           : yes
-  Bluetooth       : yes
-  Zsh             : yes
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Installing
+
+  ● Setting up AUR helper
+  ● Installing base packages
+  ● Detecting GPU & drivers
+  ◌ Installing Hyprland
+    [i] Installing hyprland...
 ```
 
-### Step 3: Automatic Installation
-
-The script automatically:
-
-1. **Installs AUR Helper** (yay or paru)
-2. **Installs Base Packages** (audio, network, utilities)
-3. **Detects & Configures GPU** (NVIDIA/AMD/Intel)
-4. **Installs Hyprland & Core Apps** (compositor, terminal, launcher)
-5. **Installs Display Manager** (your choice)
-6. **Installs Status Bar** (your choice)
-7. **Installs File Manager** (your choice)
-8. **Installs Lock Screen** (hyprlock, optional wlogout)
-9. **Installs Fonts** (JetBrains Mono, Noto, etc.)
-10. **Configures Bluetooth** (if selected)
-11. **Sets up Zsh** (with Starship prompt)
-12. **Installs Themes** (GTK, Qt, cursors, icons)
-13. **Applies Dotfiles** (configs to ~/.config)
-14. **Sets up Wallpapers**
+Each step shows a live sub-line with the current operation. Green `●` = complete, dim `◌` = in progress.
 
 ### Step 4: Reboot
 
-After installation completes:
+```
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Installation Complete
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-```bash
-sudo reboot
+  Keybinds
+    Super + T       Terminal
+    Super + A       App Launcher
+    Super + E       File Manager
+    Super + Q       Close Window
+    Super + Esc     Lock
+    Super + /       All Keybinds
+
+  Reboot now? [y/N] ▸
 ```
 
-You'll be greeted with your selected display manager (or TTY login).
-Select **Hyprland** as your session and login!
-
-## ⌨️ Keybindings
+## Keybindings
 
 ### Applications
 | Key | Action |
@@ -166,12 +163,8 @@ Select **Hyprland** as your session and login!
 | Key | Action |
 |-----|--------|
 | `Super + H/J/K/L` | Focus (vim-style) |
-| `Super + Shift + H/J/K/L` | Move window (vim-style) |
-| `Super + Ctrl + H/J/K/L` | Resize window (vim-style) |
-| `Super + Arrow` | Focus direction |
-| `Super + Shift + Arrow` | Move window |
-| `Super + Ctrl + Arrow` | Resize window |
-| `Super + Alt + Arrow` | Swap window |
+| `Super + Shift + H/J/K/L` | Move window |
+| `Super + Ctrl + H/J/K/L` | Resize window |
 | `Super + 1-0` | Switch Workspace |
 | `Super + Shift + 1-0` | Move to Workspace |
 | `Super + S` | Scratchpad |
@@ -196,103 +189,103 @@ Select **Hyprland** as your session and login!
 ### Screenshots
 | Key | Action |
 |-----|--------|
-| `Print` | Screenshot (area → clipboard) |
-| `Shift + Print` | Screenshot (fullscreen → clipboard) |
-| `Super + Print` | Screenshot (area → save) |
-| `Super + Shift + Print` | Screenshot (area → edit) |
+| `Print` | Screenshot (area to clipboard) |
+| `Shift + Print` | Screenshot (fullscreen to clipboard) |
+| `Super + Print` | Screenshot (area to file) |
+| `Super + Shift + Print` | Screenshot (area to editor) |
 
-## 📁 Directory Structure
+## Directory Structure
 
 ```
 s4d_hyprland/
-├── install.sh                      # Main installation script
+├── install.sh                      # Main installer with TUI
 ├── README.md
 ├── Configs/                        # Default configuration files
-│   ├── hypr/                      # ── Hyprland (modular) ──
+│   ├── hypr/                      # Hyprland (modular)
 │   │   ├── hyprland.conf          # Main entry — sources all modules
 │   │   ├── monitors.conf          # Monitor layout (user-editable)
 │   │   ├── userprefs.conf         # Personal overrides
-│   │   ├── animations.conf        # Router → animations/<preset>.conf
+│   │   ├── animations.conf        # Router to animation presets
 │   │   ├── hyprlock.conf          # Lock screen config
 │   │   ├── hypridle.conf          # Idle manager config
 │   │   ├── animations/            # Swappable animation presets
-│   │   │   ├── smooth.conf        # Default — smooth & balanced
-│   │   │   ├── dynamic.conf       # Bouncy & playful
-│   │   │   ├── fast.conf          # Snappy & minimal delay
-│   │   │   ├── material.conf      # Material Design inspired
-│   │   │   ├── minimal.conf       # Subtle fades only
-│   │   │   └── disabled.conf      # No animations
-│   │   ├── colors/                # Color palettes
+│   │   │   ├── smooth.conf
+│   │   │   ├── dynamic.conf
+│   │   │   ├── fast.conf
+│   │   │   ├── material.conf
+│   │   │   ├── minimal.conf
+│   │   │   └── disabled.conf
+│   │   ├── colors/
 │   │   │   ├── catppuccin-mocha.conf
 │   │   │   └── catppuccin-latte.conf
-│   │   ├── settings/              # System settings
-│   │   │   ├── env.conf           # Environment variables
-│   │   │   ├── input.conf         # Keyboard, mouse, touchpad
-│   │   │   ├── general.conf       # Gaps, borders, layout
-│   │   │   ├── misc.conf          # VFR, VRR, cursor
-│   │   │   ├── nvidia.conf        # NVIDIA-specific env vars
-│   │   │   ├── amd.conf           # AMD-specific env vars
-│   │   │   ├── intel.conf         # Intel-specific env vars
-│   │   │   └── rog.conf           # ASUS ROG laptop extras
+│   │   ├── settings/
+│   │   │   ├── env.conf
+│   │   │   ├── input.conf
+│   │   │   ├── general.conf
+│   │   │   ├── misc.conf
+│   │   │   ├── nvidia.conf
+│   │   │   ├── amd.conf
+│   │   │   ├── intel.conf
+│   │   │   └── rog.conf
 │   │   ├── themes/
-│   │   │   └── decoration.conf    # Rounding, blur, shadows, opacity
+│   │   │   └── decoration.conf
 │   │   ├── keybinds/
-│   │   │   ├── keybinds.conf      # All keybindings (bindd)
-│   │   │   └── windowrules.conf   # Float, opacity, workspace rules
+│   │   │   ├── keybinds.conf
+│   │   │   └── windowrules.conf
 │   │   ├── shaders/
 │   │   │   ├── blue-light-filter.glsl
 │   │   │   └── vibrance.glsl
-│   │   └── scripts/               # Utility scripts
-│   │       ├── wallpaper.sh       # Set / random / restore wallpaper
-│   │       ├── screenshot.sh      # Full / area / active window
-│   │       ├── volume.sh          # Volume ± with notification
-│   │       ├── brightness.sh      # Brightness ± with notification
-│   │       ├── touchpad.sh        # Toggle touchpad on/off
-│   │       ├── colorpicker.sh     # Pick color → clipboard
-│   │       ├── s4d-theme.sh       # Switch animations / colors
-│   │       ├── waybar-style.sh    # Waybar style/layout switcher
-│   │       └── keybinds-help.sh   # Display keybindings via rofi
-│   ├── waybar/                    # ── Status Bar ──
-│   │   ├── config.jsonc           # Pill-style grouped modules
-│   │   ├── style.css              # Transparent bar + Catppuccin
-│   │   ├── mocha.css              # Color definitions
-│   │   ├── styles/                # Swappable bar styles
-│   │   │   ├── default.css        # Pill Groups (default)
-│   │   │   ├── hollow.css         # Floating Pods with borders
-│   │   │   ├── solid.css          # Classic solid bar
-│   │   │   ├── minimal.css        # Just text, no frills
-│   │   │   ├── flat.css           # Bottom-line accents
-│   │   │   ├── compact.css        # Dense, space-efficient
-│   │   │   └── floating.css       # Island bar with shadow
-│   │   └── layouts/               # Alternative bar layouts
-│   │       ├── full.jsonc         # All modules
-│   │       ├── minimal.jsonc      # Center-only (clock + battery)
-│   │       └── sysmon.jsonc       # System monitor emphasis
-│   ├── rofi/                      # ── App Launcher ──
+│   │   └── scripts/
+│   │       ├── wallpaper.sh
+│   │       ├── screenshot.sh
+│   │       ├── volume.sh
+│   │       ├── brightness.sh
+│   │       ├── touchpad.sh
+│   │       ├── colorpicker.sh
+│   │       ├── s4d-theme.sh
+│   │       ├── waybar-style.sh
+│   │       └── keybinds-help.sh
+│   ├── waybar/
+│   │   ├── config.jsonc
+│   │   ├── style.css
+│   │   ├── mocha.css
+│   │   ├── styles/
+│   │   │   ├── default.css
+│   │   │   ├── hollow.css
+│   │   │   ├── solid.css
+│   │   │   ├── minimal.css
+│   │   │   ├── flat.css
+│   │   │   ├── compact.css
+│   │   │   └── floating.css
+│   │   └── layouts/
+│   │       ├── full.jsonc
+│   │       ├── minimal.jsonc
+│   │       └── sysmon.jsonc
+│   ├── rofi/
 │   │   ├── config.rasi
 │   │   ├── catppuccin-mocha.rasi
 │   │   └── scripts/power-menu.sh
-│   ├── swaync/                    # ── Notifications ──
+│   ├── swaync/
 │   │   ├── config.json
 │   │   └── style.css
-│   ├── kitty/kitty.conf           # ── Terminal ──
-│   ├── wlogout/                   # ── Power Menu ──
+│   ├── kitty/kitty.conf
+│   ├── wlogout/
 │   │   ├── layout
 │   │   └── style.css
-│   ├── fastfetch/config.jsonc     # ── System Info ──
-│   ├── starship/starship.toml     # ── Prompt ──
-│   ├── zsh/                       # ── Shell ──
+│   ├── fastfetch/config.jsonc
+│   ├── starship/starship.toml
+│   ├── zsh/
 │   │   ├── .zshrc
 │   │   └── .zprofile
-│   ├── gtk-3.0/settings.ini       # ── GTK Theme ──
+│   ├── gtk-3.0/settings.ini
 │   ├── gtk-4.0/settings.ini
-│   ├── qt5ct/qt5ct.conf           # ── Qt Theme ──
+│   ├── qt5ct/qt5ct.conf
 │   └── qt6ct/qt6ct.conf
-├── Packages/                      # Package lists
+├── Packages/
 │   ├── base.lst
 │   ├── hyprland.lst
 │   └── fonts.lst
-└── Scripts/                       # Installation scripts
+└── Scripts/
     ├── functions.sh
     ├── gpu-detect.sh
     ├── dotfiles-apply.sh
@@ -303,7 +296,6 @@ s4d_hyprland/
     ├── waybar-install.sh
     ├── dankms-install.sh
     ├── dolphin-install.sh
-    ├── nemo-install.sh
     ├── fonts-install.sh
     ├── bluetooth-install.sh
     ├── rog-install.sh
@@ -311,7 +303,7 @@ s4d_hyprland/
     └── post-install.sh
 ```
 
-## 🎨 s4d-theme — Theme Manager CLI
+## s4d-theme — Theme Manager CLI
 
 Switch animation presets, color palettes, and wallpapers on the fly:
 
@@ -331,7 +323,7 @@ s4d-theme wallpaper set ~/Pictures/wall.png
 s4d-theme status
 ```
 
-## 🎨 Waybar Style Switcher
+## Waybar Style Switcher
 
 Change your status bar appearance on the fly with `Super + W`:
 
@@ -355,16 +347,16 @@ waybar-style.sh layout sysmon
 **Available styles:** default, hollow, solid, minimal, flat, compact, floating
 **Available layouts:** default (full), minimal, sysmon
 
-## 🖥️ GPU Support
+## GPU Support
 
 The installer automatically detects and configures:
 
-- **NVIDIA**: Installs proprietary drivers, configures mkinitcpio, GRUB
-- **AMD**: Installs Mesa, Vulkan, and VA-API drivers
-- **Intel**: Installs Mesa and Intel Media driver
-- **Hybrid**: Supports laptops with multiple GPUs
+- **NVIDIA** — Installs proprietary drivers, configures mkinitcpio, GRUB
+- **AMD** — Installs Mesa, Vulkan, and VA-API drivers
+- **Intel** — Installs Mesa and Intel Media driver
+- **Hybrid** — Supports laptops with multiple GPUs
 
-## 🎨 Custom Dotfiles
+## Custom Dotfiles
 
 You can use your own dotfiles:
 
@@ -379,7 +371,7 @@ Your repository should have one of these structures:
 - `config/` folder with configs
 - Individual folders (hypr, kitty, rofi, etc.)
 
-## 🎨 Theme
+## Theme
 
 The default theme uses **Catppuccin Mocha** color scheme:
 
@@ -387,14 +379,14 @@ The default theme uses **Catppuccin Mocha** color scheme:
 - Text: `#cdd6f4`
 - Accent: `#cba6f7` (Mauve)
 
-## 📝 Logs
+## Logs
 
 Installation logs are saved to:
 ```
 ./Logs/install-YYYYMMDD-HHMMSS.log
 ```
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Hyprland doesn't start
 - Check GPU drivers are installed correctly
@@ -411,7 +403,17 @@ Installation logs are saved to:
   systemctl --user status pipewire pipewire-pulse wireplumber
   ```
 
-## 🙏 Credits
+### Ly display manager not starting
+- Verify the service is enabled: `systemctl is-enabled ly@tty2.service`
+- Check getty is masked: `systemctl is-enabled getty@tty2.service`
+- Ensure graphical target: `systemctl get-default` should show `graphical.target`
+
+### Dolphin looks wrong (black text, broken theme)
+- Ensure Kvantum is installed: `pacman -Q kvantum`
+- Check qt5ct style is set: open `qt5ct` and verify style is `kvantum-dark`
+- Re-run theme setup: `~/.config/hypr/scripts/s4d-theme.sh`
+
+## Credits
 
 - [Hyprland](https://hyprland.org/) — Wayland compositor
 - [Catppuccin](https://github.com/catppuccin) — Color scheme
@@ -422,10 +424,10 @@ Installation logs are saved to:
 - [omarchy](https://github.com/dhh/omarchy) — Clean theme system & starship prompt
 - [DankMaterialShell](https://github.com/user/DankMaterialShell) — Desktop shell alternative
 
-## 📄 License
+## License
 
 MIT License - feel free to use and modify!
 
 ---
 
-Made with 💜 for the Arch + Hyprland community
+Made with love for the Arch + Hyprland community

@@ -115,11 +115,35 @@ install_dms_source() {
 #=============================================================================
 setup_dms_service() {
     log "${INFO} Setting up DMS systemd user service..."
-    
+
     mkdir -p "$HOME/.config/systemd/user"
-    
-    # Create DMS service file
-    cat > "$HOME/.config/systemd/user/dms.service" << 'EOF'
+
+    # Detect actual DMS binary path
+    local dms_bin=""
+    if [[ -x /usr/bin/dms ]]; then
+        dms_bin="/usr/bin/dms"
+    elif [[ -x /usr/local/bin/dms ]]; then
+        dms_bin="/usr/local/bin/dms"
+    elif command -v dms &>/dev/null; then
+        dms_bin="$(command -v dms)"
+    else
+        log "${WARN} DMS binary not found — cannot create service"
+        return 1
+    fi
+
+    log "${INFO} DMS binary found at: $dms_bin"
+
+    # Check if AUR package already provides a service file
+    if [[ -f /usr/lib/systemd/user/dms.service ]]; then
+        log "${INFO} System-provided DMS service file found, using it"
+        systemctl --user daemon-reload
+        systemctl --user enable dms.service 2>/dev/null || true
+        log "${OK} DMS systemd service enabled (system-provided)"
+        return 0
+    fi
+
+    # Create DMS service file with detected binary path
+    cat > "$HOME/.config/systemd/user/dms.service" << EOF
 [Unit]
 Description=Dank Material Shell (DMS)
 PartOf=graphical-session.target
@@ -127,7 +151,7 @@ After=graphical-session.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/dms run
+ExecStart=${dms_bin} run
 ExecReload=/usr/bin/pkill -USR1 -x dms
 Restart=on-failure
 RestartSec=2
@@ -137,16 +161,16 @@ TimeoutStopSec=10
 WantedBy=graphical-session.target
 EOF
 
-    # Adjust path if installed to /usr/local/bin
-    if [[ -x /usr/local/bin/dms ]] && [[ ! -x /usr/bin/dms ]]; then
-        sed -i 's|/usr/bin/dms|/usr/local/bin/dms|g' "$HOME/.config/systemd/user/dms.service"
-    fi
-    
     # Reload and enable the service
     systemctl --user daemon-reload
-    systemctl --user enable dms.service
-    
-    log "${OK} DMS systemd service enabled"
+    systemctl --user enable dms.service 2>/dev/null || true
+
+    # Verify service is enabled
+    if systemctl --user is-enabled dms.service &>/dev/null; then
+        log "${OK} DMS systemd service enabled"
+    else
+        log "${WARN} DMS service could not be enabled — try: systemctl --user enable dms.service"
+    fi
 }
 
 #=============================================================================
@@ -162,9 +186,20 @@ install_dms_dependencies() {
     log "${INFO} Installing DMS runtime dependencies..."
 
     # Quickshell (required - DMS UI engine)
+    # install_pkg always returns 0, so use command -v / pkg_installed to check success
     if ! pkg_installed "quickshell-git" && ! pkg_installed "quickshell"; then
         log "${INFO} Installing quickshell..."
-        install_pkg "quickshell" || install_pkg "quickshell-git"
+        install_pkg "quickshell"
+        # Check if it actually installed; if not, try git variant
+        if ! pkg_installed "quickshell"; then
+            install_pkg "quickshell-git"
+        fi
+        # Final verification
+        if pkg_installed "quickshell" || pkg_installed "quickshell-git"; then
+            log "${OK} quickshell installed"
+        else
+            log "${WARN} quickshell could not be installed — DMS may not function properly"
+        fi
     else
         log "${OK} quickshell already installed"
     fi
@@ -172,12 +207,41 @@ install_dms_dependencies() {
     # Matugen (required - dynamic color/theme generation from wallpaper)
     if ! command -v matugen &>/dev/null; then
         log "${INFO} Installing matugen..."
-        install_pkg "matugen-bin" || install_pkg "matugen"
+        install_pkg "matugen-bin"
+        # Check if it actually installed; if not, try non-bin variant
+        if ! command -v matugen &>/dev/null; then
+            install_pkg "matugen"
+        fi
+        # Still not found? Try cargo install as last resort
+        if ! command -v matugen &>/dev/null; then
+            if command -v cargo &>/dev/null; then
+                log "${INFO} Trying cargo install matugen..."
+                cargo install matugen &>>"$LOG_FILE" || true
+            elif command -v rustup &>/dev/null; then
+                log "${INFO} Setting up rust toolchain for matugen..."
+                rustup default stable &>>"$LOG_FILE" || true
+                cargo install matugen &>>"$LOG_FILE" || true
+            else
+                # Install rust toolchain and try cargo
+                log "${INFO} Installing rust toolchain for matugen..."
+                install_pkg "rustup"
+                if command -v rustup &>/dev/null; then
+                    rustup default stable &>>"$LOG_FILE" || true
+                    cargo install matugen &>>"$LOG_FILE" || true
+                fi
+            fi
+        fi
+        # Final verification
+        if command -v matugen &>/dev/null; then
+            log "${OK} matugen installed"
+        else
+            log "${WARN} matugen could not be installed — DMS theme generation will not work"
+        fi
     else
         log "${OK} matugen already installed"
     fi
 
-    # Cava (audio visualizer widget in DMS panel)
+    # Cava (audio visualizer widget in DMS panel - optional)
     if ! command -v cava &>/dev/null; then
         log "${INFO} Installing cava..."
         install_pkg "cava"
@@ -189,14 +253,12 @@ install_dms_dependencies() {
     if ! pkg_installed "power-profiles-daemon"; then
         log "${INFO} Installing power-profiles-daemon..."
         install_pkg "power-profiles-daemon"
-        # Enable the service
-        sudo systemctl enable power-profiles-daemon.service 2>/dev/null || true
-        sudo systemctl start power-profiles-daemon.service 2>/dev/null || true
     else
         log "${OK} power-profiles-daemon already installed"
-        # Ensure service is enabled even if package was already present
-        sudo systemctl enable power-profiles-daemon.service 2>/dev/null || true
     fi
+    # Enable the service regardless (may already be installed but not running)
+    sudo systemctl enable power-profiles-daemon.service 2>/dev/null || true
+    sudo systemctl start power-profiles-daemon.service 2>/dev/null || true
 
     log "${OK} DMS runtime dependencies installed"
 }

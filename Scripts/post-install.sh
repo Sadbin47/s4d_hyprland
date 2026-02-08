@@ -15,8 +15,7 @@ mkdir -p "$HOME/.local/bin"
 mkdir -p "$HOME/.local/share"
 
 # XDG defaults
-xdg-mime default org.kde.dolphin.desktop inode/directory 2>/dev/null || \
-xdg-mime default nemo.desktop inode/directory 2>/dev/null || true
+xdg-mime default org.kde.dolphin.desktop inode/directory 2>/dev/null || true
 xdg-mime default firefox.desktop x-scheme-handler/http 2>/dev/null || true
 xdg-mime default firefox.desktop x-scheme-handler/https 2>/dev/null || true
 
