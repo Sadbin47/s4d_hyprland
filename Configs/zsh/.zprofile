@@ -8,8 +8,8 @@ export XDG_STATE_HOME="$HOME/.local/state"
 export XDG_CACHE_HOME="$HOME/.cache"
 
 # ── Default Programs ──
-export EDITOR="nvim"
-export VISUAL="nvim"
+export EDITOR="nano"
+export VISUAL="nano"
 export TERMINAL="kitty"
 export BROWSER="firefox"
 

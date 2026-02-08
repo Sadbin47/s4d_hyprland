@@ -64,13 +64,9 @@ install_dms_source() {
         "bluez-utils"
     )
     
-    # Install quickshell (required runtime dependency)
+    # Install quickshell (required runtime dependency — prefer git for DMS compat)
     if ! pkg_installed "quickshell-git" && ! pkg_installed "quickshell"; then
-        if yay -Si quickshell &>/dev/null 2>&1; then
-            DMS_DEPS+=("quickshell")
-        else
-            DMS_DEPS+=("quickshell-git")
-        fi
+        DMS_DEPS+=("quickshell-git")
     fi
     
     log "${INFO} Installing build dependencies..."
@@ -186,19 +182,35 @@ install_dms_dependencies() {
     log "${INFO} Installing DMS runtime dependencies..."
 
     # Quickshell (required - DMS UI engine)
-    # install_pkg always returns 0, so use command -v / pkg_installed to check success
+    # DMS requires quickshell >= 0.3; the Arch 'quickshell' package (0.2.1) is too old.
+    # Always prefer quickshell-git which builds the latest revision.
     if ! pkg_installed "quickshell-git" && ! pkg_installed "quickshell"; then
-        log "${INFO} Installing quickshell..."
-        install_pkg "quickshell"
-        # Check if it actually installed; if not, try git variant
-        if ! pkg_installed "quickshell"; then
-            install_pkg "quickshell-git"
-        fi
+        log "${INFO} Installing quickshell-git (DMS needs >= 0.3)..."
+        install_pkg "quickshell-git"
         # Final verification
-        if pkg_installed "quickshell" || pkg_installed "quickshell-git"; then
-            log "${OK} quickshell installed"
+        if pkg_installed "quickshell-git"; then
+            log "${OK} quickshell-git installed"
         else
-            log "${WARN} quickshell could not be installed — DMS may not function properly"
+            log "${WARN} quickshell-git failed, trying quickshell as fallback..."
+            install_pkg "quickshell"
+            if pkg_installed "quickshell"; then
+                log "${WARN} quickshell 0.2.1 installed — DMS may show version warnings. Consider building quickshell-git manually."
+            else
+                log "${WARN} quickshell could not be installed — DMS may not function properly"
+            fi
+        fi
+    elif pkg_installed "quickshell" && ! pkg_installed "quickshell-git"; then
+        # Upgrade from quickshell (0.2.1) to quickshell-git
+        log "${WARN} quickshell 0.2.1 detected — upgrading to quickshell-git for DMS compatibility..."
+        # Remove old quickshell first, then install git version
+        sudo pacman -Rdd --noconfirm quickshell 2>/dev/null || true
+        install_pkg "quickshell-git"
+        if pkg_installed "quickshell-git"; then
+            log "${OK} Upgraded to quickshell-git"
+        else
+            # Re-install old one if git version fails
+            install_pkg "quickshell"
+            log "${WARN} Could not upgrade quickshell — DMS may show version warnings"
         fi
     else
         log "${OK} quickshell already installed"

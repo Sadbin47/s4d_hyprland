@@ -445,6 +445,12 @@ configure_status_bar() {
         sed -i 's|^exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1.*#POLKIT_LINE|# exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 #POLKIT_LINE|' "$hypr_conf"
         # Uncomment DMS line
         sed -i 's|^# *exec-once = dms run.*#BAR_DMS|exec-once = dms run #BAR_DMS|' "$hypr_conf"
+        # Uncomment DMS service line
+        sed -i 's|^# *exec-once = systemctl --user start dms.service.*#DMS_SERVICE|exec-once = systemctl --user start dms.service #DMS_SERVICE|' "$hypr_conf"
+        # Enable and start DMS systemd user service
+        systemctl --user daemon-reload 2>/dev/null || true
+        systemctl --user enable dms.service 2>/dev/null || true
+        systemctl --user start dms.service 2>/dev/null || true
         log "${OK} Configured DankMaterialShell as status bar (disabled waybar, swaync, hypridle, polkit)"
     else
         # Ensure waybar, swaync, hypridle, polkit are active
@@ -454,6 +460,8 @@ configure_status_bar() {
         sed -i 's|^# *exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1.*#POLKIT_LINE|exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 #POLKIT_LINE|' "$hypr_conf"
         # Comment out DMS line
         sed -i 's|^exec-once = dms run.*#BAR_DMS|# exec-once = dms run #BAR_DMS|' "$hypr_conf"
+        # Comment out DMS service line
+        sed -i 's|^exec-once = systemctl --user start dms.service.*#DMS_SERVICE|# exec-once = systemctl --user start dms.service #DMS_SERVICE|' "$hypr_conf"
         log "${OK} Configured Waybar as status bar"
     fi
 }

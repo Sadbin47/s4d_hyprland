@@ -108,7 +108,6 @@ alias gco='git checkout'
 # Quick tools
 alias cat='bat --style=plain --paging=never 2>/dev/null || cat'
 alias ff='fastfetch'
-alias nv='nvim'
 alias k='kitty'
 alias cls='clear'
 
@@ -160,8 +159,7 @@ else
     PROMPT='%F{blue}%~%f ${vcs_info_msg_0_}%F{green}❯%f '
 fi
 
-# ── Fastfetch on first terminal ──
-if [[ -z "$S4D_FETCHED" ]] && command -v fastfetch &>/dev/null; then
+# ── Fastfetch on terminal open ──
+if [[ $- == *i* ]] && command -v fastfetch &>/dev/null; then
     fastfetch
-    export S4D_FETCHED=1
 fi
