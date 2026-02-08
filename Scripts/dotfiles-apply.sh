@@ -315,13 +315,13 @@ bindm = $mainMod, mouse:272, movewindow
 bindm = $mainMod, mouse:273, resizewindow
 
 # Window rules
-windowrule = float, class:^(pavucontrol)$
-windowrule = float, class:^(blueman-manager)$
-windowrule = float, class:^(nm-connection-editor)$
-windowrule = float, title:^(Picture-in-Picture)$
-windowrule = float, title:^(Open File)$
-windowrule = float, title:^(Save File)$
-windowrule = suppress maximize, class:.*
+windowrule = float, match:class ^(pavucontrol)$
+windowrule = float, match:class ^(blueman-manager)$
+windowrule = float, match:class ^(nm-connection-editor)$
+windowrule = float, match:title ^(Picture-in-Picture)$
+windowrule = float, match:title ^(Open File)$
+windowrule = float, match:title ^(Save File)$
+windowrule = suppress_event maximize, match:class .*
 
 # GPU configs (auto-enabled by gpu-detect.sh)
 # source = ~/.config/hypr/settings/nvidia.conf
@@ -437,17 +437,20 @@ configure_status_bar() {
     [[ ! -f "$hypr_conf" ]] && return
 
     if [[ "$STATUS_BAR" == "dankms" ]]; then
-        # Replace waybar with dms
-        sed -i 's/^exec-once = waybar/#exec-once = waybar/' "$hypr_conf"
-        sed -i 's/^exec-once = swaync/#exec-once = swaync/' "$hypr_conf"
-
-        if ! grep -q "exec-once = dms run" "$hypr_conf"; then
-            echo "" >> "$hypr_conf"
-            echo "exec-once = dms run" >> "$hypr_conf"
-        fi
+        # Comment out waybar and swaync lines (using markers)
+        sed -i 's|^exec-once = waybar.*#BAR_WAYBAR|# exec-once = waybar #BAR_WAYBAR|' "$hypr_conf"
+        sed -i 's|^exec-once = swaync.*#SWAYNC_LINE|# exec-once = swaync #SWAYNC_LINE|' "$hypr_conf"
+        # Uncomment DMS line
+        sed -i 's|^# *exec-once = dms run.*#BAR_DMS|exec-once = dms run #BAR_DMS|' "$hypr_conf"
         log "${OK} Configured DankMaterialShell as status bar"
+    else
+        # Ensure waybar and swaync are active
+        sed -i 's|^# *exec-once = waybar.*#BAR_WAYBAR|exec-once = waybar #BAR_WAYBAR|' "$hypr_conf"
+        sed -i 's|^# *exec-once = swaync.*#SWAYNC_LINE|exec-once = swaync #SWAYNC_LINE|' "$hypr_conf"
+        # Comment out DMS line
+        sed -i 's|^exec-once = dms run.*#BAR_DMS|# exec-once = dms run #BAR_DMS|' "$hypr_conf"
+        log "${OK} Configured Waybar as status bar"
     fi
-    # Default: waybar is already in the config
 }
 
 #=============================================================================
