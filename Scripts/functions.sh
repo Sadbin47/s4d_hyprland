@@ -6,6 +6,7 @@
 # Guard: only load once
 [[ -n "${_S4D_FUNCTIONS_LOADED:-}" ]] && return 0
 _S4D_FUNCTIONS_LOADED=1
+S4D_QUIET=false
 
 #=============================================================================
 # COLORS & STATUS ICONS
@@ -36,14 +37,23 @@ FAILED_PACKAGES=()
 # LOGGING
 #=============================================================================
 log() {
-    echo -e "$1" | tee -a "$LOG_FILE" 2>/dev/null
+    if [[ "$S4D_QUIET" == true ]]; then
+        echo -e "$1" >> "$LOG_FILE" 2>/dev/null
+    else
+        echo -e "$1" | tee -a "$LOG_FILE" 2>/dev/null
+    fi
 }
 
 log_section() {
-    echo "" | tee -a "$LOG_FILE" 2>/dev/null
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}" | tee -a "$LOG_FILE" 2>/dev/null
-    echo -e "${BOLD}${WHITE}  $1${NC}" | tee -a "$LOG_FILE" 2>/dev/null
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}" | tee -a "$LOG_FILE" 2>/dev/null
+    if [[ "$S4D_QUIET" == true ]]; then
+        echo "" >> "$LOG_FILE" 2>/dev/null
+        echo -e "━━ $1 ━━" >> "$LOG_FILE" 2>/dev/null
+    else
+        echo "" | tee -a "$LOG_FILE" 2>/dev/null
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}" | tee -a "$LOG_FILE" 2>/dev/null
+        echo -e "${BOLD}${WHITE}  $1${NC}" | tee -a "$LOG_FILE" 2>/dev/null
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}" | tee -a "$LOG_FILE" 2>/dev/null
+    fi
 }
 
 #=============================================================================

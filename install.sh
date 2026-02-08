@@ -1,54 +1,8 @@
 #!/bin/bash
-#╔═══════════════════════════════════════════════════════════════════════════════╗
-#║                        s4d Hyprland Installation Script                       ║
-#║                   Minimal, Bloat-Free Hyprland Setup for Arch                 ║
-#║                              Author: s4d                                       ║
-#╚═══════════════════════════════════════════════════════════════════════════════╝
-
 #=============================================================================
-# CURL/REMOTE EXECUTION DETECTION
+# s4d Hyprland — Installation Wizard
+# Minimal, Bloat-Free Hyprland Setup for Arch Linux
 #=============================================================================
-SCRIPT_PATH="${BASH_SOURCE[0]}"
-IS_REMOTE=false
-
-if [[ ! -t 0 && -z "$SCRIPT_PATH" ]]; then
-    IS_REMOTE=true
-elif [[ "$SCRIPT_PATH" == /dev/* ]] || [[ "$SCRIPT_PATH" == /proc/* ]]; then
-    IS_REMOTE=true
-elif [[ -n "$SCRIPT_PATH" ]] && [[ ! -d "$(dirname "$SCRIPT_PATH")/Scripts" ]]; then
-    IS_REMOTE=true
-fi
-
-if [[ "$IS_REMOTE" == true ]]; then
-    echo ""
-    echo "════════════════════════════════════════════════════════════"
-    echo "  s4d Hyprland — Remote Installation Detected"
-    echo "════════════════════════════════════════════════════════════"
-    echo ""
-
-    if ! command -v git &>/dev/null; then
-        echo "[i] Installing git..."
-        sudo pacman -S --noconfirm git
-    fi
-
-    INSTALL_DIR="$HOME/s4d_hyprland"
-    if [[ -d "$INSTALL_DIR" ]]; then
-        echo "[i] Updating existing installation..."
-        cd "$INSTALL_DIR"
-        git pull --ff-only 2>/dev/null || {
-            cd "$HOME"
-            rm -rf "$INSTALL_DIR"
-            git clone https://github.com/Sadbin47/s4d_hyprland.git "$INSTALL_DIR"
-        }
-    else
-        git clone https://github.com/Sadbin47/s4d_hyprland.git "$INSTALL_DIR"
-    fi
-
-    cd "$INSTALL_DIR"
-    chmod +x install.sh
-    exec ./install.sh
-    exit 0
-fi
 
 # NOTE: No "set -e" — we handle errors gracefully per-command
 
@@ -70,6 +24,133 @@ export LOG_FILE="$LOG_DIR/install-$(date +%Y%m%d-%H%M%S).log"
 source "$SCRIPTS_DIR/functions.sh"
 
 #=============================================================================
+# TUI — GRADIENT COLORS
+#=============================================================================
+GRAD1='\033[38;2;0;255;255m'
+GRAD2='\033[38;2;0;210;255m'
+GRAD3='\033[38;2;0;170;255m'
+GRAD4='\033[38;2;60;130;255m'
+GRAD5='\033[38;2;120;90;255m'
+GRAD6='\033[38;2;170;60;255m'
+DIM='\033[2m'
+BWHITE='\033[1;37m'
+
+#=============================================================================
+# TUI — HEADER
+#=============================================================================
+show_header() {
+    clear
+    echo ""
+    echo -e "${GRAD1}    ███████╗  ██╗  ██╗  ██████╗ ${NC}"
+    echo -e "${GRAD2}    ██╔════╝  ██║  ██║  ██╔══██╗${NC}"
+    echo -e "${GRAD3}    ███████╗  ███████║  ██║  ██║${NC}"
+    echo -e "${GRAD4}    ╚════██║  ╚════██║  ██║  ██║${NC}"
+    echo -e "${GRAD5}    ███████║       ██║  ██████╔╝${NC}"
+    echo -e "${GRAD6}    ╚══════╝       ╚═╝  ╚═════╝ ${NC}"
+    echo ""
+    echo -e "    ${DIM}Minimal Hyprland  ·  Arch Linux${NC}"
+    echo ""
+}
+
+#=============================================================================
+# TUI — MENU HELPERS
+#=============================================================================
+CHOICE=""
+
+ask_choice() {
+    local prompt="$1"
+    shift
+    local options=("$@")
+    local count=${#options[@]}
+
+    echo -e "\n  ${BWHITE}${prompt}${NC}\n"
+
+    for i in "${!options[@]}"; do
+        local num=$((i + 1))
+        echo -e "    ${GRAD3}${num}${NC} ${DIM}›${NC} ${options[$i]}"
+    done
+
+    echo ""
+    while true; do
+        echo -en "    ${GRAD4}▸${NC} "
+        read -r choice
+        if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= count )); then
+            CHOICE=$choice
+            return 0
+        fi
+        echo -e "      ${DIM}Enter 1-${count}${NC}"
+    done
+}
+
+ask_yn() {
+    local prompt="$1"
+    local default="${2:-n}"
+    local hint="y/N"
+    [[ "$default" == "y" ]] && hint="Y/n"
+
+    echo ""
+    echo -en "  ${BWHITE}${prompt}${NC} ${DIM}[${hint}]${NC} ${GRAD4}▸${NC} "
+    read -r response
+    response=${response:-$default}
+    [[ "$response" =~ ^[Yy] ]]
+}
+
+#=============================================================================
+# TUI — SPINNER & STEP RUNNER
+#=============================================================================
+_SPIN_PID=""
+
+_spin() {
+    local msg="$1"
+    local chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    local i=0
+    tput civis 2>/dev/null
+    while true; do
+        printf "\r  \033[0;36m%s\033[0m %-55s" "${chars:i%${#chars}:1}" "$msg"
+        i=$((i + 1))
+        sleep 0.08
+    done
+}
+
+run_step() {
+    local msg="$1"
+    shift
+
+    S4D_QUIET=true
+
+    _spin "$msg" &
+    _SPIN_PID=$!
+
+    "$@" >> "$LOG_FILE" 2>&1
+    local ret=$?
+
+    kill "$_SPIN_PID" 2>/dev/null
+    wait "$_SPIN_PID" 2>/dev/null
+    _SPIN_PID=""
+
+    tput cnorm 2>/dev/null
+    S4D_QUIET=false
+
+    if [[ $ret -eq 0 ]]; then
+        printf "\r  \033[0;32m●\033[0m %-55s\n" "$msg"
+    else
+        printf "\r  \033[0;33m●\033[0m %-55s\n" "$msg"
+    fi
+
+    return 0
+}
+
+#=============================================================================
+# CLEANUP TRAP
+#=============================================================================
+cleanup() {
+    tput cnorm 2>/dev/null
+    [[ -n "${SUDO_KEEPALIVE_PID:-}" ]] && kill "$SUDO_KEEPALIVE_PID" 2>/dev/null
+    [[ -n "${_SPIN_PID:-}" ]] && kill "$_SPIN_PID" 2>/dev/null
+}
+trap cleanup EXIT INT TERM
+
+#=============================================================================
 # USER SELECTIONS
 #=============================================================================
 declare -A USER_CHOICES
@@ -87,170 +168,114 @@ USER_CHOICES=(
 )
 
 #=============================================================================
-# MENU
+# CONFIGURATION MENU
 #=============================================================================
-show_banner() {
-    clear
-    echo -e "${CYAN}"
-    cat << "EOF"
-    ╔═══════════════════════════════════════════════════════════════╗
-    ║     _____  ___ _____    _   _                  _              ║
-    ║    /  ___|/ _ \|  _  \ | | | |                | |             ║
-    ║    \ `--.| | | | | | | | |_| |_   _ _ __  _ __| | __ _ _ __   ║
-    ║     `--. \ | | | | | | |  _  | | | | '_ \| '__| |/ _` | '_ \  ║
-    ║    /\__/ / |_| | |/ /  | | | | |_| | |_) | |  | | (_| | | | | ║
-    ║    \____/ \___/|___/   \_| |_/\__, | .__/|_|  |_|\__,_|_| |_| ║
-    ║                                __/ | |                        ║
-    ║                               |___/|_|   Minimal & Clean      ║
-    ╚═══════════════════════════════════════════════════════════════╝
-EOF
-    echo -e "${NC}"
-    echo -e "${WHITE}    Bloat-Free Hyprland Installation for Arch Linux${NC}"
-    echo ""
-}
-
 configuration_menu() {
-    show_banner
-    log_section "Configuration Menu"
+    show_header
 
-    echo -e "${INFO} Configure your installation:\n"
+    echo -e "  ${GRAD1}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "  ${BWHITE}Configure Installation${NC}"
+    echo -e "  ${GRAD1}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
     # 1. Display Manager
-    echo -e "${BOLD}1. Display Manager:${NC}"
-    PS3="   Select: "
-    select dm in "SDDM (Recommended)" "Ly (Minimal TUI)" "None (TTY Login)"; do
-        case $REPLY in
-            1) USER_CHOICES[display_manager]="sddm"; break;;
-            2) USER_CHOICES[display_manager]="ly"; break;;
-            3) USER_CHOICES[display_manager]="none"; break;;
-            *) echo "   Enter 1, 2, or 3";;
-        esac
-    done
-    log "${OK} Display Manager: ${USER_CHOICES[display_manager]}"
+    ask_choice "Display Manager" \
+        "SDDM ${DIM}(Feature-rich)${NC}" \
+        "Ly ${DIM}(Minimal TUI)${NC}" \
+        "None ${DIM}(TTY Login)${NC}"
+    case $CHOICE in
+        1) USER_CHOICES[display_manager]="sddm" ;;
+        2) USER_CHOICES[display_manager]="ly" ;;
+        3) USER_CHOICES[display_manager]="none" ;;
+    esac
 
     # 2. Status Bar
-    echo -e "\n${BOLD}2. Status Bar:${NC}"
-    PS3="   Select: "
-    select bar in "Waybar (Feature-rich)" "DankMaterialShell (Modern Desktop-like)"; do
-        case $REPLY in
-            1) USER_CHOICES[status_bar]="waybar"; break;;
-            2) USER_CHOICES[status_bar]="dankms"; break;;
-            *) echo "   Enter 1 or 2";;
-        esac
-    done
-    log "${OK} Status Bar: ${USER_CHOICES[status_bar]}"
+    ask_choice "Status Bar" \
+        "Waybar ${DIM}(Feature-rich)${NC}" \
+        "DankMaterialShell ${DIM}(Modern Desktop Shell)${NC}"
+    case $CHOICE in
+        1) USER_CHOICES[status_bar]="waybar" ;;
+        2) USER_CHOICES[status_bar]="dankms" ;;
+    esac
 
     # 3. File Manager
-    echo -e "\n${BOLD}3. File Manager:${NC}"
-    PS3="   Select: "
-    select fm in "Dolphin (KDE)" "Nemo (GTK, Lightweight)"; do
-        case $REPLY in
-            1) USER_CHOICES[file_manager]="dolphin"; break;;
-            2) USER_CHOICES[file_manager]="nemo"; break;;
-            *) echo "   Enter 1 or 2";;
-        esac
-    done
-    log "${OK} File Manager: ${USER_CHOICES[file_manager]}"
+    ask_choice "File Manager" \
+        "Dolphin ${DIM}(KDE)${NC}" \
+        "Nemo ${DIM}(GTK, Lightweight)${NC}"
+    case $CHOICE in
+        1) USER_CHOICES[file_manager]="dolphin" ;;
+        2) USER_CHOICES[file_manager]="nemo" ;;
+    esac
 
     # 4. Lockscreen
-    echo -e "\n${BOLD}4. Lockscreen:${NC}"
-    PS3="   Select: "
-    select lock in "Hyprlock" "Hyprlock + Wlogout"; do
-        case $REPLY in
-            1) USER_CHOICES[lockscreen]="hyprlock"; break;;
-            2) USER_CHOICES[lockscreen]="both"; break;;
-            *) echo "   Enter 1 or 2";;
-        esac
-    done
-    log "${OK} Lockscreen: ${USER_CHOICES[lockscreen]}"
+    ask_choice "Lockscreen" \
+        "Hyprlock" \
+        "Hyprlock + Wlogout"
+    case $CHOICE in
+        1) USER_CHOICES[lockscreen]="hyprlock" ;;
+        2) USER_CHOICES[lockscreen]="both" ;;
+    esac
 
     # 5. Dotfiles
-    echo -e "\n${BOLD}5. Dotfiles:${NC}"
-    PS3="   Select: "
-    select dots in "Default s4d dotfiles (Recommended)" "Custom (git URL)" "Minimal (bare essentials)"; do
-        case $REPLY in
-            1) USER_CHOICES[dotfiles]="default"; break;;
-            2)
-                USER_CHOICES[dotfiles]="custom"
-                echo -en "${ASK} Enter git repository URL: "
-                read -r USER_CHOICES[custom_dots_url]
-                break;;
-            3) USER_CHOICES[dotfiles]="minimal"; break;;
-            *) echo "   Enter 1, 2, or 3";;
-        esac
-    done
-    log "${OK} Dotfiles: ${USER_CHOICES[dotfiles]}"
+    ask_choice "Dotfiles" \
+        "Default s4d ${DIM}(Recommended)${NC}" \
+        "Custom ${DIM}(Git URL)${NC}" \
+        "Minimal ${DIM}(Bare essentials)${NC}"
+    case $CHOICE in
+        1) USER_CHOICES[dotfiles]="default" ;;
+        2)
+            USER_CHOICES[dotfiles]="custom"
+            echo -en "    ${DIM}Git URL:${NC} ${GRAD4}▸${NC} "
+            read -r USER_CHOICES[custom_dots_url]
+            ;;
+        3) USER_CHOICES[dotfiles]="minimal" ;;
+    esac
 
     # 6-9: Yes/No options
-    echo -e "\n${BOLD}6. ASUS ROG Laptop Support:${NC}"
-    PS3="   Select: "
-    select rog in "No" "Yes"; do
-        case $REPLY in
-            1) USER_CHOICES[rog_laptop]="no"; break;;
-            2) USER_CHOICES[rog_laptop]="yes"; break;;
-            *) echo "   Enter 1 or 2";;
-        esac
-    done
-    log "${OK} ROG Laptop: ${USER_CHOICES[rog_laptop]}"
+    if ask_yn "ASUS ROG Laptop?" "n"; then
+        USER_CHOICES[rog_laptop]="yes"
+    else
+        USER_CHOICES[rog_laptop]="no"
+    fi
 
-    echo -e "\n${BOLD}7. Install Fonts:${NC}"
-    PS3="   Select: "
-    select fonts in "Yes (Recommended)" "No"; do
-        case $REPLY in
-            1) USER_CHOICES[install_fonts]="yes"; break;;
-            2) USER_CHOICES[install_fonts]="no"; break;;
-            *) echo "   Enter 1 or 2";;
-        esac
-    done
-    log "${OK} Fonts: ${USER_CHOICES[install_fonts]}"
+    if ask_yn "Install Fonts?" "y"; then
+        USER_CHOICES[install_fonts]="yes"
+    else
+        USER_CHOICES[install_fonts]="no"
+    fi
 
-    echo -e "\n${BOLD}8. Bluetooth:${NC}"
-    PS3="   Select: "
-    select bt in "Yes" "No"; do
-        case $REPLY in
-            1) USER_CHOICES[configure_bluetooth]="yes"; break;;
-            2) USER_CHOICES[configure_bluetooth]="no"; break;;
-            *) echo "   Enter 1 or 2";;
-        esac
-    done
-    log "${OK} Bluetooth: ${USER_CHOICES[configure_bluetooth]}"
+    if ask_yn "Bluetooth?" "y"; then
+        USER_CHOICES[configure_bluetooth]="yes"
+    else
+        USER_CHOICES[configure_bluetooth]="no"
+    fi
 
-    echo -e "\n${BOLD}9. Zsh + Starship Prompt:${NC}"
-    PS3="   Select: "
-    select zsh in "Yes (Recommended)" "No"; do
-        case $REPLY in
-            1) USER_CHOICES[configure_zsh]="yes"; break;;
-            2) USER_CHOICES[configure_zsh]="no"; break;;
-            *) echo "   Enter 1 or 2";;
-        esac
-    done
-    log "${OK} Zsh: ${USER_CHOICES[configure_zsh]}"
+    if ask_yn "Zsh + Starship Prompt?" "y"; then
+        USER_CHOICES[configure_zsh]="yes"
+    else
+        USER_CHOICES[configure_zsh]="no"
+    fi
 
     # Summary
     echo ""
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${BOLD}Configuration Summary:${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "  Display Manager : ${GREEN}${USER_CHOICES[display_manager]}${NC}"
-    echo -e "  Status Bar      : ${GREEN}${USER_CHOICES[status_bar]}${NC}"
-    echo -e "  File Manager    : ${GREEN}${USER_CHOICES[file_manager]}${NC}"
-    echo -e "  Lockscreen      : ${GREEN}${USER_CHOICES[lockscreen]}${NC}"
-    echo -e "  Dotfiles        : ${GREEN}${USER_CHOICES[dotfiles]}${NC}"
-    echo -e "  ROG Support     : ${GREEN}${USER_CHOICES[rog_laptop]}${NC}"
-    echo -e "  Fonts           : ${GREEN}${USER_CHOICES[install_fonts]}${NC}"
-    echo -e "  Bluetooth       : ${GREEN}${USER_CHOICES[configure_bluetooth]}${NC}"
-    echo -e "  Zsh             : ${GREEN}${USER_CHOICES[configure_zsh]}${NC}"
-    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "  ${GRAD3}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "  ${DIM}Display Manager     ${NC}${WHITE}${USER_CHOICES[display_manager]}${NC}"
+    echo -e "  ${DIM}Status Bar          ${NC}${WHITE}${USER_CHOICES[status_bar]}${NC}"
+    echo -e "  ${DIM}File Manager        ${NC}${WHITE}${USER_CHOICES[file_manager]}${NC}"
+    echo -e "  ${DIM}Lockscreen          ${NC}${WHITE}${USER_CHOICES[lockscreen]}${NC}"
+    echo -e "  ${DIM}Dotfiles            ${NC}${WHITE}${USER_CHOICES[dotfiles]}${NC}"
+    echo -e "  ${DIM}ROG Support         ${NC}${WHITE}${USER_CHOICES[rog_laptop]}${NC}"
+    echo -e "  ${DIM}Fonts               ${NC}${WHITE}${USER_CHOICES[install_fonts]}${NC}"
+    echo -e "  ${DIM}Bluetooth           ${NC}${WHITE}${USER_CHOICES[configure_bluetooth]}${NC}"
+    echo -e "  ${DIM}Zsh                 ${NC}${WHITE}${USER_CHOICES[configure_zsh]}${NC}"
+    echo ""
+    echo -e "  ${GRAD3}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 
-    PS3="Proceed? "
-    select proceed in "Yes, install" "No, cancel"; do
-        case $REPLY in
-            1) break;;
-            2) log "${INFO} Cancelled."; exit 0;;
-            *) echo "   Enter 1 or 2";;
-        esac
-    done
+    if ! ask_yn "Proceed with installation?" "y"; then
+        echo -e "\n  ${DIM}Cancelled.${NC}"
+        exit 0
+    fi
 }
 
 #=============================================================================
@@ -258,29 +283,20 @@ configuration_menu() {
 #=============================================================================
 check_root() {
     if [[ $EUID -eq 0 ]]; then
-        log "${ERROR} Do NOT run as root. sudo will be used when needed."
+        echo -e "  ${RED}●${NC} Do not run as root. Sudo will be used when needed."
         exit 1
     fi
 }
 
 check_arch() {
     if [[ ! -f /etc/arch-release ]]; then
-        log "${ERROR} This script is for Arch Linux only."
+        echo -e "  ${RED}●${NC} This script is for Arch Linux only."
         exit 1
     fi
-}
-
-check_internet() {
-    log "${INFO} Checking internet..."
-    if ! ping -c 1 -W 5 archlinux.org &>/dev/null; then
-        log "${ERROR} No internet connection."
-        exit 1
-    fi
-    log "${OK} Internet OK"
 }
 
 #=============================================================================
-# AUR HELPER
+# INSTALLATION FUNCTIONS
 #=============================================================================
 install_aur_helper() {
     log_section "AUR Helper"
@@ -314,9 +330,6 @@ install_aur_helper() {
     fi
 }
 
-#=============================================================================
-# INSTALLATION FUNCTIONS
-#=============================================================================
 install_base_packages() {
     log_section "Base Packages"
     source "$PACKAGES_DIR/base.lst"
@@ -372,31 +385,23 @@ install_lockscreen() {
 }
 
 install_fonts() {
-    if [[ "${USER_CHOICES[install_fonts]}" == "yes" ]]; then
-        log_section "Fonts"
-        source "$SCRIPTS_DIR/fonts-install.sh"
-    fi
+    log_section "Fonts"
+    source "$SCRIPTS_DIR/fonts-install.sh"
 }
 
 configure_bluetooth() {
-    if [[ "${USER_CHOICES[configure_bluetooth]}" == "yes" ]]; then
-        log_section "Bluetooth"
-        source "$SCRIPTS_DIR/bluetooth-install.sh"
-    fi
+    log_section "Bluetooth"
+    source "$SCRIPTS_DIR/bluetooth-install.sh"
 }
 
 install_rog_support() {
-    if [[ "${USER_CHOICES[rog_laptop]}" == "yes" ]]; then
-        log_section "ASUS ROG Support"
-        source "$SCRIPTS_DIR/rog-install.sh"
-    fi
+    log_section "ASUS ROG Support"
+    source "$SCRIPTS_DIR/rog-install.sh"
 }
 
 configure_zsh() {
-    if [[ "${USER_CHOICES[configure_zsh]}" == "yes" ]]; then
-        log_section "Zsh & Starship"
-        source "$SCRIPTS_DIR/zsh-install.sh"
-    fi
+    log_section "Zsh & Starship"
+    source "$SCRIPTS_DIR/zsh-install.sh"
 }
 
 install_themes() {
@@ -431,8 +436,19 @@ enable_services() {
     log "${OK} NetworkManager enabled"
 
     case "${USER_CHOICES[display_manager]}" in
-        sddm) sudo systemctl enable sddm 2>/dev/null || true; log "${OK} SDDM enabled" ;;
-        ly)   sudo systemctl enable ly 2>/dev/null || true; log "${OK} Ly enabled" ;;
+        sddm)
+            sudo systemctl enable sddm 2>/dev/null || true
+            log "${OK} SDDM enabled"
+            ;;
+        ly)
+            # ly-install.sh handles full setup; ensure it's enabled
+            sudo systemctl disable "getty@tty2.service" 2>/dev/null || true
+            if systemctl list-unit-files 2>/dev/null | grep -q "ly@"; then
+                sudo systemctl enable --force "ly@tty2.service" 2>/dev/null || true
+            fi
+            sudo systemctl set-default graphical.target 2>/dev/null || true
+            log "${OK} Ly enabled"
+            ;;
     esac
 
     if [[ "${USER_CHOICES[configure_bluetooth]}" == "yes" ]]; then
@@ -450,72 +466,96 @@ enable_services() {
 main() {
     check_root
     check_arch
-    check_internet
 
-    show_banner
     configuration_menu
 
-    log_section "Starting Installation"
-    log "${INFO} Started at $(date)"
-    log "${INFO} Log: $LOG_FILE"
+    clear
+    show_header
+
+    # Pre-flight: internet
+    echo -e "  ${DIM}Checking system...${NC}"
+    if ! ping -c 1 -W 5 archlinux.org &>/dev/null; then
+        echo -e "  ${RED}●${NC} No internet connection"
+        exit 1
+    fi
+    echo -e "  ${GREEN}●${NC} Internet"
+
+    # Authenticate once, keep alive for entire install
+    echo -e "  ${DIM}Authenticating...${NC}"
+    sudo -v || { echo -e "  ${RED}●${NC} Authentication failed"; exit 1; }
+    (while true; do sudo -n true; sleep 50; done 2>/dev/null) &
+    SUDO_KEEPALIVE_PID=$!
+    echo -e "  ${GREEN}●${NC} Authentication"
+
+    echo ""
+    echo -e "  ${BWHITE}Installing${NC}"
+    echo ""
 
     # Core
-    install_aur_helper
-    install_base_packages
-    detect_and_install_gpu_drivers
-    install_hyprland_packages
+    run_step "Setting up AUR helper"            install_aur_helper
+    run_step "Installing base packages"         install_base_packages
+    run_step "Detecting GPU & drivers"          detect_and_install_gpu_drivers
+    run_step "Installing Hyprland"              install_hyprland_packages
 
-    # User-selected
-    install_display_manager
-    install_status_bar
-    install_file_manager
-    install_lockscreen
-    install_fonts
-    configure_bluetooth
-    install_rog_support
-    configure_zsh
+    # User-selected components
+    [[ "${USER_CHOICES[display_manager]}" != "none" ]] && \
+        run_step "Setting up display manager"   install_display_manager
+
+    run_step "Installing status bar"            install_status_bar
+    run_step "Installing file manager"          install_file_manager
+    run_step "Setting up lockscreen"            install_lockscreen
+
+    [[ "${USER_CHOICES[install_fonts]}" == "yes" ]] && \
+        run_step "Installing fonts"             install_fonts
+
+    [[ "${USER_CHOICES[configure_bluetooth]}" == "yes" ]] && \
+        run_step "Configuring Bluetooth"        configure_bluetooth
+
+    [[ "${USER_CHOICES[rog_laptop]}" == "yes" ]] && \
+        run_step "Installing ROG support"       install_rog_support
+
+    [[ "${USER_CHOICES[configure_zsh]}" == "yes" ]] && \
+        run_step "Configuring Zsh & Starship"   configure_zsh
 
     # Theming & configs
-    install_themes
-    apply_dotfiles
-    setup_wallpapers
+    run_step "Installing themes"                install_themes
+    run_step "Applying dotfiles"                apply_dotfiles
+    run_step "Setting up wallpapers"            setup_wallpapers
 
     # Post-install
-    run_post_install
-    enable_services
+    run_step "Post-install configuration"       run_post_install
+    run_step "Enabling services"                enable_services
 
-    # Show summary of any issues
-    show_failed_packages
-
-    # Done
-    echo ""
-    echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║           s4d Hyprland Installation Complete!                 ║${NC}"
-    echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
-    echo -e "${INFO} Reboot to start using Hyprland"
-    echo ""
-    echo -e "${CYAN}  Keybindings:${NC}"
-    echo -e "    Super + T       Terminal (Kitty)"
-    echo -e "    Super + A       App Launcher (Rofi)"
-    echo -e "    Super + E       File Manager"
-    echo -e "    Super + Q       Close Window"
-    echo -e "    Super + Escape  Lock Screen"
-    echo -e "    Super + X       Power Menu"
-    echo -e "    Super + Up      Cycle Waybar Style"
-    echo -e "    Super + Down    Waybar Style Menu"
-    echo -e "    Super + /       Keybindings Help"
-    echo ""
-    echo -e "${INFO} Log: $LOG_FILE"
     echo ""
 
-    PS3="Reboot now? "
-    select rb in "Yes" "No"; do
-        case $REPLY in
-            1) sudo reboot ;;
-            2) break ;;
-        esac
-    done
+    # Show failed packages if any
+    if [[ ${#FAILED_PACKAGES[@]} -gt 0 ]]; then
+        echo -e "  ${YELLOW}●${NC} ${DIM}Some packages could not be installed:${NC}"
+        for pkg in "${FAILED_PACKAGES[@]}"; do
+            echo -e "    ${DIM}- $pkg${NC}"
+        done
+        echo ""
+    fi
+
+    # Completion
+    echo -e "  ${GRAD1}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "  ${GREEN}${BOLD}Installation Complete${NC}"
+    echo -e "  ${GRAD1}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "  ${DIM}Keybinds${NC}"
+    echo -e "    ${WHITE}Super + T${NC}       ${DIM}Terminal${NC}"
+    echo -e "    ${WHITE}Super + A${NC}       ${DIM}App Launcher${NC}"
+    echo -e "    ${WHITE}Super + E${NC}       ${DIM}File Manager${NC}"
+    echo -e "    ${WHITE}Super + Q${NC}       ${DIM}Close Window${NC}"
+    echo -e "    ${WHITE}Super + Esc${NC}     ${DIM}Lock${NC}"
+    echo -e "    ${WHITE}Super + /${NC}       ${DIM}All Keybinds${NC}"
+    echo ""
+    echo -e "  ${DIM}Log: $LOG_FILE${NC}"
+    echo ""
+
+    echo -en "  ${BWHITE}Reboot now?${NC} ${DIM}[y/N]${NC} ${GRAD4}▸${NC} "
+    read -r rb
+    [[ "$rb" =~ ^[Yy] ]] && sudo reboot
 }
 
 main "$@"

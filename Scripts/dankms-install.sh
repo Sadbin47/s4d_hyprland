@@ -156,6 +156,52 @@ EOF
 #=============================================================================
 
 #=============================================================================
+# INSTALL DMS RUNTIME DEPENDENCIES
+#=============================================================================
+install_dms_dependencies() {
+    log "${INFO} Installing DMS runtime dependencies..."
+
+    # Quickshell (required - DMS UI engine)
+    if ! pkg_installed "quickshell-git" && ! pkg_installed "quickshell"; then
+        log "${INFO} Installing quickshell..."
+        install_pkg "quickshell" || install_pkg "quickshell-git"
+    else
+        log "${OK} quickshell already installed"
+    fi
+
+    # Matugen (required - dynamic color/theme generation from wallpaper)
+    if ! command -v matugen &>/dev/null; then
+        log "${INFO} Installing matugen..."
+        install_pkg "matugen-bin" || install_pkg "matugen"
+    else
+        log "${OK} matugen already installed"
+    fi
+
+    # Cava (audio visualizer widget in DMS panel)
+    if ! command -v cava &>/dev/null; then
+        log "${INFO} Installing cava..."
+        install_pkg "cava"
+    else
+        log "${OK} cava already installed"
+    fi
+
+    # Power-profiles-daemon (power management integration)
+    if ! pkg_installed "power-profiles-daemon"; then
+        log "${INFO} Installing power-profiles-daemon..."
+        install_pkg "power-profiles-daemon"
+        # Enable the service
+        sudo systemctl enable power-profiles-daemon.service 2>/dev/null || true
+        sudo systemctl start power-profiles-daemon.service 2>/dev/null || true
+    else
+        log "${OK} power-profiles-daemon already installed"
+        # Ensure service is enabled even if package was already present
+        sudo systemctl enable power-profiles-daemon.service 2>/dev/null || true
+    fi
+
+    log "${OK} DMS runtime dependencies installed"
+}
+
+#=============================================================================
 # MAIN INSTALLATION
 #=============================================================================
 
@@ -177,6 +223,9 @@ if ! command -v dms &>/dev/null; then
         exit 1
     fi
 fi
+
+# Install runtime dependencies (quickshell, matugen, cava, power-profiles-daemon)
+install_dms_dependencies
 
 # Setup systemd service for proper session integration
 setup_dms_service

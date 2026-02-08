@@ -85,61 +85,61 @@ EOF
 
 log "${OK} Ly configuration created"
 
+#=============================================================================
+# ENABLE LY SERVICE
+#=============================================================================
+
 # Disable any other display managers first
 for dm in gdm sddm lightdm lxdm greetd; do
     if systemctl is-enabled "$dm" &>/dev/null 2>&1; then
         sudo systemctl disable "$dm" 2>/dev/null || true
     fi
+    # Also check templated service names
+    if systemctl is-enabled "${dm}.service" &>/dev/null 2>&1; then
+        sudo systemctl disable "${dm}.service" 2>/dev/null || true
+    fi
 done
 
-# Set default boot target to graphical so Ly actually starts on boot
+# Set default boot target to graphical (required for display managers)
 sudo systemctl set-default graphical.target
 log "${OK} Set default boot target to graphical.target"
 
 # Reload systemd to pick up new service files
 sudo systemctl daemon-reload
 
-# Find and enable Ly service - check multiple possible locations and names
-LY_SERVICE=""
-for service in "ly.service" "ly-dm.service"; do
-    if systemctl list-unit-files 2>/dev/null | grep -q "^${service}"; then
-        LY_SERVICE="$service"
-        break
-    fi
-done
+# Ly on Arch uses a templated service: ly@ttyN.service
+# Default TTY is tty2
+LY_TTY="tty2"
 
-# If not found in list, check file locations directly
-if [[ -z "$LY_SERVICE" ]]; then
-    for path in /usr/lib/systemd/system /etc/systemd/system /lib/systemd/system; do
-        if [[ -f "$path/ly.service" ]]; then
-            LY_SERVICE="ly.service"
-            break
-        elif [[ -f "$path/ly-dm.service" ]]; then
-            LY_SERVICE="ly-dm.service"
-            break
-        fi
-    done
-fi
+# Disable getty on the TTY that Ly will use (CRITICAL: they conflict)
+sudo systemctl disable "getty@${LY_TTY}.service" 2>/dev/null || true
 
-if [[ -n "$LY_SERVICE" ]]; then
-    sudo systemctl disable getty@tty2.service 2>/dev/null || true
-    sudo systemctl enable "$LY_SERVICE"
-    log "${OK} Ly ($LY_SERVICE) enabled and configured"
+# Try the templated service name first (ly@tty2.service) - this is what Arch provides
+if systemctl list-unit-files 2>/dev/null | grep -q "ly@"; then
+    sudo systemctl enable --force "ly@${LY_TTY}.service"
+    log "${OK} Ly (ly@${LY_TTY}.service) enabled"
+# Fall back to non-templated service name
+elif systemctl list-unit-files 2>/dev/null | grep -q "^ly\.service"; then
+    sudo systemctl enable --force "ly.service"
+    log "${OK} Ly (ly.service) enabled"
+elif systemctl list-unit-files 2>/dev/null | grep -q "^ly-dm\.service"; then
+    sudo systemctl enable --force "ly-dm.service"
+    log "${OK} Ly (ly-dm.service) enabled"
 else
-    # Create the service file manually if it doesn't exist
+    # No service file found at all - create one manually
     log "${WARN} Ly service file not found, creating it..."
-    
-    cat << 'SERVICEEOF' | sudo tee /etc/systemd/system/ly.service >/dev/null
+
+    cat << SERVICEEOF | sudo tee /etc/systemd/system/ly@.service >/dev/null
 [Unit]
 Description=TUI display manager
 After=systemd-user-sessions.service plymouth-quit-wait.service
-Conflicts=getty@tty2.service
+Conflicts=getty@%i.service
 
 [Service]
 Type=idle
 ExecStart=/usr/bin/ly
 StandardInput=tty
-TTYPath=/dev/tty2
+TTYPath=/dev/%i
 TTYReset=yes
 TTYVHangup=yes
 
@@ -149,9 +149,8 @@ Alias=display-manager.service
 SERVICEEOF
 
     sudo systemctl daemon-reload
-    sudo systemctl disable getty@tty2.service 2>/dev/null || true
-    sudo systemctl enable ly.service
-    log "${OK} Ly service created and enabled"
+    sudo systemctl enable --force "ly@${LY_TTY}.service"
+    log "${OK} Ly service created and enabled (ly@${LY_TTY}.service)"
 fi
 
 #=============================================================================
@@ -186,5 +185,5 @@ if [[ -d /usr/share/wayland-sessions ]]; then
 fi
 
 log "${OK} Ly display manager installation complete"
-log "${INFO} Ly will appear on tty2 after reboot"
+log "${INFO} Ly will appear on ${LY_TTY} after reboot"
 log "${INFO} Select 'Hyprland' from the session list and login"
