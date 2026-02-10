@@ -83,7 +83,7 @@ hide_f1_commands = false
 input_len = 255
 lang = en
 load = true
-min_refresh_rate = 10
+animation_frame_delay = 10
 path = /usr/local/sbin:/usr/local/bin:/usr/bin
 restart_cmd = /usr/bin/systemctl reboot
 save = true
@@ -94,7 +94,6 @@ sleep_cmd = /usr/bin/systemctl suspend
 term_reset_cmd = /usr/bin/tput reset
 waylandsessions = /usr/share/wayland-sessions
 xsessions = /usr/share/xsessions
-xsessions_d = /usr/share/xsessions
 initial_info_text = s4d Hyprland
 blank_box = true
 box_main_color = 6
@@ -132,7 +131,23 @@ LY_TTY="tty2"
 # Disable getty on the TTY that Ly will use (CRITICAL: they conflict)
 sudo systemctl disable "getty@${LY_TTY}.service" 2>/dev/null || true
 sudo systemctl mask "getty@${LY_TTY}.service" 2>/dev/null || true
-log "${OK} Disabled getty@${LY_TTY}.service"
+sudo systemctl stop "getty@${LY_TTY}.service" 2>/dev/null || true
+log "${OK} Disabled and masked getty@${LY_TTY}.service"
+
+# Handle systemd-logind autovt (prevents getty from auto-spawning on TTY switch)
+# This is critical: systemd-logind can auto-start getty via autovt@.service
+if [[ -f /usr/lib/systemd/system/ly@.service ]] || [[ -f /etc/systemd/system/ly@.service ]]; then
+    sudo mkdir -p /etc/systemd/system
+    sudo ln -sf /usr/lib/systemd/system/ly@.service \
+        "/etc/systemd/system/autovt@${LY_TTY}.service" 2>/dev/null || true
+    log "${OK} Symlinked autovt@${LY_TTY}.service -> ly@.service"
+fi
+
+# Also disable autovt for this TTY to prevent conflicts
+if [[ -f /etc/systemd/logind.conf ]]; then
+    # Ensure NAutoVTs doesn't include our TTY
+    log "${INFO} Note: If Ly still shows TTY login, check /etc/systemd/logind.conf NAutoVTs setting"
+fi
 
 # Determine the service file location
 LY_SERVICE_FOUND=false
@@ -165,8 +180,9 @@ if [[ "$LY_SERVICE_FOUND" == false ]]; then
     cat << SERVICEEOF | sudo tee /usr/lib/systemd/system/ly@.service >/dev/null
 [Unit]
 Description=TUI display manager
-After=systemd-user-sessions.service plymouth-quit-wait.service
+After=systemd-user-sessions.service plymouth-quit-wait.service getty@%i.service
 Conflicts=getty@%i.service
+Before=getty@%i.service
 
 [Service]
 Type=idle
@@ -175,6 +191,8 @@ StandardInput=tty
 TTYPath=/dev/%i
 TTYReset=yes
 TTYVHangup=yes
+Restart=on-failure
+RestartSec=3
 
 [Install]
 WantedBy=graphical.target
