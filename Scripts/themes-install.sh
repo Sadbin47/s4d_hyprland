@@ -108,9 +108,8 @@ textless_progressbar=false
 menubar_mouse_tracking=true
 slim_toolbars=false
 toolbutton_style=1
-translucent_windows=false
+translucent_windows=true
 blurring=true
-popup_blurring=true
 vertical_spin_indicators=false
 spin_button_width=16
 fill_rubberband=false
@@ -132,7 +131,7 @@ layout_spacing=2
 layout_margin=4
 no_window_pattern=false
 opaque=
-reduce_window_opacity=0
+reduce_window_opacity=10
 reduce_menu_opacity=20
 respect_DE=true
 scrollable_menu=true
@@ -186,10 +185,10 @@ HACKSEOF
   </defs>
   <!-- Window interior -->
   <rect id="WindowInterior" x="0" y="0" width="100" height="100" rx="0" ry="0"
-        style="fill:#0a0a0a;fill-opacity:0.85"/>
+        style="fill:#0a0a0a;fill-opacity:0.75"/>
   <!-- Generic frame -->
   <rect id="GenericFrame" x="0" y="100" width="100" height="100" rx="0" ry="0"
-        style="fill:#0a0a0a;fill-opacity:0.9;stroke:#2a2a2a;stroke-width:1"/>
+        style="fill:#0a0a0a;fill-opacity:0.80;stroke:#2a2a2a;stroke-width:1"/>
 </svg>
 SVGEOF
 
@@ -197,10 +196,10 @@ SVGEOF
     cat > "$KVANTUM_DIR/kvantum.kvconfig" << 'EOF'
 [General]
 theme=s4d-dark
-translucent_windows=false
+translucent_windows=true
 blurring=true
 composite=true
-reduce_window_opacity=0
+reduce_window_opacity=10
 reduce_menu_opacity=10
 EOF
 

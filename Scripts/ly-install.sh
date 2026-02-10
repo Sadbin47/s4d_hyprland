@@ -10,17 +10,16 @@ log "${INFO} Installing Ly display manager..."
 # Install Ly
 install_pkg "ly"
 
-# Verify Ly actually installed
+# Verify Ly actually installed — check every possible binary name/path
 LY_BIN=""
-if command -v ly-dm &>/dev/null; then
-    LY_BIN="$(command -v ly-dm)"
-elif command -v ly &>/dev/null; then
-    LY_BIN="$(command -v ly)"
-elif [[ -x /usr/bin/ly-dm ]]; then
-    LY_BIN="/usr/bin/ly-dm"
-elif [[ -x /usr/bin/ly ]]; then
-    LY_BIN="/usr/bin/ly"
-fi
+for candidate in ly-dm ly; do
+    if command -v "$candidate" &>/dev/null; then
+        LY_BIN="$(command -v "$candidate")"
+        break
+    fi
+done
+[[ -z "$LY_BIN" && -x /usr/bin/ly-dm ]] && LY_BIN="/usr/bin/ly-dm"
+[[ -z "$LY_BIN" && -x /usr/bin/ly ]]    && LY_BIN="/usr/bin/ly"
 
 if [[ -z "$LY_BIN" ]]; then
     log "${ERROR} Ly binary not found after installation — aborting Ly setup"
@@ -35,21 +34,13 @@ log "${OK} Ly binary found at: $LY_BIN"
 #=============================================================================
 log "${INFO} Ensuring Hyprland session file exists..."
 
-# Create wayland-sessions directory if it doesn't exist
 sudo mkdir -p /usr/share/wayland-sessions
 
 # Detect correct Hyprland binary name
-HYPR_BIN=""
-if command -v Hyprland &>/dev/null; then
-    HYPR_BIN="Hyprland"
-elif command -v hyprland &>/dev/null; then
-    HYPR_BIN="hyprland"
-else
-    HYPR_BIN="Hyprland"  # Default
-fi
+HYPR_BIN="Hyprland"
+command -v Hyprland &>/dev/null && HYPR_BIN="Hyprland"
+command -v hyprland &>/dev/null && HYPR_BIN="hyprland"
 
-# Create/update hyprland.desktop session file
-log "${INFO} Creating Hyprland session file (Exec=$HYPR_BIN)..."
 cat << DEOF | sudo tee /usr/share/wayland-sessions/hyprland.desktop >/dev/null
 [Desktop Entry]
 Name=Hyprland
@@ -58,17 +49,14 @@ Exec=$HYPR_BIN
 Type=Application
 DesktopNames=Hyprland
 DEOF
-log "${OK} Created /usr/share/wayland-sessions/hyprland.desktop"
-
-# Make sure it's readable
 sudo chmod 644 /usr/share/wayland-sessions/hyprland.desktop
+log "${OK} Created /usr/share/wayland-sessions/hyprland.desktop"
 
 #=============================================================================
 # CONFIGURE LY
 #=============================================================================
 sudo mkdir -p /etc/ly
 
-# Create custom configuration
 cat << 'EOF' | sudo tee /etc/ly/config.ini >/dev/null
 # Ly configuration
 animate = true
@@ -105,82 +93,75 @@ EOF
 log "${OK} Ly configuration created"
 
 #=============================================================================
-# ENABLE LY SERVICE
+# DISABLE ALL COMPETING DISPLAY MANAGERS
 #=============================================================================
 
-# Disable any other display managers first
 for dm in gdm sddm lightdm lxdm greetd; do
-    if systemctl is-enabled "$dm" &>/dev/null 2>&1; then
-        sudo systemctl disable "$dm" 2>/dev/null || true
-    fi
-    if systemctl is-enabled "${dm}.service" &>/dev/null 2>&1; then
-        sudo systemctl disable "${dm}.service" 2>/dev/null || true
-    fi
+    sudo systemctl disable "$dm" 2>/dev/null || true
+    sudo systemctl disable "${dm}.service" 2>/dev/null || true
+    sudo systemctl stop "$dm" 2>/dev/null || true
 done
 
-# Set default boot target to graphical (required for display managers)
+#=============================================================================
+# SET BOOT TARGET
+#=============================================================================
 sudo systemctl set-default graphical.target
 log "${OK} Set default boot target to graphical.target"
 
-# Reload systemd to pick up new service files
-sudo systemctl daemon-reload
-
-# Ly on Arch uses a templated service: ly@ttyN.service
+#=============================================================================
+# DETECT THE LY SERVICE FILE (from installed package)
+#=============================================================================
 LY_TTY="tty2"
 
-# Disable getty on the TTY that Ly will use (CRITICAL: they conflict)
-sudo systemctl disable "getty@${LY_TTY}.service" 2>/dev/null || true
-sudo systemctl mask "getty@${LY_TTY}.service" 2>/dev/null || true
-sudo systemctl stop "getty@${LY_TTY}.service" 2>/dev/null || true
-log "${OK} Disabled and masked getty@${LY_TTY}.service"
+# Discover what service file the package actually provides
+LY_SVC_FILE=""
+LY_SVC_TYPE=""  # "template" or "simple"
 
-# Handle systemd-logind autovt (prevents getty from auto-spawning on TTY switch)
-# This is critical: systemd-logind can auto-start getty via autovt@.service
-if [[ -f /usr/lib/systemd/system/ly@.service ]] || [[ -f /etc/systemd/system/ly@.service ]]; then
-    sudo mkdir -p /etc/systemd/system
-    sudo ln -sf /usr/lib/systemd/system/ly@.service \
-        "/etc/systemd/system/autovt@${LY_TTY}.service" 2>/dev/null || true
-    log "${OK} Symlinked autovt@${LY_TTY}.service -> ly@.service"
+# Check for templated service (ly@.service) — used by upstream and most AUR builds
+for path in /usr/lib/systemd/system/ly@.service /etc/systemd/system/ly@.service; do
+    if [[ -f "$path" ]]; then
+        LY_SVC_FILE="$path"
+        LY_SVC_TYPE="template"
+        break
+    fi
+done
+
+# Check for non-templated service (ly.service / ly-dm.service) if no template found
+if [[ -z "$LY_SVC_FILE" ]]; then
+    for svc in ly.service ly-dm.service; do
+        for path in /usr/lib/systemd/system/$svc /etc/systemd/system/$svc; do
+            if [[ -f "$path" ]]; then
+                LY_SVC_FILE="$path"
+                LY_SVC_TYPE="simple"
+                break 2
+            fi
+        done
+    done
 fi
 
-# Also disable autovt for this TTY to prevent conflicts
-if [[ -f /etc/systemd/logind.conf ]]; then
-    # Ensure NAutoVTs doesn't include our TTY
-    log "${INFO} Note: If Ly still shows TTY login, check /etc/systemd/logind.conf NAutoVTs setting"
+# Also check via systemctl (in case files are in unusual locations)
+if [[ -z "$LY_SVC_FILE" ]]; then
+    if systemctl list-unit-files 2>/dev/null | grep -q "ly@\.service"; then
+        LY_SVC_TYPE="template"
+    elif systemctl list-unit-files 2>/dev/null | grep -q "^ly\.service"; then
+        LY_SVC_TYPE="simple"
+    elif systemctl list-unit-files 2>/dev/null | grep -q "^ly-dm\.service"; then
+        LY_SVC_TYPE="simple"
+    fi
 fi
 
-# Determine the service file location
-LY_SERVICE_FOUND=false
+log "${INFO} Detected: SVC_FILE=${LY_SVC_FILE:-none} SVC_TYPE=${LY_SVC_TYPE:-none}"
 
-# Check for the templated service provided by the ly package
-if [[ -f /usr/lib/systemd/system/ly@.service ]]; then
-    log "${INFO} Found system-provided ly@.service"
-    sudo systemctl enable --force "ly@${LY_TTY}.service"
-    LY_SERVICE_FOUND=true
-    log "${OK} Ly (ly@${LY_TTY}.service) enabled"
-elif systemctl list-unit-files 2>/dev/null | grep -q "ly@"; then
-    log "${INFO} Found ly@ templated service"
-    sudo systemctl enable --force "ly@${LY_TTY}.service"
-    LY_SERVICE_FOUND=true
-    log "${OK} Ly (ly@${LY_TTY}.service) enabled"
-elif systemctl list-unit-files 2>/dev/null | grep -q "^ly\.service"; then
-    sudo systemctl enable --force "ly.service"
-    LY_SERVICE_FOUND=true
-    log "${OK} Ly (ly.service) enabled"
-elif systemctl list-unit-files 2>/dev/null | grep -q "^ly-dm\.service"; then
-    sudo systemctl enable --force "ly-dm.service"
-    LY_SERVICE_FOUND=true
-    log "${OK} Ly (ly-dm.service) enabled"
-fi
-
-if [[ "$LY_SERVICE_FOUND" == false ]]; then
-    # No service file found at all - create one manually with correct binary path
-    log "${WARN} Ly service file not found, creating it..."
+#=============================================================================
+# CREATE SERVICE FILE IF NOTHING EXISTS
+#=============================================================================
+if [[ -z "$LY_SVC_TYPE" ]]; then
+    log "${WARN} No Ly service file found — creating ly@.service manually"
 
     cat << SERVICEEOF | sudo tee /usr/lib/systemd/system/ly@.service >/dev/null
 [Unit]
-Description=TUI display manager
-After=systemd-user-sessions.service plymouth-quit-wait.service getty@%i.service
+Description=TUI Display Manager (Ly)
+After=systemd-user-sessions.service plymouth-quit-wait.service
 Conflicts=getty@%i.service
 Before=getty@%i.service
 
@@ -191,6 +172,8 @@ StandardInput=tty
 TTYPath=/dev/%i
 TTYReset=yes
 TTYVHangup=yes
+PAMName=ly
+UtmpIdentifier=%I
 Restart=on-failure
 RestartSec=3
 
@@ -199,61 +182,126 @@ WantedBy=graphical.target
 Alias=display-manager.service
 SERVICEEOF
 
-    sudo systemctl daemon-reload
-    sudo systemctl enable --force "ly@${LY_TTY}.service"
-    log "${OK} Ly service created and enabled (ly@${LY_TTY}.service)"
+    LY_SVC_FILE="/usr/lib/systemd/system/ly@.service"
+    LY_SVC_TYPE="template"
+    log "${OK} Created /usr/lib/systemd/system/ly@.service"
 fi
 
 #=============================================================================
-# VERIFY EVERYTHING IS SET UP CORRECTLY
+# KILL GETTY ON LY'S TTY — NUCLEAR APPROACH
+# getty MUST be dead on the target TTY or it will steal the console
+#=============================================================================
+
+# 1. Stop immediately
+sudo systemctl stop "getty@${LY_TTY}.service" 2>/dev/null || true
+
+# 2. Disable (remove from boot)
+sudo systemctl disable "getty@${LY_TTY}.service" 2>/dev/null || true
+
+# 3. Mask (symlink to /dev/null — prevents ANY activation including by logind)
+sudo systemctl mask "getty@${LY_TTY}.service" 2>/dev/null || true
+
+# 4. Also mask the autovt instance (systemd-logind auto-spawns these on TTY switch)
+sudo systemctl mask "autovt@${LY_TTY}.service" 2>/dev/null || true
+
+# 5. Override autovt for this TTY to point to Ly instead of getty
+#    This is the CRITICAL step — logind calls autovt@ttyN.service when switching TTYs
+if [[ "$LY_SVC_TYPE" == "template" ]]; then
+    sudo mkdir -p /etc/systemd/system
+    sudo ln -sf "${LY_SVC_FILE}" "/etc/systemd/system/autovt@${LY_TTY}.service"
+    log "${OK} Redirected autovt@${LY_TTY}.service -> ly@.service"
+fi
+
+# 6. Reduce NAutoVTs so logind doesn't auto-spawn getty on our TTY
+#    TTY2 = index 2, so if NAutoVTs=1, logind only auto-spawns getty on tty1
+if [[ -f /etc/systemd/logind.conf ]]; then
+    if ! grep -q "^NAutoVTs=" /etc/systemd/logind.conf; then
+        # Add NAutoVTs=1 to only auto-spawn getty on tty1
+        sudo sed -i 's/^#NAutoVTs=.*/NAutoVTs=1/' /etc/systemd/logind.conf 2>/dev/null || \
+        echo "NAutoVTs=1" | sudo tee -a /etc/systemd/logind.conf >/dev/null
+        log "${OK} Set NAutoVTs=1 in logind.conf"
+    fi
+fi
+
+log "${OK} Killed and masked all getty on ${LY_TTY}"
+
+#=============================================================================
+# ENABLE LY SERVICE
+#=============================================================================
+sudo systemctl daemon-reload
+
+if [[ "$LY_SVC_TYPE" == "template" ]]; then
+    sudo systemctl enable --force "ly@${LY_TTY}.service"
+    log "${OK} Enabled ly@${LY_TTY}.service"
+elif [[ "$LY_SVC_TYPE" == "simple" ]]; then
+    # For non-templated service, check which name exists
+    if systemctl list-unit-files 2>/dev/null | grep -q "^ly-dm\.service"; then
+        sudo systemctl enable --force "ly-dm.service"
+        log "${OK} Enabled ly-dm.service"
+    else
+        sudo systemctl enable --force "ly.service"
+        log "${OK} Enabled ly.service"
+    fi
+fi
+
+#=============================================================================
+# VERIFY EVERYTHING
 #=============================================================================
 log "${INFO} Verifying Ly setup..."
 
-# Verify the service is actually enabled
-if systemctl is-enabled "ly@${LY_TTY}.service" &>/dev/null 2>&1; then
-    log "${OK} ly@${LY_TTY}.service is enabled"
-elif systemctl is-enabled "ly.service" &>/dev/null 2>&1; then
-    log "${OK} ly.service is enabled"
-else
-    log "${WARN} Ly service does not appear to be enabled!"
-    log "${INFO} Attempting direct symlink as fallback..."
-    # Direct symlink as absolute last resort
-    sudo ln -sf /usr/lib/systemd/system/ly@.service \
-        /etc/systemd/system/display-manager.service 2>/dev/null || true
-    sudo systemctl daemon-reload
+VERIFY_OK=true
+
+# Check Ly service is enabled
+LY_ENABLED=false
+for svc in "ly@${LY_TTY}.service" "ly.service" "ly-dm.service"; do
+    if systemctl is-enabled "$svc" &>/dev/null 2>&1; then
+        log "${OK} $svc is enabled"
+        LY_ENABLED=true
+        break
+    fi
+done
+if [[ "$LY_ENABLED" == false ]]; then
+    log "${WARN} Ly service is NOT enabled — attempting force enable"
     sudo systemctl enable --force "ly@${LY_TTY}.service" 2>/dev/null || true
+    VERIFY_OK=false
 fi
 
-# Verify getty is not going to conflict
-if systemctl is-enabled "getty@${LY_TTY}.service" &>/dev/null 2>&1; then
-    log "${WARN} getty@${LY_TTY}.service is still enabled — disabling"
-    sudo systemctl disable "getty@${LY_TTY}.service" 2>/dev/null || true
+# Check getty is masked
+GETTY_STATE=$(systemctl is-enabled "getty@${LY_TTY}.service" 2>/dev/null || echo "unknown")
+if [[ "$GETTY_STATE" == "masked" || "$GETTY_STATE" == "masked-runtime" ]]; then
+    log "${OK} getty@${LY_TTY}.service is masked"
+else
+    log "${WARN} getty@${LY_TTY}.service state: $GETTY_STATE — re-masking"
     sudo systemctl mask "getty@${LY_TTY}.service" 2>/dev/null || true
+    VERIFY_OK=false
 fi
 
-# Verify default target
-CURRENT_TARGET=$(systemctl get-default 2>/dev/null)
-if [[ "$CURRENT_TARGET" != "graphical.target" ]]; then
-    log "${WARN} Default target is $CURRENT_TARGET, setting to graphical.target"
+# Check boot target
+CURRENT_TARGET=$(systemctl get-default 2>/dev/null || echo "unknown")
+if [[ "$CURRENT_TARGET" == "graphical.target" ]]; then
+    log "${OK} Boot target: graphical.target"
+else
+    log "${WARN} Boot target is $CURRENT_TARGET, fixing..."
     sudo systemctl set-default graphical.target
+    VERIFY_OK=false
 fi
 
-# Verify Hyprland session file
+# Check Hyprland session
 if [[ -f /usr/share/wayland-sessions/hyprland.desktop ]]; then
-    log "${OK} Hyprland session found: /usr/share/wayland-sessions/hyprland.desktop"
+    log "${OK} Hyprland session file exists"
 else
     log "${WARN} Hyprland session file not found!"
+    VERIFY_OK=false
 fi
 
-# Check if Hyprland binary exists
-if command -v Hyprland &>/dev/null; then
-    log "${OK} Hyprland binary found: $(which Hyprland)"
+# Check Hyprland binary
+if command -v Hyprland &>/dev/null || command -v hyprland &>/dev/null; then
+    log "${OK} Hyprland binary found"
 else
-    log "${WARN} Hyprland binary not found in PATH"
-    log "${INFO} Make sure Hyprland is installed before rebooting"
+    log "${WARN} Hyprland binary not in PATH (will be available after package install)"
 fi
 
-# List available sessions for debugging
+# List sessions for debugging
 log "${INFO} Available wayland sessions:"
 if [[ -d /usr/share/wayland-sessions ]]; then
     for session in /usr/share/wayland-sessions/*.desktop; do
@@ -264,6 +312,11 @@ if [[ -d /usr/share/wayland-sessions ]]; then
     done
 fi
 
-log "${OK} Ly display manager installation complete"
+if [[ "$VERIFY_OK" == true ]]; then
+    log "${OK} Ly display manager setup: ALL CHECKS PASSED"
+else
+    log "${WARN} Some checks needed fixing — review the log above"
+fi
+
 log "${INFO} Ly will appear on ${LY_TTY} after reboot"
 log "${INFO} Select 'Hyprland' from the session list and login"

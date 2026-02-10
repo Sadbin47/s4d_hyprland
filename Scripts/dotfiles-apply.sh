@@ -443,14 +443,13 @@ configure_status_bar() {
         # DMS replaces hypridle and polkit-gnome too
         sed -i 's|^exec-once = hypridle.*#HYPRIDLE_LINE|# exec-once = hypridle #HYPRIDLE_LINE|' "$hypr_conf"
         sed -i 's|^exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1.*#POLKIT_LINE|# exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 #POLKIT_LINE|' "$hypr_conf"
-        # Uncomment DMS line
+        # Uncomment DMS line (exec-once launch — do NOT use systemd service, they conflict)
         sed -i 's|^# *exec-once = dms run.*#BAR_DMS|exec-once = dms run #BAR_DMS|' "$hypr_conf"
-        # Uncomment DMS service line
-        sed -i 's|^# *exec-once = systemctl --user start dms.service.*#DMS_SERVICE|exec-once = systemctl --user start dms.service #DMS_SERVICE|' "$hypr_conf"
-        # Enable and start DMS systemd user service
-        systemctl --user daemon-reload 2>/dev/null || true
-        systemctl --user enable dms.service 2>/dev/null || true
-        systemctl --user start dms.service 2>/dev/null || true
+        # Increase wallpaper delay so DMS initializes first (DMS sets its own wallpaper/theme)
+        sed -i 's|sleep [0-9]* && ~/.config/hypr/scripts/wallpaper.sh restore.*#WALLPAPER_LINE|sleep 8 \&\& ~/.config/hypr/scripts/wallpaper.sh restore #WALLPAPER_LINE|' "$hypr_conf"
+        # Disable DMS systemd service if enabled (only use exec-once method)
+        systemctl --user disable dms.service 2>/dev/null || true
+        systemctl --user stop dms.service 2>/dev/null || true
         log "${OK} Configured DankMaterialShell as status bar (disabled waybar, swaync, hypridle, polkit)"
     else
         # Ensure waybar, swaync, hypridle, polkit are active
@@ -460,8 +459,11 @@ configure_status_bar() {
         sed -i 's|^# *exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1.*#POLKIT_LINE|exec-once = /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 #POLKIT_LINE|' "$hypr_conf"
         # Comment out DMS line
         sed -i 's|^exec-once = dms run.*#BAR_DMS|# exec-once = dms run #BAR_DMS|' "$hypr_conf"
-        # Comment out DMS service line
-        sed -i 's|^exec-once = systemctl --user start dms.service.*#DMS_SERVICE|# exec-once = systemctl --user start dms.service #DMS_SERVICE|' "$hypr_conf"
+        # Restore normal wallpaper delay
+        sed -i 's|sleep [0-9]* && ~/.config/hypr/scripts/wallpaper.sh restore.*#WALLPAPER_LINE|sleep 5 \&\& ~/.config/hypr/scripts/wallpaper.sh restore #WALLPAPER_LINE|' "$hypr_conf"
+        # Disable DMS service if it was previously enabled
+        systemctl --user disable dms.service 2>/dev/null || true
+        systemctl --user stop dms.service 2>/dev/null || true
         log "${OK} Configured Waybar as status bar"
     fi
 }

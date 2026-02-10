@@ -185,14 +185,8 @@ configuration_menu() {
     # 3. File Manager (Dolphin — only option, best Wayland integration)
     USER_CHOICES[file_manager]="dolphin"
 
-    # 4. Lockscreen
-    ask_choice "Lockscreen" \
-        "Hyprlock" \
-        "Hyprlock + Wlogout"
-    case $CHOICE in
-        1) USER_CHOICES[lockscreen]="hyprlock" ;;
-        2) USER_CHOICES[lockscreen]="both" ;;
-    esac
+    # 4. Lockscreen (hyprlock + wlogout always installed)
+    USER_CHOICES[lockscreen]="both"
 
     # 5. Dotfiles
     ask_choice "Dotfiles" \
@@ -241,7 +235,7 @@ configuration_menu() {
     echo -e "  ${DIM}Display Manager     ${NC}${WHITE}${USER_CHOICES[display_manager]}${NC}"
     echo -e "  ${DIM}Status Bar          ${NC}${WHITE}${USER_CHOICES[status_bar]}${NC}"
     echo -e "  ${DIM}File Manager        ${NC}${WHITE}dolphin${NC}"
-    echo -e "  ${DIM}Lockscreen          ${NC}${WHITE}${USER_CHOICES[lockscreen]}${NC}"
+    echo -e "  ${DIM}Lockscreen          ${NC}${WHITE}hyprlock + wlogout${NC}"
     echo -e "  ${DIM}Dotfiles            ${NC}${WHITE}${USER_CHOICES[dotfiles]}${NC}"
     echo -e "  ${DIM}ROG Support         ${NC}${WHITE}${USER_CHOICES[rog_laptop]}${NC}"
     echo -e "  ${DIM}Fonts               ${NC}${WHITE}${USER_CHOICES[install_fonts]}${NC}"
@@ -423,13 +417,25 @@ enable_services() {
             log "${OK} SDDM enabled"
             ;;
         ly)
-            # ly-install.sh handles full setup; ensure it's enabled
-            sudo systemctl disable "getty@tty2.service" 2>/dev/null || true
-            if systemctl list-unit-files 2>/dev/null | grep -q "ly@"; then
-                sudo systemctl enable --force "ly@tty2.service" 2>/dev/null || true
+            # ly-install.sh already handles full setup (enable service, mask getty,
+            # redirect autovt, set graphical.target). Just verify it stuck.
+            local ly_ok=false
+            for svc in "ly@tty2.service" "ly.service" "ly-dm.service"; do
+                if systemctl is-enabled "$svc" &>/dev/null 2>&1; then
+                    ly_ok=true
+                    break
+                fi
+            done
+            if [[ "$ly_ok" == false ]]; then
+                log "${WARN} Ly service not enabled — re-running setup"
+                sudo systemctl daemon-reload
+                sudo systemctl mask "getty@tty2.service" 2>/dev/null || true
+                sudo systemctl mask "autovt@tty2.service" 2>/dev/null || true
+                sudo systemctl enable --force "ly@tty2.service" 2>/dev/null || \
+                sudo systemctl enable --force "ly.service" 2>/dev/null || true
             fi
             sudo systemctl set-default graphical.target 2>/dev/null || true
-            log "${OK} Ly enabled"
+            log "${OK} Ly verified"
             ;;
     esac
 

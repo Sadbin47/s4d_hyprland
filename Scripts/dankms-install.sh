@@ -110,63 +110,17 @@ install_dms_source() {
 # SETUP DMS SYSTEMD SERVICE
 #=============================================================================
 setup_dms_service() {
-    log "${INFO} Setting up DMS systemd user service..."
+    log "${INFO} Setting up DMS launch configuration..."
 
-    mkdir -p "$HOME/.config/systemd/user"
+    # DMS is launched via exec-once in hyprland.conf, NOT via systemd user service.
+    # Using both methods causes conflicts (double-launch, wallpaper races).
+    # The exec-once method is more reliable and gives DMS direct access to
+    # the Hyprland environment variables without needing dbus workarounds.
 
-    # Detect actual DMS binary path
-    local dms_bin=""
-    if [[ -x /usr/bin/dms ]]; then
-        dms_bin="/usr/bin/dms"
-    elif [[ -x /usr/local/bin/dms ]]; then
-        dms_bin="/usr/local/bin/dms"
-    elif command -v dms &>/dev/null; then
-        dms_bin="$(command -v dms)"
-    else
-        log "${WARN} DMS binary not found — cannot create service"
-        return 1
-    fi
-
-    log "${INFO} DMS binary found at: $dms_bin"
-
-    # Check if AUR package already provides a service file
-    if [[ -f /usr/lib/systemd/user/dms.service ]]; then
-        log "${INFO} System-provided DMS service file found, using it"
-        systemctl --user daemon-reload
-        systemctl --user enable dms.service 2>/dev/null || true
-        log "${OK} DMS systemd service enabled (system-provided)"
-        return 0
-    fi
-
-    # Create DMS service file with detected binary path
-    cat > "$HOME/.config/systemd/user/dms.service" << EOF
-[Unit]
-Description=Dank Material Shell (DMS)
-PartOf=graphical-session.target
-After=graphical-session.target
-
-[Service]
-Type=simple
-ExecStart=${dms_bin} run
-ExecReload=/usr/bin/pkill -USR1 -x dms
-Restart=on-failure
-RestartSec=2
-TimeoutStopSec=10
-
-[Install]
-WantedBy=graphical-session.target
-EOF
-
-    # Reload and enable the service
-    systemctl --user daemon-reload
-    systemctl --user enable dms.service 2>/dev/null || true
-
-    # Verify service is enabled
-    if systemctl --user is-enabled dms.service &>/dev/null; then
-        log "${OK} DMS systemd service enabled"
-    else
-        log "${WARN} DMS service could not be enabled — try: systemctl --user enable dms.service"
-    fi
+    # Disable any previously enabled systemd service to avoid conflicts
+    systemctl --user stop dms.service 2>/dev/null || true
+    systemctl --user disable dms.service 2>/dev/null || true
+    log "${OK} DMS will launch via exec-once in hyprland.conf (no systemd service)"
 }
 
 #=============================================================================
