@@ -128,15 +128,25 @@ _cycle_layout() {
 }
 
 # ── Position Functions ───────────────────────────────────────────────────────
-# Sync vertical CSS override: append @import when left/right, strip it for top/bottom
+# Sync vertical CSS override: concatenate rules directly (CSS @import MUST be
+# before all other rules — appending an @import at the end is silently ignored).
 _sync_vertical_css() {
     local style_css="$WAYBAR_DIR/style.css"
+    local vertical_css="$WAYBAR_DIR/vertical.css"
     local pos; pos=$(get_current_position)
-    # Always remove any previous vertical import first
+
+    # Strip any previous vertical block + stale @import line
     sed -i '/@import "vertical.css";/d' "$style_css"
-    # Add it back if in vertical mode
-    if [[ "$pos" == "left" || "$pos" == "right" ]]; then
-        echo '@import "vertical.css";' >> "$style_css"
+    sed -i '/\/\* __VERTICAL_START__ \*\//,/\/\* __VERTICAL_END__ \*\//d' "$style_css"
+
+    # Append vertical rules directly if in vertical mode
+    if [[ "$pos" == "left" || "$pos" == "right" ]] && [[ -f "$vertical_css" ]]; then
+        {
+            echo '/* __VERTICAL_START__ */'
+            # Skip @import lines from vertical.css (mocha.css is already imported)
+            grep -v '^@import' "$vertical_css"
+            echo '/* __VERTICAL_END__ */'
+        } >> "$style_css"
     fi
 }
 
@@ -167,6 +177,8 @@ apply_position() {
             fi
             # Restore group orientations to horizontal
             sed -i 's/"orientation":[[:space:]]*"vertical"/"orientation": "horizontal"/g' "$config"
+            # Restore standard spacing
+            _set_json_num "$config" "spacing" 15
 
             # Margins
             _set_json_num "$config" "margin-left"   10
@@ -183,10 +195,12 @@ apply_position() {
             # ── Vertical bar: use width, remove height ──
             # Swap "height" to "width" for vertical sidebar
             if grep -q '"height"' "$config"; then
-                sed -i 's/"height":[[:space:]]*[0-9]*/"width": 44/' "$config"
+                sed -i 's/"height":[[:space:]]*[0-9]*/"width": 52/' "$config"
             fi
             # Flip all group orientations to vertical
             sed -i 's/"orientation":[[:space:]]*"horizontal"/"orientation": "vertical"/g' "$config"
+            # Compact spacing for vertical stacking
+            _set_json_num "$config" "spacing" 4
 
             # Margins
             _set_json_num "$config" "margin-top"    10

@@ -1,17 +1,23 @@
 /* ── Vertical Bar Overrides (left/right position) ──────────────────────────
- * Auto-toggled by waybar-style.sh when position is left or right.
- * Do NOT edit manually — this import is managed by the position switcher.
+ * Concatenated onto style.css by waybar-style.sh when position is left/right.
+ * These rules override horizontal defaults via CSS cascade (later = wins).
+ * Do NOT edit manually — managed by the position switcher.
  */
-@import "mocha.css";
+
+/* ── Force vertical bar dimensions ────────────────────────────────────── */
+#waybar {
+    min-width: 42px;
+}
 
 /* ── Core vertical adjustments ────────────────────────────────────────── */
 #waybar .module {
-    padding: 4px 0;
-    margin: 0;
+    padding: 4px 2px;
+    margin: 1px 0;
     font-size: 12px;
+    min-width: unset;
 }
 
-/* ── Pill groups: vertical padding ────────────────────────────────────── */
+/* ── Pill groups: vertical layout ─────────────────────────────────────── */
 #left-ws, #left-media, #left-system,
 #right-window, #right-hw, #right-status,
 #center-clock, #center-media, #center-primary,
@@ -19,31 +25,49 @@
 #center-info, #center-controls,
 #hw, #system, #status,
 #left, #center, #right {
-    padding: 6px 2px;
-    min-width: 36px;
+    padding: 6px 4px;
+    min-width: unset;
+    border-radius: 10px;
 }
 
 /* ── Workspaces: stacked buttons ──────────────────────────────────────── */
+#workspaces {
+    padding: 2px;
+}
 #workspaces button {
-    padding: 4px 0;
+    padding: 3px 0;
+    min-width: 24px;
+    min-height: 18px;
+    font-size: 11px;
+}
+#workspaces button.active {
+    padding: 3px 2px;
     min-width: 28px;
-    min-height: 20px;
-    font-size: 12px;
 }
 
-#workspaces button.active {
+/* ── Hide long text modules — icons only in vertical mode ─────────────── */
+#window label,
+#mpris label,
+#network label,
+#wireplumber label,
+#battery label,
+#backlight label,
+#bluetooth label,
+#idle_inhibitor label {
+    font-size: 0;
+}
+
+/* ── Keep icon-only modules visible ───────────────────────────────────── */
+#cpu, #memory, #temperature, #clock,
+#custom\/power, #custom\/notification,
+#custom\/previous, #custom\/pause, #custom\/next {
+    font-size: 12px;
     padding: 4px 2px;
 }
 
-/* ── Long text modules: truncate ──────────────────────────────────────── */
-#window label,
-#mpris label {
-    font-size: 0;   /* hide text — only show in tooltip */
-}
-
-/* ── Clock: compact vertical ──────────────────────────────────────────── */
+/* ── Clock: compact stacked format ────────────────────────────────────── */
 #clock {
-    padding: 4px 0;
+    padding: 4px 2px;
     font-size: 11px;
 }
 

@@ -93,6 +93,25 @@ EOF
 log "${OK} Ly configuration created"
 
 #=============================================================================
+# PAM CONFIGURATION — CRITICAL: Ly silently fails without this
+#=============================================================================
+log "${INFO} Ensuring PAM configuration for Ly..."
+
+# Check if the package installed a PAM file; if not, create one
+if [[ ! -f /etc/pam.d/ly ]]; then
+    cat << 'PAMEOF' | sudo tee /etc/pam.d/ly >/dev/null
+#%PAM-1.0
+auth       include    login
+account    include    login
+password   include    login
+session    include    login
+PAMEOF
+    log "${OK} Created /etc/pam.d/ly (PAM authentication)"
+else
+    log "${OK} /etc/pam.d/ly already exists"
+fi
+
+#=============================================================================
 # DISABLE ALL COMPETING DISPLAY MANAGERS
 #=============================================================================
 
@@ -167,6 +186,7 @@ Before=getty@%i.service
 
 [Service]
 Type=idle
+ExecStartPre=/usr/bin/chvt %I
 ExecStart=${LY_BIN}
 StandardInput=tty
 TTYPath=/dev/%i
@@ -174,8 +194,8 @@ TTYReset=yes
 TTYVHangup=yes
 PAMName=ly
 UtmpIdentifier=%I
-Restart=on-failure
-RestartSec=3
+Restart=always
+RestartSec=2
 
 [Install]
 WantedBy=graphical.target
@@ -318,5 +338,61 @@ else
     log "${WARN} Some checks needed fixing — review the log above"
 fi
 
+#=============================================================================
+# PATCH EXISTING SERVICE FILE: Ensure chvt + Restart=always
+#=============================================================================
+# Package-provided service files may lack chvt (causes Ly to fail on TTY grab)
+if [[ -n "$LY_SVC_FILE" && -f "$LY_SVC_FILE" ]]; then
+    # Add ExecStartPre=chvt if missing
+    if ! grep -q "ExecStartPre.*chvt" "$LY_SVC_FILE"; then
+        sudo sed -i '/^ExecStart=/i ExecStartPre=/usr/bin/chvt %I' "$LY_SVC_FILE"
+        log "${OK} Patched $LY_SVC_FILE: added ExecStartPre=chvt"
+    fi
+    # Upgrade Restart from on-failure to always
+    if grep -q "Restart=on-failure" "$LY_SVC_FILE"; then
+        sudo sed -i 's/Restart=on-failure/Restart=always/' "$LY_SVC_FILE"
+        log "${OK} Patched $LY_SVC_FILE: Restart=always"
+    fi
+    sudo systemctl daemon-reload
+fi
+
+#=============================================================================
+# TTY AUTO-START FALLBACK (safety net if Ly ever fails to launch)
+#=============================================================================
+# If the user ends up at a raw TTY login on tty1/tty2, auto-start Hyprland
+# after login — so they never get stuck at a blank TTY.
+log "${INFO} Adding TTY auto-start fallback to .zprofile..."
+
+S4D_ZPROFILE="$HOME/.zprofile"
+if [[ -f "$S4D_ZPROFILE" ]] && ! grep -q 'HYPRLAND_TTY_AUTOSTART' "$S4D_ZPROFILE"; then
+    cat << 'AUTOEOF' >> "$S4D_ZPROFILE"
+
+# ── Auto-start Hyprland from TTY (fallback if DM fails) ── #HYPRLAND_TTY_AUTOSTART
+if [[ -z "$DISPLAY" && -z "$WAYLAND_DISPLAY" ]] && [[ "$(tty)" == /dev/tty[12] ]]; then
+    echo "Starting Hyprland..."
+    exec Hyprland
+fi
+AUTOEOF
+    log "${OK} Added TTY auto-start fallback to .zprofile"
+fi
+
+#=============================================================================
+# CREATE start-hyprland HELPER
+#=============================================================================
+mkdir -p "$HOME/.local/bin"
+
+cat << 'HELPEREOF' > "$HOME/.local/bin/start-hyprland"
+#!/bin/sh
+# Convenience launcher — use if you end up at a raw TTY
+if [ -n "$WAYLAND_DISPLAY" ] || [ -n "$DISPLAY" ]; then
+    echo "A graphical session is already running."
+    exit 1
+fi
+exec Hyprland
+HELPEREOF
+chmod +x "$HOME/.local/bin/start-hyprland"
+log "${OK} Created ~/.local/bin/start-hyprland helper"
+
 log "${INFO} Ly will appear on ${LY_TTY} after reboot"
 log "${INFO} Select 'Hyprland' from the session list and login"
+log "${INFO} If Ly fails, logging in at TTY will auto-start Hyprland"

@@ -43,3 +43,9 @@ export HYPRCURSOR_SIZE=24
 # ── Misc ──
 export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR}/ssh-agent.socket"
 export LESSHISTFILE=-
+
+# ── Auto-start Hyprland from TTY (fallback if DM fails) ── #HYPRLAND_TTY_AUTOSTART
+if [[ -z "$DISPLAY" && -z "$WAYLAND_DISPLAY" ]] && [[ "$(tty)" == /dev/tty[12] ]]; then
+    echo "Starting Hyprland..."
+    exec Hyprland
+fi
