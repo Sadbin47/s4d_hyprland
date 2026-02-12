@@ -1,0 +1,73 @@
+// s4d Layout: Kanji — Japanese numeral workspace icons, center clock emphasis
+// Left: kanji workspaces | Center: big clock & date | Right: icon-only status row
+{
+  "layer": "top",
+  "position": "top",
+  "height": 30,
+  "margin-left": 10,
+  "margin-right": 10,
+  "margin-top": 5,
+  "margin-bottom": 0,
+  "spacing": 15,
+  "reload_style_on_change": true,
+
+  "modules-left": [
+    "group/left-ws",
+    "group/left-window"
+  ],
+  "modules-center": [
+    "group/center-clock"
+  ],
+  "modules-right": [
+    "group/right-icons",
+    "group/right-controls"
+  ],
+
+  "group/left-ws": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/workspaces"]
+  },
+  "group/left-window": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/window"]
+  },
+  "group/center-clock": {
+    "orientation": "horizontal",
+    "modules": ["clock"]
+  },
+  "group/right-icons": {
+    "orientation": "horizontal",
+    "modules": ["cpu", "memory", "temperature", "network", "wireplumber"]
+  },
+  "group/right-controls": {
+    "orientation": "horizontal",
+    "modules": ["backlight", "battery", "idle_inhibitor", "custom/notification", "custom/power"]
+  },
+
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "all-outputs": true,
+    "format": "{icon}",
+    "format-icons": {
+      "1": "一", "2": "二", "3": "三", "4": "四", "5": "五",
+      "6": "六", "7": "七", "8": "八", "9": "九", "10": "十"
+    },
+    "persistent-workspaces": { "*": 5 }
+  },
+  "hyprland/window": { "format": " 󰶞 {}", "max-length": 30, "separate-outputs": false },
+  "clock": {
+    "format": "  {:%H:%M  ·  %A}  ",
+    "format-alt": "  {:%Y年 %m月 %d日}  ",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+  },
+  "cpu": { "interval": 3, "format": "" },
+  "memory": { "interval": 3, "format": "" },
+  "temperature": { "critical-threshold": 80, "interval": 3, "format": "", "format-critical": "" },
+  "network": { "format-wifi": "{icon}", "format-disconnected": "󰖪", "format-icons": { "wifi": ["󰤯","󰤟","󰤢","󰤥","󰤨"] }, "tooltip-format-wifi": "{essid} ({signalStrength}%)\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}", "on-click": "nm-connection-editor" },
+  "wireplumber": { "format": "{icon}", "format-muted": "󰖁", "format-icons": ["", "", ""], "tooltip-format": "Volume: {volume}%", "on-click": "pavucontrol" },
+  "backlight": { "format": "{icon}", "format-icons": ["", "", "", "", ""], "tooltip-format": "Brightness: {percent}%" },
+  "battery": { "states": { "good": 95, "warning": 30, "critical": 15 }, "format": "{icon}", "format-alt": "{icon} {capacity}%", "format-plugged": "", "format-icons": [" "," "," "," "] },
+  "idle_inhibitor": { "format": "{icon}", "format-icons": { "activated": "󰅶", "deactivated": "󰛊" } },
+  "custom/power": { "format": "⏻", "on-click": "wlogout -b 4 -c 0 -r 0 -m 0 --protocol layer-shell 2>/dev/null" },
+  "custom/notification": { "format": "󰂚", "on-click": "swaync-client -t -sw" }
+}

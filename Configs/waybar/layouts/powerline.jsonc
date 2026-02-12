@@ -1,0 +1,85 @@
+// s4d Layout: Powerline — Dense single-row info bar, everything visible
+// All three sections packed, no wasted space, full-width
+{
+  "layer": "top",
+  "position": "top",
+  "height": 28,
+  "margin-left": 0,
+  "margin-right": 0,
+  "margin-top": 0,
+  "margin-bottom": 0,
+  "spacing": 0,
+  "reload_style_on_change": true,
+
+  "modules-left": [
+    "group/left-power",
+    "group/left-ws",
+    "group/left-window"
+  ],
+  "modules-center": [
+    "group/center-media"
+  ],
+  "modules-right": [
+    "group/right-hw",
+    "group/right-net",
+    "group/right-status"
+  ],
+
+  "group/left-power": {
+    "orientation": "horizontal",
+    "modules": ["custom/power"]
+  },
+  "group/left-ws": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/workspaces"]
+  },
+  "group/left-window": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/window"]
+  },
+  "group/center-media": {
+    "orientation": "horizontal",
+    "modules": ["custom/previous", "mpris", "custom/next"]
+  },
+  "group/right-hw": {
+    "orientation": "horizontal",
+    "modules": ["cpu", "temperature", "memory"]
+  },
+  "group/right-net": {
+    "orientation": "horizontal",
+    "modules": ["network", "wireplumber", "backlight"]
+  },
+  "group/right-status": {
+    "orientation": "horizontal",
+    "modules": ["battery", "idle_inhibitor", "custom/notification", "tray", "clock"]
+  },
+
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "all-outputs": true,
+    "format": "{name}",
+    "persistent-workspaces": { "*": 5 }
+  },
+  "hyprland/window": { "format": " {} ", "max-length": 40, "separate-outputs": false },
+  "mpris": {
+    "format": "{player_icon} {title} — {artist}",
+    "format-paused": "{status_icon} {title}",
+    "player-icons": { "default": "󰝚", "spotify": "󰓇", "firefox": "󰗃" },
+    "status-icons": { "paused": "󰏤" },
+    "max-length": 35
+  },
+  "custom/previous": { "format": "󰙣", "on-click": "playerctl previous", "tooltip": false },
+  "custom/next": { "format": "󰙡", "on-click": "playerctl next", "tooltip": false },
+  "clock": { "format": " {:%H:%M}", "format-alt": " {:%a %d %b}", "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>" },
+  "cpu": { "interval": 3, "format": " {usage}%" },
+  "temperature": { "critical-threshold": 80, "interval": 3, "format": " {temperatureC}°C" },
+  "memory": { "interval": 3, "format": " {percentage}%" },
+  "network": { "format-wifi": " {essid}", "format-disconnected": "󰖪 Off", "on-click": "nm-connection-editor" },
+  "wireplumber": { "format": "{icon} {volume}%", "format-muted": "󰖁", "format-icons": ["", "", ""], "on-click": "pavucontrol" },
+  "backlight": { "format": " {percent}%", "tooltip-format": "Brightness: {percent}%" },
+  "battery": { "format": "{icon} {capacity}%", "format-plugged": " {capacity}%", "format-icons": [" "," "," "," "], "states": { "warning": 30, "critical": 15 } },
+  "idle_inhibitor": { "format": "{icon}", "format-icons": { "activated": "󰅶", "deactivated": "󰛊" } },
+  "custom/power": { "format": "  ", "on-click": "wlogout -b 4 -c 0 -r 0 -m 0 --protocol layer-shell 2>/dev/null" },
+  "custom/notification": { "format": "󰂚", "on-click": "swaync-client -t -sw" },
+  "tray": { "icon-size": 14, "spacing": 6, "show-passive-items": true }
+}

@@ -1,0 +1,85 @@
+// s4d Layout: macOS — Apple-inspired top bar
+// Left: logo + menu + ws | Center: window title | Right: tray + status + clock
+{
+  "layer": "top",
+  "position": "top",
+  "height": 28,
+  "margin-left": 0,
+  "margin-right": 0,
+  "margin-top": 0,
+  "margin-bottom": 0,
+  "spacing": 8,
+  "reload_style_on_change": true,
+
+  "modules-left": [
+    "group/left-apple",
+    "group/left-ws"
+  ],
+  "modules-center": [
+    "group/center-window"
+  ],
+  "modules-right": [
+    "group/right-tray",
+    "group/right-status",
+    "group/right-clock"
+  ],
+
+  "group/left-apple": {
+    "orientation": "horizontal",
+    "modules": ["custom/apple", "custom/power"]
+  },
+  "group/left-ws": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/workspaces"]
+  },
+  "group/center-window": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/window"]
+  },
+  "group/right-tray": {
+    "orientation": "horizontal",
+    "modules": ["tray"]
+  },
+  "group/right-status": {
+    "orientation": "horizontal",
+    "modules": ["bluetooth", "network", "wireplumber", "backlight", "battery"]
+  },
+  "group/right-clock": {
+    "orientation": "horizontal",
+    "modules": ["custom/notification", "clock"]
+  },
+
+  "custom/apple": {
+    "format": "  ",
+    "tooltip": false
+  },
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "all-outputs": true,
+    "format": "{icon}",
+    "format-icons": {
+      "active": "●",
+      "default": "○",
+      "empty": "○"
+    },
+    "persistent-workspaces": { "*": 5 }
+  },
+  "hyprland/window": {
+    "format": "<b>{}</b>",
+    "max-length": 45,
+    "separate-outputs": false,
+    "rewrite": { "": "Desktop" }
+  },
+  "clock": {
+    "format": "{:%a %b %d  %H:%M}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+  },
+  "bluetooth": { "format": "󰂯", "format-off": "󰂲", "format-connected": "󰂱", "on-click": "blueman-manager" },
+  "network": { "format-wifi": "  ", "format-ethernet": "󰌗 ", "format-disconnected": "󰖪 ", "tooltip-format-wifi": "{essid} ({signalStrength}%)", "on-click": "nm-connection-editor" },
+  "wireplumber": { "format": "{icon} ", "format-muted": "󰖁 ", "format-icons": ["", "", ""], "tooltip-format": "Volume: {volume}%", "on-click": "pavucontrol" },
+  "backlight": { "format": "{icon} ", "format-icons": ["", "", "", "", ""], "tooltip-format": "Brightness: {percent}%" },
+  "battery": { "states": { "good": 95, "warning": 30, "critical": 15 }, "format": "{icon} {capacity}%", "format-plugged": " {capacity}%", "format-icons": ["", "", "", ""] },
+  "custom/power": { "format": "", "on-click": "wlogout -b 4 -c 0 -r 0 -m 0 --protocol layer-shell 2>/dev/null" },
+  "custom/notification": { "format": "󰂚", "on-click": "swaync-client -t -sw" },
+  "tray": { "icon-size": 16, "spacing": 8, "show-passive-items": true }
+}

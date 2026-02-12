@@ -1,0 +1,65 @@
+// s4d Layout: Split — Two separated islands, empty center
+// Left island: workspaces + media | Right island: status + clock
+{
+  "layer": "top",
+  "position": "top",
+  "height": 30,
+  "margin-left": 10,
+  "margin-right": 10,
+  "margin-top": 5,
+  "margin-bottom": 0,
+  "spacing": 15,
+  "reload_style_on_change": true,
+
+  "modules-left": [
+    "group/left-ws",
+    "group/left-media"
+  ],
+  "modules-center": [],
+  "modules-right": [
+    "group/right-system",
+    "group/right-time"
+  ],
+
+  "group/left-ws": {
+    "orientation": "horizontal",
+    "modules": ["custom/power", "hyprland/workspaces"]
+  },
+  "group/left-media": {
+    "orientation": "horizontal",
+    "modules": ["mpris"]
+  },
+  "group/right-system": {
+    "orientation": "horizontal",
+    "modules": ["backlight", "wireplumber", "network", "battery"]
+  },
+  "group/right-time": {
+    "orientation": "horizontal",
+    "modules": ["idle_inhibitor", "custom/notification", "clock"]
+  },
+
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "all-outputs": true,
+    "format": "{name}",
+    "persistent-workspaces": { "*": 5 }
+  },
+  "mpris": {
+    "format": "{player_icon} {title}",
+    "format-paused": "{status_icon} {title}",
+    "player-icons": { "default": "󰝚 ", "spotify": "󰓇 ", "firefox": "󰗃 " },
+    "status-icons": { "paused": "󰏤 " },
+    "max-length": 30
+  },
+  "clock": {
+    "format": "  {:%H:%M · %b %d}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+  },
+  "backlight": { "format": "{icon}", "format-icons": ["", "", "", "", "", "", "", "", ""], "tooltip-format": "Brightness: {percent}%" },
+  "wireplumber": { "format": "{icon}", "format-muted": "󰖁", "format-icons": ["", "", ""], "tooltip-format": "Volume: {volume}%", "on-click": "pavucontrol" },
+  "network": { "format-wifi": "{icon}", "format-disconnected": "󰖪", "format-icons": { "wifi": ["󰤯","󰤟","󰤢","󰤥","󰤨"] }, "on-click": "nm-connection-editor" },
+  "battery": { "states": { "good": 95, "warning": 30, "critical": 15 }, "format": "{icon}", "format-alt": "{icon} {capacity}%", "format-plugged": "", "format-icons": [" "," "," "," "] },
+  "idle_inhibitor": { "format": "{icon}", "format-icons": { "activated": "󰅶", "deactivated": "󰛊" } },
+  "custom/power": { "format": "", "on-click": "wlogout -b 4 -c 0 -r 0 -m 0 --protocol layer-shell 2>/dev/null", "tooltip-format": "Power Menu" },
+  "custom/notification": { "format": "󰂚", "on-click": "swaync-client -t -sw" }
+}

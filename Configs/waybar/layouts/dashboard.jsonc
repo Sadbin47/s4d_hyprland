@@ -1,0 +1,103 @@
+// s4d Layout: Dashboard — Full monitoring, every stat visible
+// Packed with all hw modules in expanded format, tray, bluetooth
+{
+  "layer": "top",
+  "position": "top",
+  "height": 32,
+  "margin-left": 6,
+  "margin-right": 6,
+  "margin-top": 5,
+  "margin-bottom": 0,
+  "spacing": 10,
+  "reload_style_on_change": true,
+
+  "modules-left": [
+    "group/left-ws",
+    "group/left-hw",
+    "group/left-thermal"
+  ],
+  "modules-center": [
+    "group/center-media"
+  ],
+  "modules-right": [
+    "group/right-net",
+    "group/right-power",
+    "group/right-clock"
+  ],
+
+  "group/left-ws": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/workspaces"]
+  },
+  "group/left-hw": {
+    "orientation": "horizontal",
+    "modules": ["cpu", "memory"]
+  },
+  "group/left-thermal": {
+    "orientation": "horizontal",
+    "modules": ["temperature"]
+  },
+  "group/center-media": {
+    "orientation": "horizontal",
+    "modules": ["custom/previous", "mpris", "custom/pause", "custom/next"]
+  },
+  "group/right-net": {
+    "orientation": "horizontal",
+    "modules": ["network", "network#speed", "bluetooth"]
+  },
+  "group/right-power": {
+    "orientation": "horizontal",
+    "modules": ["backlight", "wireplumber", "battery", "tray"]
+  },
+  "group/right-clock": {
+    "orientation": "horizontal",
+    "modules": ["idle_inhibitor", "custom/notification", "clock", "custom/power"]
+  },
+
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "all-outputs": true,
+    "format": "{name}",
+    "persistent-workspaces": { "*": 5 }
+  },
+  "cpu": { "interval": 2, "format": " {usage:>2}%  {avg_frequency:0.1f}GHz", "on-click": "kitty -e btop" },
+  "memory": { "interval": 2, "format": " {used:0.1f}G / {total:0.1f}G", "on-click": "kitty -e btop" },
+  "temperature": { "critical-threshold": 80, "interval": 2, "format": " {temperatureC}°C", "format-critical": " {temperatureC}°C 🔥" },
+  "network": {
+    "format-wifi": " {essid} ({signalStrength}%)",
+    "format-ethernet": "󰌗 {ifname}",
+    "format-disconnected": "󰖪 Disconnected",
+    "on-click": "nm-connection-editor"
+  },
+  "network#speed": { "interval": 2, "format": "⇣{bandwidthDownBytes} ⇡{bandwidthUpBytes}" },
+  "bluetooth": { "format": "󰂯 {status}", "format-off": "󰂲", "format-connected": "󰂱 {num_connections}", "on-click": "blueman-manager" },
+  "backlight": { "format": " {percent}%", "tooltip-format": "Brightness: {percent}%" },
+  "wireplumber": { "format": "{icon} {volume}%", "format-muted": "󰖁 muted", "format-icons": ["", "", ""], "on-click": "pavucontrol" },
+  "battery": {
+    "states": { "good": 95, "warning": 30, "critical": 15 },
+    "format": "{icon} {capacity}% {power:0.1f}W",
+    "format-plugged": " {capacity}%",
+    "format-icons": [" "," "," "," "],
+    "tooltip-format": "{capacity}% — {timeTo}"
+  },
+  "mpris": {
+    "format": "{player_icon} {title} — {artist}",
+    "format-paused": "{status_icon} {title}",
+    "player-icons": { "default": "󰝚", "spotify": "󰓇", "firefox": "󰗃" },
+    "status-icons": { "paused": "󰏤" },
+    "max-length": 30
+  },
+  "custom/previous": { "format": "󰙣", "on-click": "playerctl previous", "tooltip": false },
+  "custom/pause": { "format": "󰐎", "on-click": "playerctl play-pause", "tooltip": false },
+  "custom/next": { "format": "󰙡", "on-click": "playerctl next", "tooltip": false },
+  "clock": {
+    "format": "  {:%H:%M:%S}",
+    "interval": 1,
+    "format-alt": "  {:%A, %B %d %Y}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+  },
+  "idle_inhibitor": { "format": "{icon}", "format-icons": { "activated": "󰅶", "deactivated": "󰛊" } },
+  "custom/power": { "format": "⏻", "on-click": "wlogout -b 4 -c 0 -r 0 -m 0 --protocol layer-shell 2>/dev/null" },
+  "custom/notification": { "format": "󰂚", "on-click": "swaync-client -t -sw" },
+  "tray": { "icon-size": 16, "spacing": 8, "show-passive-items": true }
+}

@@ -1,0 +1,68 @@
+// s4d Layout: Centered — Symmetric wings around a central clock island
+// Left: workspaces + system | Center: clock pill | Right: hw + controls
+{
+  "layer": "top",
+  "position": "top",
+  "height": 30,
+  "margin-left": 10,
+  "margin-right": 10,
+  "margin-top": 5,
+  "margin-bottom": 0,
+  "spacing": 15,
+  "reload_style_on_change": true,
+
+  "modules-left": [
+    "group/left-ws",
+    "group/left-sys"
+  ],
+  "modules-center": [
+    "group/center-clock"
+  ],
+  "modules-right": [
+    "group/right-hw",
+    "group/right-controls"
+  ],
+
+  "group/left-ws": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/workspaces"]
+  },
+  "group/left-sys": {
+    "orientation": "horizontal",
+    "modules": ["backlight", "wireplumber", "network"]
+  },
+  "group/center-clock": {
+    "orientation": "horizontal",
+    "modules": ["custom/power", "clock", "custom/notification"]
+  },
+  "group/right-hw": {
+    "orientation": "horizontal",
+    "modules": ["cpu", "temperature", "memory"]
+  },
+  "group/right-controls": {
+    "orientation": "horizontal",
+    "modules": ["idle_inhibitor", "battery", "tray"]
+  },
+
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "all-outputs": true,
+    "format": "{name}",
+    "persistent-workspaces": { "*": 5 }
+  },
+  "clock": {
+    "format": "  {:%H:%M  · %a %d}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+  },
+  "cpu": { "interval": 3, "format": " {usage:>2}%", "on-click": "kitty -e btop" },
+  "temperature": { "critical-threshold": 80, "interval": 3, "format": " {temperatureC:>2}°C" },
+  "memory": { "interval": 3, "format": " {:>2}%", "on-click": "kitty -e btop" },
+  "backlight": { "format": "{icon}", "format-icons": ["", "", "", "", "", "", "", "", ""], "tooltip-format": "Brightness: {percent}%" },
+  "wireplumber": { "format": "{icon}", "format-muted": "󰖁", "format-icons": ["", "", ""], "tooltip-format": "Volume: {volume}%", "on-click": "pavucontrol" },
+  "network": { "format-wifi": "{icon}", "format-ethernet": "󰌗", "format-disconnected": "󰖪", "format-icons": { "wifi": ["󰤯","󰤟","󰤢","󰤥","󰤨"] }, "on-click": "nm-connection-editor" },
+  "battery": { "states": { "good": 95, "warning": 30, "critical": 15 }, "format": "{icon} {capacity}%", "format-plugged": " {capacity}%", "format-icons": [" "," "," "," "] },
+  "idle_inhibitor": { "format": "{icon}", "format-icons": { "activated": "󰅶", "deactivated": "󰛊" } },
+  "custom/power": { "format": "", "on-click": "wlogout -b 4 -c 0 -r 0 -m 0 --protocol layer-shell 2>/dev/null", "tooltip-format": "Power Menu" },
+  "custom/notification": { "format": "󰂚", "on-click": "swaync-client -t -sw", "tooltip-format": "Notifications" },
+  "tray": { "icon-size": 16, "spacing": 8, "show-passive-items": true }
+}

@@ -1,0 +1,58 @@
+// s4d Layout: Dock — Bottom bar, macOS dock feel
+// Center-heavy: workspaces in center, flanked by status info
+{
+  "layer": "top",
+  "position": "bottom",
+  "height": 34,
+  "margin-left": 200,
+  "margin-right": 200,
+  "margin-top": 0,
+  "margin-bottom": 6,
+  "spacing": 12,
+  "reload_style_on_change": true,
+
+  "modules-left": [
+    "group/left-power"
+  ],
+  "modules-center": [
+    "group/center-ws"
+  ],
+  "modules-right": [
+    "group/right-info"
+  ],
+
+  "group/left-power": {
+    "orientation": "horizontal",
+    "modules": ["custom/power", "idle_inhibitor", "custom/notification"]
+  },
+  "group/center-ws": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/workspaces"]
+  },
+  "group/right-info": {
+    "orientation": "horizontal",
+    "modules": ["wireplumber", "network", "battery", "clock"]
+  },
+
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "all-outputs": true,
+    "format": "{icon}",
+    "format-icons": {
+      "1": "一", "2": "二", "3": "三", "4": "四", "5": "五",
+      "active": "󰮯", "default": "󰊠"
+    },
+    "persistent-workspaces": { "*": 5 }
+  },
+  "clock": {
+    "format": "{:%H:%M}",
+    "format-alt": "{:%a %b %d}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+  },
+  "wireplumber": { "format": "{icon} {volume}%", "format-muted": "󰖁 muted", "format-icons": ["", "", ""], "on-click": "pavucontrol" },
+  "network": { "format-wifi": "  {essid}", "format-ethernet": "󰌗  Wired", "format-disconnected": "󰖪  Off", "on-click": "nm-connection-editor" },
+  "battery": { "states": { "good": 95, "warning": 30, "critical": 15 }, "format": "{icon} {capacity}%", "format-plugged": " {capacity}%", "format-icons": [" "," "," "," "] },
+  "idle_inhibitor": { "format": "{icon}", "format-icons": { "activated": "󰅶", "deactivated": "󰛊" } },
+  "custom/power": { "format": "⏻", "on-click": "wlogout -b 4 -c 0 -r 0 -m 0 --protocol layer-shell 2>/dev/null", "tooltip-format": "Power Menu" },
+  "custom/notification": { "format": "󰂚", "on-click": "swaync-client -t -sw", "tooltip-format": "Notifications" }
+}

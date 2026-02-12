@@ -1,0 +1,59 @@
+// s4d Layout: Focus — Distraction-free, workspace + window title emphasis
+// Left: workspaces only | Center: active window (prominent) | Right: clock only
+{
+  "layer": "top",
+  "position": "top",
+  "height": 30,
+  "margin-left": 10,
+  "margin-right": 10,
+  "margin-top": 5,
+  "margin-bottom": 0,
+  "spacing": 15,
+  "reload_style_on_change": true,
+
+  "modules-left": [
+    "group/left-ws"
+  ],
+  "modules-center": [
+    "group/center-window"
+  ],
+  "modules-right": [
+    "group/right-clock"
+  ],
+
+  "group/left-ws": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/workspaces"]
+  },
+  "group/center-window": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/window"]
+  },
+  "group/right-clock": {
+    "orientation": "horizontal",
+    "modules": ["clock"]
+  },
+
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "all-outputs": true,
+    "format": "{icon}",
+    "format-icons": {
+      "active": "●",
+      "default": "○",
+      "empty": "○"
+    },
+    "persistent-workspaces": { "*": 5 }
+  },
+  "hyprland/window": {
+    "format": "{}",
+    "max-length": 60,
+    "separate-outputs": false,
+    "rewrite": { "": "~ desktop ~" }
+  },
+  "clock": {
+    "format": "{:%H:%M}",
+    "format-alt": "{:%A, %B %d %Y}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+  }
+}

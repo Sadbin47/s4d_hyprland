@@ -1,0 +1,72 @@
+// s4d Layout: Statusline — Vim-inspired bottom status line
+// Left: power + ws mode | Center: window title | Right: hw + time
+{
+  "layer": "top",
+  "position": "bottom",
+  "height": 26,
+  "margin-left": 0,
+  "margin-right": 0,
+  "margin-top": 0,
+  "margin-bottom": 0,
+  "spacing": 0,
+  "reload_style_on_change": true,
+
+  "modules-left": [
+    "group/left-mode",
+    "group/left-ws"
+  ],
+  "modules-center": [
+    "group/center-window"
+  ],
+  "modules-right": [
+    "group/right-hw",
+    "group/right-info"
+  ],
+
+  "group/left-mode": {
+    "orientation": "horizontal",
+    "modules": ["custom/power", "idle_inhibitor"]
+  },
+  "group/left-ws": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/workspaces"]
+  },
+  "group/center-window": {
+    "orientation": "horizontal",
+    "modules": ["hyprland/window"]
+  },
+  "group/right-hw": {
+    "orientation": "horizontal",
+    "modules": ["cpu", "memory", "temperature"]
+  },
+  "group/right-info": {
+    "orientation": "horizontal",
+    "modules": ["network", "wireplumber", "battery", "clock"]
+  },
+
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "all-outputs": true,
+    "format": "[{name}]",
+    "persistent-workspaces": { "*": 5 }
+  },
+  "hyprland/window": {
+    "format": "{}",
+    "max-length": 50,
+    "separate-outputs": false,
+    "rewrite": { "": "[No Name]" }
+  },
+  "clock": {
+    "format": "{:%H:%M}",
+    "format-alt": "{:%Y-%m-%d}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+  },
+  "cpu": { "interval": 3, "format": "cpu:{usage}%" },
+  "memory": { "interval": 3, "format": "mem:{percentage}%" },
+  "temperature": { "critical-threshold": 80, "interval": 3, "format": "tmp:{temperatureC}°C" },
+  "network": { "format-wifi": "net:up", "format-disconnected": "net:down", "on-click": "nm-connection-editor" },
+  "wireplumber": { "format": "vol:{volume}%", "format-muted": "vol:muted", "on-click": "pavucontrol" },
+  "battery": { "states": { "warning": 30, "critical": 15 }, "format": "bat:{capacity}%", "format-plugged": "bat:AC", "format-icons": [" "," "," "," "] },
+  "idle_inhibitor": { "format": "{icon}", "format-icons": { "activated": "󰅶", "deactivated": "󰛊" } },
+  "custom/power": { "format": "", "on-click": "wlogout -b 4 -c 0 -r 0 -m 0 --protocol layer-shell 2>/dev/null" }
+}
