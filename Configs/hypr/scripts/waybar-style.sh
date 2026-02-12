@@ -63,6 +63,8 @@ set_style() {
         echo "Error: style '$name' not found"; list_styles; return 1
     fi
     cp -f "$target" "$WAYBAR_DIR/style.css"
+    # Re-apply vertical override if bar is currently in left/right position
+    _sync_vertical_css
     echo "$name" > "$CURRENT_STYLE_FILE"
     restart_waybar
     notify "  Style" "→ $name"
@@ -126,6 +128,18 @@ _cycle_layout() {
 }
 
 # ── Position Functions ───────────────────────────────────────────────────────
+# Sync vertical CSS override: append @import when left/right, strip it for top/bottom
+_sync_vertical_css() {
+    local style_css="$WAYBAR_DIR/style.css"
+    local pos; pos=$(get_current_position)
+    # Always remove any previous vertical import first
+    sed -i '/@import "vertical.css";/d' "$style_css"
+    # Add it back if in vertical mode
+    if [[ "$pos" == "left" || "$pos" == "right" ]]; then
+        echo '@import "vertical.css";' >> "$style_css"
+    fi
+}
+
 apply_position() {
     local pos="$1"
     local config="$WAYBAR_DIR/config.jsonc"
@@ -144,31 +158,53 @@ apply_position() {
         sed -i '0,/{/a\  "position": "'"$pos"'",' "$config"
     fi
 
-    # Adjust margins based on position for a clean look
     case "$pos" in
-        top)
-            _set_json_num "$config" "margin-top"    5
-            _set_json_num "$config" "margin-bottom"  0
+        top|bottom)
+            # ── Horizontal bar: use height, remove width ──
+            # Swap "width" back to "height" if previously set for vertical
+            if grep -q '"width"' "$config"; then
+                sed -i 's/"width":[[:space:]]*[0-9]*/"height": 30/' "$config"
+            fi
+            # Restore group orientations to horizontal
+            sed -i 's/"orientation":[[:space:]]*"vertical"/"orientation": "horizontal"/g' "$config"
+
+            # Margins
+            _set_json_num "$config" "margin-left"   10
+            _set_json_num "$config" "margin-right"  10
+            if [[ "$pos" == "top" ]]; then
+                _set_json_num "$config" "margin-top"    5
+                _set_json_num "$config" "margin-bottom"  0
+            else
+                _set_json_num "$config" "margin-top"    0
+                _set_json_num "$config" "margin-bottom"  5
+            fi
             ;;
-        bottom)
-            _set_json_num "$config" "margin-top"    0
-            _set_json_num "$config" "margin-bottom"  5
-            ;;
-        left)
-            _set_json_num "$config" "margin-left"   5
-            _set_json_num "$config" "margin-right"   0
+        left|right)
+            # ── Vertical bar: use width, remove height ──
+            # Swap "height" to "width" for vertical sidebar
+            if grep -q '"height"' "$config"; then
+                sed -i 's/"height":[[:space:]]*[0-9]*/"width": 44/' "$config"
+            fi
+            # Flip all group orientations to vertical
+            sed -i 's/"orientation":[[:space:]]*"horizontal"/"orientation": "vertical"/g' "$config"
+
+            # Margins
             _set_json_num "$config" "margin-top"    10
             _set_json_num "$config" "margin-bottom" 10
-            ;;
-        right)
-            _set_json_num "$config" "margin-left"   0
-            _set_json_num "$config" "margin-right"   5
-            _set_json_num "$config" "margin-top"    10
-            _set_json_num "$config" "margin-bottom" 10
+            if [[ "$pos" == "left" ]]; then
+                _set_json_num "$config" "margin-left"   5
+                _set_json_num "$config" "margin-right"   0
+            else
+                _set_json_num "$config" "margin-left"   0
+                _set_json_num "$config" "margin-right"   5
+            fi
             ;;
     esac
 
     echo "$pos" > "$CURRENT_POSITION_FILE"
+
+    # Toggle vertical CSS override
+    _sync_vertical_css
 }
 
 _set_json_num() {

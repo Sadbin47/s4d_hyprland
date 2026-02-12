@@ -1,12 +1,12 @@
 {
     "label" : "lock",
-    "action" : "hyprlock",
+    "action" : "pidof hyprlock || hyprlock",
     "text" : "Lock",
     "keybind" : "l"
 }
 {
     "label" : "logout",
-    "action" : "hyprctl dispatch exit",
+    "action" : "hyprctl dispatch exit 0",
     "text" : "Logout",
     "keybind" : "e"
 }
@@ -15,12 +15,6 @@
     "action" : "systemctl suspend",
     "text" : "Suspend",
     "keybind" : "u"
-}
-{
-    "label" : "hibernate",
-    "action" : "systemctl hibernate",
-    "text" : "Hibernate",
-    "keybind" : "h"
 }
 {
     "label" : "shutdown",
@@ -33,4 +27,10 @@
     "action" : "systemctl reboot",
     "text" : "Reboot",
     "keybind" : "r"
+}
+{
+    "label" : "restart",
+    "action" : "hyprctl reload",
+    "text" : "Restart Hyprland",
+    "keybind" : "h"
 }

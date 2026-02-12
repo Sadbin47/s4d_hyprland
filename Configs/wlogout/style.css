@@ -1,4 +1,4 @@
-/* ── s4d Wlogout Theme — Catppuccin Mocha ── */
+/* ── s4d Wlogout Theme — Catppuccin Mocha · Minimal Popup ── */
 
 @define-color base     #1e1e2e;
 @define-color surface0 #313244;
@@ -15,23 +15,25 @@
 * {
     background-image: none;
     font-family: "JetBrainsMono Nerd Font";
-    font-size: 14px;
+    font-size: 13px;
 }
 
 window {
-    background-color: alpha(@base, 0.85);
+    background-color: transparent;
 }
 
 button {
-    background-color: alpha(@surface0, 0.7);
+    background-color: alpha(@surface0, 0.85);
     border: 2px solid @surface1;
-    border-radius: 16px;
+    border-radius: 12px;
     color: @text;
-    margin: 12px;
+    margin: 6px;
     padding: 0;
+    min-width: 90px;
+    min-height: 90px;
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 20%;
+    background-size: 28%;
     box-shadow: none;
     text-shadow: none;
     animation: none;
@@ -41,7 +43,7 @@ button {
 button:focus,
 button:active,
 button:hover {
-    background-color: alpha(@surface1, 0.8);
+    background-color: alpha(@surface1, 0.9);
     border-color: @mauve;
     color: @mauve;
     outline-style: none;
@@ -62,11 +64,6 @@ button:hover {
 }
 #suspend:hover { border-color: @blue; color: @blue; }
 
-#hibernate {
-    background-image: image(url("/usr/share/wlogout/icons/hibernate.png"), url("/usr/local/share/wlogout/icons/hibernate.png"));
-}
-#hibernate:hover { border-color: @peach; color: @peach; }
-
 #shutdown {
     background-image: image(url("/usr/share/wlogout/icons/shutdown.png"), url("/usr/local/share/wlogout/icons/shutdown.png"));
 }
@@ -76,3 +73,8 @@ button:hover {
     background-image: image(url("/usr/share/wlogout/icons/reboot.png"), url("/usr/local/share/wlogout/icons/reboot.png"));
 }
 #reboot:hover { border-color: @mauve; color: @mauve; }
+
+#restart {
+    background-image: image(url("/usr/share/wlogout/icons/hibernate.png"), url("/usr/local/share/wlogout/icons/hibernate.png"));
+}
+#restart:hover { border-color: @peach; color: @peach; }

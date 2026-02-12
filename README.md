@@ -131,7 +131,8 @@ Each step shows a live sub-line with the current operation. Green `●` = comple
     Super + A       App Launcher
     Super + E       File Manager
     Super + Q       Close Window
-    Super + Esc     Lock
+    Super + L       Lock
+    Super + X       Power Menu
     Super + /       All Keybinds
 
   Reboot now? [y/N] ▸
@@ -152,39 +153,49 @@ Each step shows a live sub-line with the current operation. Green `●` = comple
 | Key | Action |
 |-----|--------|
 | `Super + Q` | Close Window |
+| `Super + Shift + Q` | Kill Process |
 | `Super + F` | Fullscreen |
 | `Super + Shift + F` | Maximize |
 | `Super + V` | Toggle Floating |
 | `Super + P` | Pseudo-tile |
 | `Super + D` | Toggle Split |
 | `Super + G` | Toggle Group |
+| `Super + [ / ]` | Prev / Next in Group |
 
 ### Navigation
 | Key | Action |
 |-----|--------|
-| `Super + H/J/K/L` | Focus (vim-style) |
-| `Super + Shift + H/J/K/L` | Move window |
-| `Super + Ctrl + H/J/K/L` | Resize window |
+| `Super + ←↑↓→` | Focus Window |
+| `Super + Shift + ←↑↓→` | Move Window |
+| `Super + Ctrl + ←↑↓→` | Resize Window |
+| `Super + Alt + Shift + ←↑↓→` | Swap Window |
 | `Super + 1-0` | Switch Workspace |
 | `Super + Shift + 1-0` | Move to Workspace |
+| `Super + Tab / Shift+Tab` | Cycle Workspaces |
 | `Super + S` | Scratchpad |
-| `Super + Tab` | Next Workspace |
+| `Super + Shift + S` | Move to Scratchpad |
 
-### System & Utilities
+### Lock Screen & Power
 | Key | Action |
 |-----|--------|
+| `Super + L` | Lock Screen (blur + dim 30%) |
 | `Super + Escape` | Lock Screen |
 | `Super + X` | Power Menu (wlogout) |
-| `Super + N` | Notification Center |
-| `Super + /` | Keybindings Help |
-| `Super + W` | Waybar Style (rofi) |
-| `Super + Shift + W` | Waybar Next Style |
-| `Super + Shift + N` | Wallpaper Select |
+| `Super + Delete` | Restart Hyprland (reload config) |
+| `Ctrl + Alt + Delete` | Exit Hyprland |
+
+### Waybar & Wallpaper (waybar mode only — no conflict with DMS)
+| Key | Action |
+|-----|--------|
+| `Super + Alt + →` | Next Waybar Layout |
+| `Super + Alt + ←` | Previous Waybar Layout |
+| `Super + Alt + ↑` | Next Wallpaper |
+| `Super + Alt + ↓` | Previous Wallpaper |
+| `Super + W` | Cycle Waybar CSS Style |
+| `Super + Shift + W` | Waybar Menu (rofi — styles/layouts/position) |
+| `Super + Alt + P` | Cycle Bar Position (Top → Bottom → Left → Right) |
 | `Super + Alt + W` | Random Wallpaper |
-| `Super + Shift + B` | Blue Light Filter |
-| `Super + Shift + T` | Toggle Touchpad |
-| `Super + Shift + C` | Color Picker |
-| `Super + Shift + V` | Clipboard History |
+| `Super + Shift + N` | Wallpaper Select (rofi) |
 
 ### Screenshots
 | Key | Action |
@@ -193,6 +204,15 @@ Each step shows a live sub-line with the current operation. Green `●` = comple
 | `Shift + Print` | Screenshot (fullscreen to clipboard) |
 | `Super + Print` | Screenshot (area to file) |
 | `Super + Shift + Print` | Screenshot (area to editor) |
+
+### Utilities
+| Key | Action |
+|-----|--------|
+| `Super + N` | Notification Center |
+| `Super + Shift + C` | Color Picker |
+| `Super + Shift + V` | Clipboard History |
+| `Super + Shift + T` | Toggle Touchpad |
+| `Super + /` | Keybindings Help |
 
 ## Directory Structure
 
@@ -231,6 +251,7 @@ s4d_hyprland/
 │   │   │   └── decoration.conf
 │   │   ├── keybinds/
 │   │   │   ├── keybinds.conf
+│   │   │   ├── keybinds-bar.conf     # Waybar-only binds (not loaded with DMS)
 │   │   │   └── windowrules.conf
 │   │   ├── shaders/
 │   │   │   ├── blue-light-filter.glsl
@@ -249,6 +270,7 @@ s4d_hyprland/
 │   │   ├── config.jsonc
 │   │   ├── style.css
 │   │   ├── mocha.css
+│   │   ├── vertical.css              # Auto-toggled for left/right position
 │   │   ├── styles/
 │   │   │   ├── default.css
 │   │   │   ├── hollow.css
@@ -260,7 +282,18 @@ s4d_hyprland/
 │   │   └── layouts/
 │   │       ├── full.jsonc
 │   │       ├── minimal.jsonc
-│   │       └── sysmon.jsonc
+│   │       ├── sysmon.jsonc
+│   │       ├── centered.jsonc
+│   │       ├── dock.jsonc
+│   │       ├── split.jsonc
+│   │       ├── powerline.jsonc
+│   │       ├── focus.jsonc
+│   │       ├── islands.jsonc
+│   │       ├── topright.jsonc
+│   │       ├── statusline.jsonc
+│   │       ├── dashboard.jsonc
+│   │       ├── macos.jsonc
+│   │       └── kanji.jsonc
 │   ├── rofi/
 │   │   ├── config.rasi
 │   │   ├── catppuccin-mocha.rasi
@@ -325,27 +358,38 @@ s4d-theme status
 
 ## Waybar Style Switcher
 
-Change your status bar appearance on the fly with `Super + W`:
+Change your status bar appearance, layout, and position on the fly:
 
 ```bash
-# Via rofi menu (Super + W)
+# Interactive rofi menu (Super + Shift + W)
 waybar-style.sh rofi
+
+# Cycle CSS styles (Super + W)
+waybar-style.sh next
+waybar-style.sh prev
 
 # Set directly
 waybar-style.sh set hollow
 waybar-style.sh set floating
 
-# Cycle through styles (Super + Shift + W)
-waybar-style.sh next
-waybar-style.sh prev
+# Switch layout (Super + Alt + →/←)
+waybar-style.sh layout next
+waybar-style.sh layout set centered
+waybar-style.sh layout set islands
 
-# Switch layout
-waybar-style.sh layout minimal
-waybar-style.sh layout sysmon
+# Cycle bar position (Super + Alt + P)
+waybar-style.sh position next
+waybar-style.sh position left
+waybar-style.sh position bottom
 ```
 
-**Available styles:** default, hollow, solid, minimal, flat, compact, floating
-**Available layouts:** default (full), minimal, sysmon
+**Available styles (7):** default, compact, flat, floating, hollow, minimal, solid
+
+**Available layouts (14):** full, minimal, sysmon, centered, dock, split, powerline, focus, islands, topright, statusline, dashboard, macos, kanji
+
+**Positions:** top, bottom, left, right — left/right auto-converts to vertical sidebar mode
+
+> **Note:** Waybar keybinds are in `keybinds-bar.conf` and only loaded when waybar is the active bar. When DankMaterialShell is active, these binds stay disabled — zero conflicts.
 
 ## GPU Support
 
