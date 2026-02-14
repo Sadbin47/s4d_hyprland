@@ -13,4 +13,3 @@ void main() {
     pixColor.rgb = mix(pixColor.rgb, vec3(mx), amt);
     gl_FragColor = pixColor;
 }
-s
