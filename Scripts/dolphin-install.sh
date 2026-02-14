@@ -36,20 +36,27 @@ MenuBar=Disabled
 update_info=dolphin_detailsmodesettings.upd:rename-leading-padding
 
 [General]
-BrowseThroughArchives=true
-ConfirmClosingMultipleTabs=true
-GlobalViewProps=true
-RememberOpenedTabs=true
-ShowFullPath=true
-ShowFullPathInTitlebar=true
 ShowSelectionToggle=false
 ShowStatusBar=false
-ShowZoomSlider=false
 Version=202
+ViewPropsTimestamp=2023,4,26,16,58,48.324
+
+[IconsMode]
+MaximumTextLines=1
+PreviewSize=144
+
+[InformationPanel]
+dateFormat=ShortFormat
+
+[KFileDialog Settings]
+Places Icons Auto-resize=false
+Places Icons Static Size=16
+
+[KPropertiesDialog]
+2560x1080 screen: Window-Maximized=true
 
 [MainWindow]
 MenuBar=Disabled
-ToolBarsMovable=Disabled
 
 [MainWindow][Toolbar mainToolBar]
 IconSize=16
@@ -61,27 +68,8 @@ IconSize=16
 [PreviewSettings]
 Plugins=appimagethumbnail,audiothumbnail,comicbookthumbnail,cursorthumbnail,djvuthumbnail,ebookthumbnail,exrthumbnail,imagethumbnail,jpegthumbnail,kraorathumbnail,windowsexethumbnail,windowsimagethumbnail,opendocumentthumbnail,svgthumbnail,ffmpegthumbs
 
-[DetailsMode]
-ExpandableFolders=false
-PreviewSize=22
-
-[CompactMode]
-PreviewSize=32
-
-[IconsMode]
-MaximumTextLines=1
-PreviewSize=112
-
-[InformationPanel]
-dateFormat=ShortFormat
-
-[Search]
-Location=Everywhere
-
-[VersionControl]
-enabledPlugins=Git
-
 [Toolbar mainToolBar]
+IconSize=16
 ToolButtonStyle=IconOnly
 EOF
 
@@ -304,4 +292,3 @@ else
 fi
 
 log "${OK} Dolphin installed and configured"
-

@@ -1,165 +1,52 @@
-# ╔══════════════════════════════════════════════════════╗
-# ║  s4d Zsh Configuration                              ║
-# ╚══════════════════════════════════════════════════════╝
+# Add user configurations here
+# For HyDE to not touch your beloved configurations,
+# we added a config file for you to customize HyDE before loading zshrc
+# Edit $ZDOTDIR/.user.zsh to customize HyDE before loading zshrc
 
-# ── History ──
-HISTFILE=~/.zsh_history
-HISTSIZE=10000
-SAVEHIST=10000
-setopt HIST_IGNORE_ALL_DUPS
-setopt HIST_SAVE_NO_DUPS
-setopt HIST_REDUCE_BLANKS
-setopt INC_APPEND_HISTORY
-setopt SHARE_HISTORY
+#  Plugins 
+# oh-my-zsh plugins are loaded  in $ZDOTDIR/.user.zsh file, see the file for more information
 
-# ── Options ──
-setopt AUTO_CD
-setopt AUTO_PUSHD
-setopt PUSHD_IGNORE_DUPS
-setopt CORRECT
-setopt INTERACTIVE_COMMENTS
-setopt NO_BEEP
+#  Aliases 
+# Override aliases here in '$ZDOTDIR/.zshrc' (already set in .zshenv)
 
-# ── Completion ──
-autoload -Uz compinit
-compinit -d ~/.cache/zsh/zcompdump
-zstyle ':completion:*' menu select
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' # Case insensitive
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-zstyle ':completion:*' rehash true
-zstyle ':completion:*' accept-exact '*(N)'
-zstyle ':completion:*' use-cache on
-zstyle ':completion:*' cache-path ~/.cache/zsh/compcache
+# # Helpful aliases
+# alias c='clear'                                                        # clear terminal
+# alias l='eza -lh --icons=auto'                                         # long list
+# alias ls='eza -1 --icons=auto'                                         # short list
+# alias ll='eza -lha --icons=auto --sort=name --group-directories-first' # long list all
+# alias ld='eza -lhD --icons=auto'                                       # long list dirs
+# alias lt='eza --icons=auto --tree'                                     # list folder as tree
+# alias un='$aurhelper -Rns'                                             # uninstall package
+# alias up='$aurhelper -Syu'                                             # update system/package/aur
+# alias pl='$aurhelper -Qs'                                              # list installed package
+# alias pa='$aurhelper -Ss'                                              # list available package
+# alias pc='$aurhelper -Sc'                                              # remove unused cache
+# alias po='$aurhelper -Qtdq | $aurhelper -Rns -'                        # remove unused packages, also try > $aurhelper -Qqd | $aurhelper -Rsu --print -
+# alias vc='code'                                                        # gui code editor
+# alias fastfetch='fastfetch --logo-type kitty'
 
-# ── Key Bindings ──
-bindkey -e  # Emacs-style
-bindkey '^[[A' history-search-backward
-bindkey '^[[B' history-search-forward
-bindkey '^[[H' beginning-of-line
-bindkey '^[[F' end-of-line
-bindkey '^[[3~' delete-char
-bindkey '^[[1;5C' forward-word
-bindkey '^[[1;5D' backward-word
+# # Directory navigation shortcuts
+# alias ..='cd ..'
+# alias ...='cd ../..'
+# alias .3='cd ../../..'
+# alias .4='cd ../../../..'
+# alias .5='cd ../../../../..'
 
-# ── Aliases ──
-# Navigation
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
+# # Always mkdir a path (this doesn't inhibit functionality to make a single dir)
+# alias mkdir='mkdir -p'
 
-# Listing (use eza if available)
-if command -v eza &>/dev/null; then
-    alias ls='eza --icons --group-directories-first'
-    alias ll='eza -la --icons --group-directories-first'
-    alias lt='eza --tree --icons --level=2'
-    alias la='eza -a --icons --group-directories-first'
-else
-    alias ls='ls --color=auto'
-    alias ll='ls -lah --color=auto'
-    alias la='ls -A --color=auto'
-fi
+#  This is your file 
+# Add your configurations here
+# export EDITOR=nvim
+export EDITOR=code
 
-# Safety
-alias rm='rm -I --preserve-root'
-alias mv='mv -iv'
-alias cp='cp -iv'
-alias ln='ln -iv'
+# unset -f command_not_found_handler # Uncomment to prevent searching for commands not found in package manager
 
-# System
-alias grep='grep --color=auto'
-alias df='df -h'
-alias du='du -h'
-alias free='free -h'
-alias ip='ip -color=auto'
-alias dmesg='dmesg --color=auto'
+export PATH=$PATH:/home/s4d/.spicetify
 
-# Pacman / AUR
-alias pac='sudo pacman'
-alias pacs='sudo pacman -S'
-alias pacr='sudo pacman -Rns'
-alias pacss='pacman -Ss'
-alias pacq='pacman -Q'
-alias pacu='sudo pacman -Syu'
-alias yays='yay -S'
-alias yayu='yay -Syu'
-alias cleanup='sudo pacman -Rns $(pacman -Qdtq) 2>/dev/null; yay -Sc --noconfirm 2>/dev/null'
+export NVM_DIR="$HOME/.config/nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# Hyprland
-alias hypr='cd ~/.config/hypr'
-alias hc='$EDITOR ~/.config/hypr/hyprland.conf'
-alias hr='hyprctl reload'
-alias hw='hyprctl clients'
-alias hm='hyprctl monitors'
-
-# s4d Theme
-alias s4d-theme='~/.config/hypr/scripts/s4d-theme.sh'
-alias s4d-wall='~/.config/hypr/scripts/wallpaper.sh'
-
-# Git
-alias g='git'
-alias gs='git status'
-alias ga='git add'
-alias gc='git commit'
-alias gp='git push'
-alias gl='git log --oneline --graph --decorate -20'
-alias gd='git diff'
-alias gco='git checkout'
-
-# Quick tools
-alias cat='bat --style=plain --paging=never 2>/dev/null || cat'
-alias ff='fastfetch'
-alias k='kitty'
-alias cls='clear'
-
-# ── Functions ──
-# Create and cd into directory
-mkcd() { mkdir -p "$@" && cd "$_"; }
-
-# Extract any archive
-extract() {
-    if [[ -f "$1" ]]; then
-        case "$1" in
-            *.tar.bz2) tar xjf "$1" ;;
-            *.tar.gz)  tar xzf "$1" ;;
-            *.tar.xz)  tar xJf "$1" ;;
-            *.bz2)     bunzip2 "$1" ;;
-            *.gz)      gunzip "$1" ;;
-            *.tar)     tar xf "$1" ;;
-            *.tbz2)    tar xjf "$1" ;;
-            *.tgz)     tar xzf "$1" ;;
-            *.zip)     unzip "$1" ;;
-            *.7z)      7z x "$1" ;;
-            *.rar)     unrar x "$1" ;;
-            *)         echo "'$1' cannot be extracted" ;;
-        esac
-    else
-        echo "'$1' is not a valid file"
-    fi
-}
-
-# ── Plugins (load if available) ──
-# zsh-autosuggestions
-[[ -f /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && \
-    source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-
-# zsh-syntax-highlighting (must be last)
-[[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && \
-    source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
-# ── Prompt ──
-# Use starship if available, otherwise simple prompt
-if command -v starship &>/dev/null; then
-    export STARSHIP_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/starship/starship.toml"
-    eval "$(starship init zsh)"
-else
-    autoload -Uz vcs_info
-    precmd() { vcs_info }
-    zstyle ':vcs_info:git:*' formats '%F{magenta}(%b)%f '
-    setopt PROMPT_SUBST
-    PROMPT='%F{blue}%~%f ${vcs_info_msg_0_}%F{green}❯%f '
-fi
-
-# ── Fastfetch on terminal open ──
-if [[ $- == *i* ]] && command -v fastfetch &>/dev/null; then
-    fastfetch
-fi
+# bun completions
+[ -s "/home/s4d/.bun/_bun" ] && source "/home/s4d/.bun/_bun"
